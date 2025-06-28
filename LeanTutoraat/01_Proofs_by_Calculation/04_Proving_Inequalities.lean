@@ -18,11 +18,11 @@ example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 :=
 
 -- Example 1.4.2
 -- Exercise: replace the words "sorry" with the correct Lean justification.
-example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 :=
+example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 := by
   calc
-    r = (s + r + r - s) / 2 := by sorry
-    _ ≤ (3 + (s + 3) - s) / 2 := by sorry
-    _ = 3 := by sorry
+    r = (s + r + r - s) / 2 := by ring
+    _ ≤ (3 + (s + 3) - s) / 2 := by addarith [h1, h2]
+    _ = 3 := by ring
 
 -- Example 1.4.3
 -- Exercise: type out the whole proof printed in the text as a Lean proof.

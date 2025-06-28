@@ -1,16 +1,12 @@
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.IntervalCases
-import Mathlib.Tactic.Set
 import Library.Config.Constructor
 import Library.Config.Contradiction
 import Library.Config.ExistsDelaborator
 import Library.Config.Initialize
 import Library.Config.Ring
-import Library.Config.Set
 import Library.Config.Use
 import Library.Theory.Comparison
-import Library.Theory.Parity
-import Library.Theory.Prime
 import Library.Tactic.Addarith
 import Library.Tactic.Cancel
 import Library.Tactic.Extra.Basic

@@ -45,4 +45,4 @@ elab_rules : tactic | `(tactic| addarith [$args,*]) => withMainContext do
     Linarith.linarith (only_on := true)
       (← args.getElems.mapM (elabTerm ·.raw none)).toList
       { discharger := addarithDischarger, splitHypotheses := false })
-  <|> throwError "addarith failed to prove this"
+  <|> throwError "Ay! Addarith failed to prove this"

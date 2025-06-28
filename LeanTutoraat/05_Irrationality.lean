@@ -24,11 +24,11 @@ noncomputable section
     gesloten onder +, 0, 1, -, *
     x>0, x integral => x ≥ 1
 
-  TODO: move to import file
+  Key: n ! * a (n + 1) is integer!
 -/
 
 
-
+lemma integrality (n : ℕ) (k : ℕ) : ∃ m : ℕ, n ! * m = (n + k) !
 
 /-
   Propositie: (n + k)! ≥ 2 ^ k * n!
@@ -95,13 +95,43 @@ lemma a2 : a 2 = 2 := by unfold a; unfold Finset.sum; norm_num
 
 lemma a3 : a 3 = 5/2 := by unfold a; unfold Finset.sum; norm_num
 
-example (x y : ℝ) (h : 0 ≤ y) : x ≤ x + y := by exact le_add_of_nonneg_right h
+lemma le_add_pos  (x y : ℝ) (h : 0 ≤ y) : x ≤ x + y := by
+  addarith [h]
+
+lemma a_succ (n : ℕ) : a (n + 1) = a n + 1 / (n ! : ℝ) := by
+  unfold a
+  rw [sum_range_succ]
+
 
 lemma a_monotone (n : ℕ) : a n ≤ a (n + 1) := by
   unfold a
   rw [sum_range_succ]
-  apply le_add_of_nonneg_right
-  positivity
+  have h : 0 ≤ 1 / (n ! : ℝ) := by positivity
+  apply le_add_pos
+  exact h
+
+
+lemma factorial_a_succ (n : ℕ) :
+    (n + 1)! * a (n + 2) = (n + 1) * n ! * a (n + 1) + 1 := by
+  rw [a_succ]
+  rw [factorial_succ]
+  field_simp
+  ring
+
+lemma a_integrality (n : ℕ) : ∃ m : ℕ, n ! * a (n + 1) = m := by
+  simple_induction n with n IH
+  · -- base case
+    use 1
+    rw [a]
+    norm_num
+  · -- inductive step
+    obtain ⟨m, hm⟩ := IH
+    use (n + 1) * m + 1
+    rw [factorial_a_succ]
+    push_cast
+    rw [← hm]
+    ring
+
 
 
 /-
@@ -128,3 +158,27 @@ theorem a_to_e : ∀ ε > 0, ∃ N : ℕ, e < a N + ε := by sorry
 
 
 #min_imports
+
+
+/-
+  We will now prove that e is irrational. Assume e = p / q with p, q ∈ ℕ and q > 0.
+
+  Consider the real number x = q! * (e - a (q + 1)).
+
+  Note: x = q! * (1 / (q + 1)! + 1 / (q + 2)! + ... )
+
+-/
+
+
+
+variable (p : ℕ) (q : ℕ) (hq : q > 0) (hrat : q * e = p)
+
+def x := q ! * (e - a (q + 1))
+
+
+lemma x_integrality : ∃ N : ℤ, x = N := by
+  obtain ⟨m, hm⟩ := a_integrality q
+  use (q - 1)! * p - m
+  -- warning: this is Nat subtraction, so need to explicitly use hq somewher
+
+  sorry

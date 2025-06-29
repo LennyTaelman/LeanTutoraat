@@ -16,45 +16,60 @@ noncomputable section
 
 #check Nat.factorial_succ
 
+def fac (n : ℕ) : ℝ :=
+  match n with
+  | 0 => 1
+  | n + 1 => (n + 1) * fac n
+
+lemma fac_zero : fac 0 = 1 := by rfl
+
+lemma fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by rfl
+
+lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
+  simple_induction n with n IH
+  · -- base case
+    rw [fac_zero]
+  · -- inductive step
+    have h : (n : ℝ) + 1 ≥ 1 := by addarith []
+    calc fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
+      _ ≥ 1 * fac n := by rel [h]
+      _ ≥ 1 := by addarith [IH]
+
+lemma fac_gt_zero (n : ℕ) : fac n > 0 := by
+  calc fac n ≥ 1 := by apply fac_ge_one
+    _ > 0 := by numbers
 
 
-/-
-  Integraliteit:
-    IsIntegral (x : ℝ) : Prop
-    gesloten onder +, 0, 1, -, *
-    x>0, x integral => x ≥ 1
-
-  Key: n ! * a (n + 1) is integer!
--/
-
-
-lemma integrality (n : ℕ) (k : ℕ) : ∃ m : ℕ, n ! * m = (n + k) !
-
-/-
-  Propositie: (n + k)! ≥ 2 ^ k * n!
--/
-
-
-lemma afschatting_faculteit (n : ℕ) (k : ℕ) (h_n : n > 0) :
-    (n + k) ! ≥ 2 ^ k * n ! := by
+lemma fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
+    fac (n + k) ≥ 2 ^ k * fac n := by
   simple_induction k with k IH
   · -- base case
-    calc (n + 0) ! = n ! := by ring
-      _ = 2 ^ 0 * n ! := by ring
-      _ ≥ 1 * n ! := by extra
+    calc fac (n + 0) = fac n := by ring
+      _ ≥ 1 * fac n := by addarith []
   · -- inductive step
-    have h : n + k + 1 ≥ 2 := by addarith [h_n]
-    calc (n + (k + 1)) ! = ((n + k) + 1) ! := by ring
-      _ = (n + k + 1) * (n + k) ! := by rw [factorial_succ]
-      _ ≥ (n + k + 1) * (2 ^ k * n !) := by rel [IH]
-      _ ≥ 2 * (2 ^ k * n !) := by rel [h]
-      _ = 2 ^ (k + 1) * n ! := by ring
+    have h : (n : ℝ) + (k : ℝ) + 1 ≥ 2 := by norm_cast; addarith [hn]
+    have h2 : 2 ^ k * fac n > 0 := by sorry
+    calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
+      _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]; norm_cast
+      _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
+      _ ≥ 2 * (2 ^ k * fac n) := by rel [h]
+      _ = 2 ^ (k + 1) * fac n := by ring
 
--- looks the same, but this is an inequality in ℝ
-lemma afschatting_reel (n : ℕ) (k : ℕ) (h_n : n > 0) :
-    ((n + k) ! : ℝ) ≥ 2 ^ k * n ! := by
-  norm_cast -- this reduces the goal to the same inequality in ℕ
-  apply afschatting_faculteit n k h_n
+
+lemma self_div_eq_0 (x : ℝ) (h : x > 0) : x / x = 1 := by
+  field_simp
+
+lemma fac_div_fac_integral (n : ℕ) (m : ℕ) (h : n ≥ m) :
+    ∃ N : ℤ, fac n / fac m = N := by
+  induction_from_starting_point n, h with k hk IH
+  · use 1; norm_cast; apply self_div_eq_0; exact fac_gt_zero m
+  · obtain ⟨N, hN⟩ := IH
+    use N * (k + 1)
+    rw [fac_succ]
+    simp_all
+    rw [← hN]
+    field_simp
+    ring
 
 
 
@@ -85,15 +100,12 @@ lemma geometric_sum_lt_2 (k : ℕ) : ∑ i in range k, 1 / (2 : ℝ) ^ i < 2 := 
   Note that a n consists of n terms
 -/
 
-def a (n : ℕ) := ∑ i in range n, 1 / (i ! : ℝ)
+def a (n : ℕ) := ∑ i in range n, 1 / fac i
 
 lemma a0 : a 0 = 0 := by rfl
 
-lemma a1 : a 1 = 1 := by unfold a; norm_num
+lemma a1 : a 1 = 1 := by unfold a; norm_num; exact fac_zero
 
-lemma a2 : a 2 = 2 := by unfold a; unfold Finset.sum; norm_num
-
-lemma a3 : a 3 = 5/2 := by unfold a; unfold Finset.sum; norm_num
 
 lemma le_add_pos  (x y : ℝ) (h : 0 ≤ y) : x ≤ x + y := by
   addarith [h]

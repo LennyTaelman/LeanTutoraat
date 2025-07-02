@@ -54,25 +54,6 @@ example : forall_sufficiently_large n : ℤ, n ^ 3 ≥ 4 * n ^ 2 + 7 := by
     _ ≥ 4 * n ^ 2 + 7 := by extra
 
 
-example : Prime 2 := by
-  constructor
-  · numbers -- show `2 ≤ 2`
-  intro m hmp
-  have hp : 0 < 2 := by numbers
-  have hmp_le : m ≤ 2 := Nat.le_of_dvd hp hmp
-  have h1m : 1 ≤ m := Nat.pos_of_dvd_of_pos hmp hp
-  interval_cases m
-  · left
-    numbers -- show `1 = 1`
-  · right
-    numbers -- show `2 = 2`
-
-
-example : ¬ Prime 6 := by
-  apply not_prime 2 3
-  · numbers -- show `2 ≠ 1`
-  · numbers -- show `2 ≠ 6`
-  · numbers -- show `6 = 2 * 3`
 
 /-! # Exercises -/
 
@@ -90,7 +71,4 @@ example : ∃ a : ℝ, ∀ b : ℝ, ∃ c : ℝ, a + b < c := by
   sorry
 
 example : forall_sufficiently_large x : ℝ, x ^ 3 + 3 * x ≥ 7 * x ^ 2 + 12 := by
-  sorry
-
-example : ¬(Prime 45) := by
   sorry

@@ -216,26 +216,23 @@ lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
 
 
 
+lemma n_plus_one_inv_le_c (n : ℕ) (hn : n ≥ 1) : ((n : ℝ) + 1)⁻¹ ≤ c := by
+  rw [c_def]
+  apply inv_le_of_inv_le
+  · numbers
+  · norm_num; norm_cast; addarith [hn] -- TODO: import norm_cast into addarith?
 
-
-
-lemma n_plus_one_ge_two (n : ℕ) (hn : n ≥ 1) : 1/(n + 1 : ℝ) ≤ c := by
-  sorry
 
 lemma a_halving (n : ℕ) (hn : n ≥ 1) : a (n + 1) ≤ c * a n  := by
-  rw [a_def]
-  rw [fac_succ]
-  simp only [mul_inv_rev]
-  rw [a_def]
-
-
-
-  sorry
-
+  have h : a n > 0 := a_pos n
+  calc
+    _ = ((n:ℝ) + 1)⁻¹ * a n := by rw [a_succ]
+    _ ≤ c * a n := by rel [n_plus_one_inv_le_c n hn]
 
 
 lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     a (n + k) ≤  c^ k * (a n)  := by
+  have h : c > 0 := by exact c_pos
   simple_induction k with k IH
   · -- base case
     simp
@@ -244,7 +241,7 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     calc
       _ = a ((n + k) + 1) := by ring
       _ ≤ c * a (n + k)  := by apply a_halving; addarith [hn]
-      _ ≤ c * (c ^ k * a n) := by sorry -- rel [IH] needs c > 0
+      _ ≤ c * (c ^ k * a n) := by rel [IH]
       _ = c ^ (k + 1) * a n := by ring
 
 
@@ -283,12 +280,12 @@ lemma key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
   Alternative interpretation: use the statements below as an (implicit)
   definition of the number e. Key facts:
   - e is a real number
-  - a n < e
-  - a n ≤ a (n+1)
-  - for all ε > 0, ∃ N : ℕ, e < a N + ε
+  - s n < e
+  - for all ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε
   Verify for yourself that these uniquely determine e.
 
   TODO: move these to an imported file, just mention the defining lemmas here
+  No! Cannot do this, since we need the definition of s n here.
 -/
 
 
@@ -296,7 +293,7 @@ def e := exp 1
 
 lemma s_below_e (n : ℕ) : s n < e := by sorry
 
-theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, e < s N + ε := by sorry
+theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε := by sorry
 
 
 
@@ -318,16 +315,10 @@ theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, e < s N + ε := by sorry
 
 -/
 
-def x (q : ℕ) := (fac q) * (e - s (q + 1))
+def t (n : ℕ) := e - s n
 
-lemma x_def (q : ℕ) : x q = (fac q) * (e - s (q + 1)) := by rfl
+lemma t_def (n : ℕ) : t n = e - s n := by rfl
 
-lemma x_gt_zero (q : ℕ) : 0 < x q := by
-  rw [x_def]
-  apply mul_pos
-  · exact fac_gt_zero q
-  · addarith [s_below_e (q + 1)]
-
--- this is the key one!
-lemma x_lt_one (q : ℕ) : x q < 1 := by
-  sorry
+lemma t_pos (n : ℕ) : 0 < t n := by
+  rw [t_def]
+  addarith [s_below_e n]

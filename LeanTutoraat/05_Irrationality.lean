@@ -40,15 +40,6 @@ lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]; numbers
 
 lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]; numbers
 
--- lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
---   simple_induction n with n IH
---   · rw [fac_zero]
---     numbers
---   · rw [fac_succ]
---     apply mul_ne_zero
---     · addarith []
---     · exact IH
-
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
   simple_induction n with n IH
   · rw [fac_zero]
@@ -142,8 +133,10 @@ lemma a_mul_fac_eq_one (n : ℕ) : a n * fac n = 1 := by
   apply inv_mul_cancel
   exact fac_ne_zero n
 
-lemma a_pos (n : ℕ) : a n > 0 := by
-  apply inv_pos.mpr -- TODO: find better lemma name for this
+lemma a_pos (n : ℕ) : 0 < a n  := by
+  rw [a_def]
+  -- TODO: find better tactic to do this (addarith? variation)
+  rw [inv_pos]
   exact fac_gt_zero n
 
 
@@ -172,27 +165,28 @@ lemma s_monotone (n : ℕ) : s n < s (n + 1) := by
   addarith [a_pos n]
 
 
-
-
 lemma factorial_s_succ (n : ℕ) :
     (fac (n + 1)) * s (n + 2) = (n + 1) * (fac n) * s (n + 1) + 1 := by
-  rw [s_succ]
+  calc
+    _ = fac (n + 1) * ( s (n + 1) + a (n + 1)) := by rw [s_succ]
+    _ = fac (n + 1) * s (n + 1) + fac (n + 1) * a (n + 1) := by ring
+    _ = (n + 1) * fac n * s (n + 1) + fac (n + 1) * a (n + 1) := by rw [fac_succ]
+    _ = (n + 1) * fac n * s (n + 1) + a (n + 1) * fac (n + 1) := by ring
+    _ = (n + 1) * fac n * s (n + 1) + 1 := by rw [a_mul_fac_eq_one]
 
-  rw [fac_succ]
-  sorry
 
-lemma a_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
+lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
   simple_induction n with n IH
   · use 1
     rw [s_succ]
     rw [fac_zero]
     rw [s_zero, a_zero]
     numbers
-  · obtain ⟨m, hm⟩ := IH
+  · obtain ⟨m, hm⟩ := IH -- obtain an m from the ∃ in the inductive hypothesis
     use (n + 1) * m + 1
     rw [factorial_s_succ, mul_assoc]
     rw [hm]
-    norm_cast
+    norm_cast -- TODO: user will expect 'ring' here
 
 
 
@@ -209,6 +203,8 @@ lemma a_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
   - a n ≤ a (n+1)
   - for all ε > 0, ∃ N : ℕ, e < a N + ε
   Verify for yourself that these uniquely determine e.
+
+  TODO: move these to an imported file, just mention the defining lemmas here
 -/
 
 
@@ -227,18 +223,21 @@ theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, e < s N + ε := by sorry
 
   Note: x = q! * (1 / (q + 1)! + 1 / (q + 2)! + ... )
 
+  Strategy:
+  - for all q, 0 < x < 1
+  - if e=p/q, then x is integer!
 -/
 
+def x (q : ℕ) := (fac q) * (e - s (q + 1))
 
+lemma x_def (q : ℕ) : x q = (fac q) * (e - s (q + 1)) := by rfl
 
-variable (p : ℕ) (q : ℕ) (hq : q > 0) (hrat : q * e = p)
+lemma x_gt_zero (q : ℕ) : 0 < x q := by
+  rw [x_def]
+  apply mul_pos
+  · exact fac_gt_zero q
+  · addarith [s_below_e (q + 1)]
 
-def x := q ! * (e - s (q + 1))
-
-
-lemma x_integrality : ∃ N : ℤ, x = N := by
-  obtain ⟨m, hm⟩ := a_integrality q
-  use (q - 1)! * p - m
-  -- warning: this is Nat subtraction, so need to explicitly use hq somewher
-
+-- this is the key one!
+lemma x_lt_one (q : ℕ) : x q < 1 := by
   sorry

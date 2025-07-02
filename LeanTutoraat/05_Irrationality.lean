@@ -2,11 +2,17 @@
 import Mathlib
 import Library.Basic
 
+-- NOTE: this also establishes a basic simp tactic
 math2001_init
 
 open Nat Finset Real BigOperators
 noncomputable section
 
+
+
+
+
+example (x : ℝ) : x - x = 0 := by simp
 
 /-
   In this worksheet, we will prove that e is irrational. This is intended as a
@@ -60,6 +66,13 @@ lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
   The key lower bound on the factorial function
 -/
 
+lemma aux (n : ℕ) (k : ℕ) :
+    0 < 2 ^ k * fac n := by
+  apply mul_pos
+  · positivity
+  · exact fac_gt_zero n
+
+
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     fac (n + k) ≥ 2 ^ k * fac n := by
   simple_induction k with k IH
@@ -69,8 +82,7 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
   · -- inductive step
     have h : (n : ℝ) + (k : ℝ) + 1 ≥ 2 := by norm_cast; addarith [hn]
     have h2 : (2 : ℝ) ^ k > 0 := by positivity
-    have h3 : 2 ^ k * fac n > 0 := by
-      exact mul_pos h2 (fac_gt_zero n)
+    have h3 : 2 ^ k * fac n > 0 := by exact aux n k
     calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
       _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]; norm_cast
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
@@ -78,41 +90,34 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
       _ = 2 ^ (k + 1) * fac n := by ring
 
 
-lemma self_div_eq_0 (x : ℝ) (h : x > 0) : x / x = 1 := by
-  field_simp
-
-lemma fac_div_fac_integral (n : ℕ) (m : ℕ) (h : n ≥ m) :
-    ∃ N : ℤ, fac n * (fac m)⁻¹ = N := by
-  induction_from_starting_point n, h with k hk IH
-  · use 1; sorry
-  · obtain ⟨N, hN⟩ := IH
-    use N * (k + 1)
-    rw [fac_succ]
-    simp_all
-    rw [← hN]
-    field_simp
-    ring
-
-
-
 /-
   Propositie: ∑_{i=0}^{k-1} 1 / (2 ^ i : ℝ) ≤ 2
 -/
 
+def c : ℝ := 1 / (2 : ℝ)
 
-lemma geometric_sum (k : ℕ) : ∑ i in range k, 1 / (2 : ℝ) ^ i = 2 - 2 / (2 : ℝ) ^ k := by
+lemma c_def : c = 1 / (2 : ℝ) := by rfl
+
+lemma c_pos : c > 0 := by rw [c_def]; positivity
+
+
+lemma geometric_sum (k : ℕ) : ∑ i in range k, c ^ i = 2 - 2 * c ^ k := by
   simple_induction k with k IH
   · -- base case
+    rw [sum_range_zero]
     ring
   · -- inductive step
     rw [Finset.sum_range_succ]
     rw [IH]
+    rw [c_def]
     ring
 
-lemma geometric_sum_lt_2 (k : ℕ) : ∑ i in range k, 1 / (2 : ℝ) ^ i < 2 := by
+lemma geometric_sum_lt_2 (k : ℕ) : ∑ i in range k, c ^ i < 2 := by
   rw [geometric_sum]
-  apply sub_lt_self
+  simp
+  rw [c_def]
   positivity
+
 
 /-
   De rij a_n = 1 / fac n
@@ -139,6 +144,12 @@ lemma a_pos (n : ℕ) : 0 < a n  := by
   rw [inv_pos]
   exact fac_gt_zero n
 
+lemma a_succ (n : ℕ) : a (n + 1) = ((n : ℝ) + 1)⁻¹ *  a n  := by
+  rw [a_def]
+  rw [fac_succ]
+  rw [a_def]
+  simp only [mul_inv_rev]
+  ring
 
 /-
   De partiele sommen s_n = ∑_{i=0}^{n-1} a_i van de reeks ∑_{i=0}^{∞} a_i
@@ -164,6 +175,10 @@ lemma s_monotone (n : ℕ) : s n < s (n + 1) := by
   rw [s_succ]
   addarith [a_pos n]
 
+/-
+  Establish that n ! * s (n + 1) is an integer.
+-/
+
 
 lemma factorial_s_succ (n : ℕ) :
     (fac (n + 1)) * s (n + 2) = (n + 1) * (fac n) * s (n + 1) + 1 := by
@@ -187,6 +202,79 @@ lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
     rw [factorial_s_succ, mul_assoc]
     rw [hm]
     norm_cast -- TODO: user will expect 'ring' here
+
+
+/-
+  Key inequality for s n
+-/
+
+-- alternative: use fac_bound
+
+
+-- TODO: really need to practice a bit with inverses and inequalities
+-- this is a MESS now
+
+
+
+
+
+
+
+
+
+
+lemma n_plus_one_ge_two (n : ℕ) (hn : n ≥ 1) : 1/(n + 1 : ℝ) ≤ c := by
+  sorry
+
+lemma a_halving (n : ℕ) (hn : n ≥ 1) : a (n + 1) ≤ c * a n  := by
+  rw [a_def]
+  rw [fac_succ]
+  simp only [mul_inv_rev]
+  rw [a_def]
+
+
+
+  sorry
+
+
+
+lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    a (n + k) ≤  c^ k * (a n)  := by
+  simple_induction k with k IH
+  · -- base case
+    simp
+    rfl
+  · -- inductive step
+    calc
+      _ = a ((n + k) + 1) := by ring
+      _ ≤ c * a (n + k)  := by apply a_halving; addarith [hn]
+      _ ≤ c * (c ^ k * a n) := by sorry -- rel [IH] needs c > 0
+      _ = c ^ (k + 1) * a n := by ring
+
+
+
+
+
+
+
+lemma key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    s (n + k) - s n ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i := by
+  simple_induction k with k IH
+  · -- base case
+    rw [sum_range_zero]
+    rw [add_zero, sub_self, mul_zero] -- TODO: make this a tactic?
+  · -- inductive step
+    rw [sum_range_succ]
+    calc
+      _ = s ((n + k) + 1) - s n := by ring
+      _ = s (n + k) + a (n + k) - s n := by rw [s_succ]
+      _ = (s (n + k) - s n) + a (n + k) := by ring
+      _ ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i + a (n + k) := by rel [IH]
+      _ ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i + (fac n)⁻¹ * (1 / (2 : ℝ) ^ k) := by rel [a_bound n k hn]
+      _ = (fac n)⁻¹ * (∑ i in range k, 1 / (2 : ℝ) ^ i + 1 / (2 : ℝ) ^ k) := by ring
+      _ = (fac n)⁻¹ * (∑ i in range (k + 1), 1 / (2 : ℝ) ^ i) := by rw [sum_range_succ]
+
+
 
 
 
@@ -217,15 +305,21 @@ theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, e < s N + ε := by sorry
 
 
 /-
-  We will now prove that e is irrational. Assume e = p / q with p, q ∈ ℕ and q > 0.
+  We will now prove that e is irrational. Consider the tail
 
-  Consider the real number x = q! * (e - a (q + 1)).
+  t n = e - s n = 1 / n! + 1 / (n+1)! + ...
 
-  Note: x = q! * (1 / (q + 1)! + 1 / (q + 2)! + ... )
+  By the key bound, we have t n ≤ 2 * 1 / n!, so
+  (n-1)! * t n < 1 for n > 2
 
-  Strategy:
-  - for all q, 0 < x < 1
-  - if e=p/q, then x is integer!
+  Note that (n-1)! * s n is an integer, so (n-1)! * t n is also an integer.
+
+  Now if e is rational, then (n-1)! * e is an integer for n big enough
+
+  But then (n-1)! * t n is an integer, and (n-1)! * t n < 1
+
+  This is a contradiction.
+
 -/
 
 def x (q : ℕ) := (fac q) * (e - s (q + 1))

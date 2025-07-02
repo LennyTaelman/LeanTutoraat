@@ -27,8 +27,12 @@ macro "aesop" : tactic => `(tactic | fail "aesop tactic disabled")
 macro "tauto" : tactic => `(tactic | fail "tauto tactic disabled")
 
 open Lean.Parser.Tactic in
-macro "simp"  (&" only")?  (" [" withoutPosition((simpStar <|> simpErase <|> simpLemma),*) "]")?
-  (location)? : tactic => `(tactic | fail "simp tactic disabled")
+macro "simp" : tactic => `(tactic|
+    simp only [one_mul, mul_one, zero_mul, mul_zero,
+      add_zero, zero_add, _root_.pow_zero, div_one, sub_self,
+      pow_one, one_pow,
+      sub_lt_self_iff])
+
 
 /--
 Configure the environment with the right options and attributes

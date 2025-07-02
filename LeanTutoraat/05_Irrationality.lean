@@ -10,10 +10,6 @@ noncomputable section
 
 
 
-
-
-example (x : ℝ) : x - x = 0 := by simp
-
 /-
   In this worksheet, we will prove that e is irrational. This is intended as a
   group project, where participants can work on different parts of the proof
@@ -258,21 +254,21 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
 
 
 lemma key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) - s n ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i := by
+    s (n + k) - s n ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i := by
   simple_induction k with k IH
   · -- base case
     rw [sum_range_zero]
     rw [add_zero, sub_self, mul_zero] -- TODO: make this a tactic?
   · -- inductive step
-    rw [sum_range_succ]
     calc
       _ = s ((n + k) + 1) - s n := by ring
       _ = s (n + k) + a (n + k) - s n := by rw [s_succ]
       _ = (s (n + k) - s n) + a (n + k) := by ring
-      _ ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i + a (n + k) := by rel [IH]
-      _ ≤ (fac n)⁻¹ * ∑ i in range k, 1 / (2 : ℝ) ^ i + (fac n)⁻¹ * (1 / (2 : ℝ) ^ k) := by rel [a_bound n k hn]
-      _ = (fac n)⁻¹ * (∑ i in range k, 1 / (2 : ℝ) ^ i + 1 / (2 : ℝ) ^ k) := by ring
-      _ = (fac n)⁻¹ * (∑ i in range (k + 1), 1 / (2 : ℝ) ^ i) := by rw [sum_range_succ]
+      _ ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
+      _ ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
+      _ = (fac n)⁻¹ * ∑ i in range k, c ^ i + c ^ k * (fac n)⁻¹ := by rw [a_def]
+      _ = (fac n)⁻¹ * (∑ i in range k, c ^ i + c ^ k) := by ring
+      _ = (fac n)⁻¹ * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
 
 
 

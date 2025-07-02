@@ -322,3 +322,19 @@ lemma t_def (n : ℕ) : t n = e - s n := by rfl
 lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
   addarith [s_below_e n]
+
+lemma e_rational_factorial :
+    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ m n : ℕ, n > 0 ∧ (fac n) * e = m) := by
+  intro h
+  obtain ⟨p, q, hq, he⟩ := h
+  use q
+
+  sorry
+
+
+  theorem e_irrational : ¬ ∃ p q : ℕ, q > 0 ∧ e = p / q := by
+  intro h
+  obtain ⟨p, q, hq, he⟩ := h
+  sorry
+
+#print axioms e_irrational

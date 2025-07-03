@@ -59,6 +59,31 @@ lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
 
 
 /-
+  Natural factorial
+-/
+
+def nat_fac (n : ℕ) : ℕ :=
+  match n with
+  | 0 => 1
+  | n + 1 => (n + 1) * nat_fac n
+
+lemma nat_fac_zero : nat_fac 0 = 1 := by rfl
+
+lemma nat_fac_succ (n : ℕ) : nat_fac (n + 1) = (n + 1) * nat_fac n := by rfl
+
+lemma fac_eq_nat_fac (n : ℕ) : fac n = nat_fac n := by
+  simple_induction n with n IH
+  · rw [fac_zero]
+    rw [nat_fac_zero]
+    numbers
+  · rw [fac_succ]
+    rw [nat_fac_succ]
+    rw [IH]
+    norm_cast -- should be ring?
+
+
+
+/-
   The key lower bound on the factorial function
 -/
 
@@ -303,15 +328,15 @@ theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε := by sorry
   t n = e - s n = 1 / n! + 1 / (n+1)! + ...
 
   By the key bound, we have t n ≤ 2 * 1 / n!, so
-  (n-1)! * t n < 1 for n > 2
+  n! * t (n + 1) < 1 for n > 1
 
-  Note that (n-1)! * s n is an integer, so (n-1)! * t n is also an integer.
+  Note that n! * s (n + 1) is an integer.
 
-  Now if e is rational, then (n-1)! * e is an integer for n big enough
+  Now if e is rational, then n! * e is an integer for n big enough
 
-  But then (n-1)! * t n is an integer, and (n-1)! * t n < 1
+  But then n! * t (n + 1) is an integer/
 
-  This is a contradiction.
+  This is a contradiction with the fact that n! * t (n + 1) < 1.
 
 -/
 
@@ -323,18 +348,39 @@ lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
   addarith [s_below_e n]
 
+
+lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * nat_fac (q - 1) := by
+  have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq
+  rw [← h]
+  rw [fac_succ]
+  rw [fac_eq_nat_fac]
+  norm_cast -- should be ring or numbers
+
+
 lemma e_rational_factorial :
-    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ m n : ℕ, n > 0 ∧ (fac n) * e = m) := by
+    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ n > 1, ∃ m : ℕ, (fac n) * e = m) := by
   intro h
   obtain ⟨p, q, hq, he⟩ := h
-  use q
+  use q + 1
+  constructor
+  · addarith [hq]
+  · rw [he]
+    rw [fac_succ]
+    use nat_fac (q - 1) * p * (q + 1)
+    rw [fac_div_integral]
+    norm_cast
+    field_simp
+    ring
+    exact hq
 
-  sorry
+
 
 
   theorem e_irrational : ¬ ∃ p q : ℕ, q > 0 ∧ e = p / q := by
   intro h
-  obtain ⟨p, q, hq, he⟩ := h
+  obtain ⟨n, hn, m, hm⟩ := e_rational_factorial h
+
+
   sorry
 
 #print axioms e_irrational

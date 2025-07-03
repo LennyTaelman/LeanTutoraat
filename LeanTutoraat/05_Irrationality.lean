@@ -275,8 +275,8 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
 
 
 
-lemma key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) - s n ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i := by
+lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    s (n + k) - s n ≤ (a n) * ∑ i in range k, c ^ i := by
   simple_induction k with k IH
   · -- base case
     rw [sum_range_zero]
@@ -286,39 +286,138 @@ lemma key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
       _ = s ((n + k) + 1) - s n := by ring
       _ = s (n + k) + a (n + k) - s n := by rw [s_succ]
       _ = (s (n + k) - s n) + a (n + k) := by ring
-      _ ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
-      _ ≤ (fac n)⁻¹ * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
-      _ = (fac n)⁻¹ * ∑ i in range k, c ^ i + c ^ k * (fac n)⁻¹ := by rw [a_def]
-      _ = (fac n)⁻¹ * (∑ i in range k, c ^ i + c ^ k) := by ring
-      _ = (fac n)⁻¹ * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
+      _ ≤ (a n) * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
+      _ ≤ (a n) * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
+      _ = (a n) * ∑ i in range k, c ^ i + c ^ k * (a n) := by rw [a_def]
+      _ = (a n) * (∑ i in range k, c ^ i + c ^ k) := by ring
+      _ = (a n) * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
 
 
+theorem key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    s (n + k) - s n ≤ (a n) * 2 := by
+  have h : a n > 0 := a_pos n
+  calc
+    _ ≤ (a n) * ∑ i in range k, c ^ i := by rel [s_under_geometric n k hn]
+    _ ≤ (a n) * 2 := by rel [geometric_sum_lt_2 k]
 
 
 
 /-
   The next part introduces the number e and establishes that a n converges to e.
-  In this worksheet, we will take this as a known block box, i.e. assume
-  others have already proved it. Since Lean has checked the statement, we
-  can trust it.
+  In this worksheet, we will take this as a known block box. Since Lean has
+  checked the statement, we can trust it.
 
-  Alternative interpretation: use the statements below as an (implicit)
-  definition of the number e. Key facts:
+  More precisely, we will assume the following key facts:
   - e is a real number
-  - s n < e
+  - s n < e for all n
   - for all ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε
-  Verify for yourself that these uniquely determine e.
-
-  TODO: move these to an imported file, just mention the defining lemmas here
-  No! Cannot do this, since we need the definition of s n here.
+  One can take these collectivelty as a *definition* of the number e.
 -/
 
 
 def e := exp 1
 
-lemma s_below_e (n : ℕ) : s n < e := by sorry
+lemma inv_to_zero : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, (n : ℝ)⁻¹ < ε := by
+  intro ε hε
+  -- Use archimedean property to find N such that 1/(N+1) < ε
+  obtain ⟨N, hN⟩ := exists_nat_one_div_lt hε
+  use N + 1
+  intro n hn
+  -- We have n ≥ N + 1, so 1/n ≤ 1/(N+1) < ε
+  calc
+    _ ≤ (N + 1 : ℝ)⁻¹ := by apply inv_le_inv_of_le; addarith [hN]; norm_cast
+    _ = 1 / (N + 1) := by rw [one_div]
+    _ < ε := hN
 
-theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε := by sorry
+lemma twice_inv_to_zero : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, 2 * (n : ℝ)⁻¹ < ε := by
+  intro ε hε
+  have h : 0 < ε / 2 := by positivity
+  obtain ⟨N, hN⟩ := inv_to_zero (ε / 2) h
+  use N
+  intro n hn
+  calc
+    _ < 2 * (ε / 2) := by rel [hN n hn]
+    _ = ε := by ring
+
+
+lemma a_to_zero : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, 2 * a n < ε := by
+  intro ε hε
+  obtain ⟨N, hN⟩ := twice_inv_to_zero ε hε
+  use N
+  intro n hn
+  sorry
+
+
+
+lemma s_cauchy : IsCauSeq abs s := by
+  unfold s
+  unfold IsCauSeq
+  intro ε
+
+  simp
+  sorry
+
+
+lemma s_below_e (n : ℕ) : s n < e := by
+  unfold e
+
+  sorry
+
+theorem s_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |e - s n| < ε := by
+  intro ε hε
+  -- s n = ∑ i in range n, (fac i)⁻¹ = ∑ i in range n, 1 / i.factorial
+  -- e = exp 1 = lim_{n→∞} ∑ i in range n, 1^i / i.factorial
+  -- The convergence follows from the fact that exp is defined as this limit
+
+  -- Use the fact that the exponential series is Cauchy
+  have h_cauchy : IsCauSeq Complex.abs (fun n => ∑ m in range n, (1 : ℂ) ^ m / m.factorial) :=
+    Complex.isCauSeq_exp 1
+
+  -- Convert to real convergence
+  have h_conv : ∃ N, ∀ n ≥ N, |Real.exp 1 - ∑ m in range n, (1 : ℝ) ^ m / m.factorial| < ε := by
+    -- This follows from the definition of exp and Cauchy sequence convergence
+    have : ∀ ε > 0, ∃ N, ∀ n ≥ N, |(∑ m in range n, (1 : ℝ) ^ m / m.factorial) - Real.exp 1| < ε := by
+      intro ε' hε'
+      -- Use the fact that Real.exp is the real part of Complex.exp
+      have eq_exp : Real.exp 1 = (Complex.exp 1).re := by simp [Real.exp]
+      rw [eq_exp]
+      -- Use convergence of the complex exponential series
+      have : Complex.exp 1 = CauSeq.lim (Complex.exp' 1) := rfl
+      rw [this]
+      simp only [Complex.exp']
+      -- Apply Cauchy convergence
+      sorry -- This would require more detailed analysis of CauSeq.lim
+    have this_conv := this ε hε
+    obtain ⟨N, hN⟩ := this_conv
+    use N
+    intro n hn
+    rw [abs_sub_comm]
+    exact hN n hn
+
+  obtain ⟨N, hN⟩ := h_conv
+  use N
+  intro n hn
+
+    -- Show s n = ∑ m in range n, 1 / m.factorial
+  have h_eq : s n = ∑ m in range n, (1 : ℝ) ^ m / m.factorial := by
+    rw [s_def]
+    congr 1
+    ext i
+    rw [a_def, fac_eq_nat_fac]
+    simp [one_pow]
+    -- Show nat_fac i = i !
+    have nat_fac_eq : nat_fac i = i ! := by
+      induction i with
+      | zero => rfl
+      | succ n ih => rw [nat_fac_succ, Nat.factorial_succ, ih]
+    rw [nat_fac_eq]
+
+  have : |∑ m in range n, (1 : ℝ) ^ m / m.factorial - e| = |Real.exp 1 - ∑ m in range n, (1 : ℝ) ^ m / m.factorial| := by
+    rw [← abs_sub_comm]
+    simp [e]
+
+  rw [h_eq, this]
+  exact hN n hn
 
 
 

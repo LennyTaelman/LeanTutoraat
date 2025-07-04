@@ -4,6 +4,11 @@ import Library.Basic
 
 math2001_init
 
+/-! # Proofs with structure -/
+
+
+/-! ## Establishing intermediate results with `have` -/
+
 
 example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 := by
   have hb : b = 1 := by addarith [h2]
@@ -67,3 +72,12 @@ example {n : ℤ} (hn : n ^ 2 + 4 = 4 * n) : n = 2 := by
 
 example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
   sorry
+
+
+/-! ## Invoking a lemma with `apply` -/
+
+
+/-! ## Proving ∀-statements with `intro` -/
+
+
+/-! ## Proving ∃-statements with `use` -/

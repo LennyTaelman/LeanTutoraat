@@ -56,3 +56,6 @@ example {a : ℝ} (ha : -1 ≤ a) (n : ℕ) : (1 + a) ^ n ≥ 1 + n * a := by
 
 example : ∃ C : ℕ, ∀ n : ℕ, n ≥ C → (3:ℤ) ^ n ≥ 2 ^ n + 100 := by
   sorry
+
+
+/-! # Finite sums -/

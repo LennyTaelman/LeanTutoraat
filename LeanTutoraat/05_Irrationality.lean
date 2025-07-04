@@ -314,7 +314,7 @@ lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
     _ = 1 * 2 + 1 := by rw [a_one, s_one]
     _ = 3 := by numbers
 
--- hint: can use `simple_induction` to distinguish
+-- trick: can use `simple_induction` to distinguish
 -- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
 lemma s_bounded (n : ℕ) : s n ≤ 3 := by
   simple_induction n with k IH
@@ -322,10 +322,6 @@ lemma s_bounded (n : ℕ) : s n ≤ 3 := by
     numbers
   · apply s_bounded'
 
-lemma s_bounded'' (n : ℕ) (hn : n ≥ 1): |s n| ≤ 3 := by
-  rw [abs_of_nonneg]
-  apply s_bounded
-  apply s_nonneg
 
 
 
@@ -344,11 +340,14 @@ lemma s_bounded'' (n : ℕ) (hn : n ≥ 1): |s n| ≤ 3 := by
 
 -- prove that s is Cauchy using s_monotone and s_bounded
 
-#check isCauSeq_of_mono_bounded s s_bounded''
-
 theorem s_cauchy : IsCauSeq abs s := by
+  have h : ∀ n, n ≥ 0 → |s n| ≤ 3 := by
+    intro n _
+    rw [abs_of_nonneg]
+    apply s_bounded
+    apply s_nonneg
   apply isCauSeq_of_mono_bounded
-  · exact s_bounded''
+  · exact h
   · intro n hn
     rw [succ_eq_add_one]
     rel [s_monotone n]

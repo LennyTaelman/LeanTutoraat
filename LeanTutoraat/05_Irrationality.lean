@@ -196,6 +196,12 @@ lemma s_monotone (n : ℕ) : s n < s (n + 1) := by
   rw [s_succ]
   addarith [a_pos n]
 
+lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
+  simple_induction n with n IH
+  · rw [s_zero]
+  · rw [s_succ]
+    addarith [IH, a_pos n]
+
 /-
   Establish that n ! * s (n + 1) is an integer.
 -/
@@ -300,6 +306,27 @@ theorem key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     _ ≤ (a n) * ∑ i in range k, c ^ i := by rel [s_under_geometric n k hn]
     _ ≤ (a n) * 2 := by rel [geometric_sum_lt_2 k]
 
+lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
+  have h : 1 ≥ 1 := by numbers
+  calc
+    _ = (s (1 + n) - s 1) + s 1 := by ring
+    _ ≤ (a 1) * 2 + s 1 := by rel [key_bound 1 n h]
+    _ = 1 * 2 + 1 := by rw [a_one, s_one]
+    _ = 3 := by numbers
+
+-- hint: can use `simple_induction` to distinguish
+-- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
+lemma s_bounded (n : ℕ) : s n ≤ 3 := by
+  simple_induction n with k IH
+  · rw [s_zero]
+    numbers
+  · apply s_bounded'
+
+lemma s_bounded'' (n : ℕ) (hn : n ≥ 1): |s n| ≤ 3 := by
+  rw [abs_of_nonneg]
+  apply s_bounded
+  apply s_nonneg
+
 
 
 /-
@@ -315,51 +342,21 @@ theorem key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
 -/
 
 
-def e := exp 1
+-- prove that s is Cauchy using s_monotone and s_bounded
 
-lemma fac_ge_n (n : ℕ) (hn : n ≥ 1) : fac n ≥ n := by
-  induction_from_starting_point n, hn with k hk IH
-  · rw [fac_one]
-  · rw [fac_succ]
-    have hsq : k * k ≥ 1 := by exact one_le_mul hk hk
-    calc
-      _ ≥ ((k:ℝ) + 1) * k := by rel [IH]
-      _ = k*k  + k := by norm_cast; ring
-      _ ≥ 1 + (k:ℝ) := by norm_cast; addarith [hsq]
-      _ = (k:ℝ) + 1 := by ring
+#check isCauSeq_of_mono_bounded s s_bounded''
 
-lemma a_under_harmonic (n : ℕ) (hn : n ≥ 1): a n ≤ 1 / (n : ℝ) := by
-  have h : a n > 0 := a_pos n
-
-
-lemma a_to_zero : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, a n < ε := by
-  intro ε hε
-  obtain ⟨N, hN⟩ := exists_nat_one_div_lt hε
-  use N + 1
-  intro n hn
-  have hn2 : n ≥ 1 := by addarith [hn]
-  calc
-    _ = (fac n)⁻¹ := by rw [a_def]
-    _ ≤ (n : ℝ)⁻¹ := by apply inv_le_inv_of_le; norm_cast; apply fac_ge_n; addarith [hn2]
-    _ ≤ ((N : ℝ) + 1)⁻¹ := by apply inv_le_inv_of_le; norm_cast; addarith []; norm_cast
-    _ = 1 / (N + 1) := by rw [one_div]
-    _ < ε := by exact hN
+theorem s_cauchy : IsCauSeq abs s := by
+  apply isCauSeq_of_mono_bounded
+  · exact s_bounded''
+  · intro n hn
+    rw [succ_eq_add_one]
+    rel [s_monotone n]
 
 
 
-
-lemma s_cauchy : IsCauSeq abs s := by
-  unfold IsCauSeq
-  intro ε hε
-  have h : 0 < ε / 2 := by positivity
-  obtain ⟨N, hN⟩ := a_to_zero (ε / 2) h
-  use max N 1
-  intro j hj
-  have hj2 : j ≥ 1 := by exact le_of_max_le_right hj
-  have hj3 : j ≥ N := by exact le_of_max_le_left hj
-
-  sorry
-
+-- define e as the limit of s
+def e : ℝ := sorry
 
 lemma s_below_e (n : ℕ) : s n < e := by
   unfold e

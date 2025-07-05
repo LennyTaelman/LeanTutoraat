@@ -192,9 +192,16 @@ lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by
 lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
 
 
-lemma s_monotone (n : ℕ) : s n < s (n + 1) := by
+lemma s_lt_next (n : ℕ) : s n < s (n + 1) := by
   rw [s_succ]
   addarith [a_pos n]
+
+lemma s_monotone (n : ℕ) (m : ℕ) (hm : m > n) : s n < s m := by
+  induction_from_starting_point m, hm with k hk IH
+  · exact s_lt_next n
+  · calc
+    _ < s k := by rel [IH]
+    _ < s (k + 1) := by rel [s_lt_next k]
 
 lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
   simple_induction n with n IH
@@ -326,19 +333,20 @@ lemma s_bounded (n : ℕ) : s n ≤ 3 := by
 
 
 /-
-  The next part introduces the number e and establishes that a n converges to e.
-  In this worksheet, we will take this as a known block box. Since Lean has
-  checked the statement, we can trust it.
-
-  More precisely, we will assume the following key facts:
-  - e is a real number
+  The next part shows that the sequence s n is Cauchy, defines e : ℝ to be its
+  limit, and establishes two key lemma:
   - s n < e for all n
   - for all ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε
-  One can take these collectivelty as a *definition* of the number e.
+  The proofs have been pre-filled, since they require working closely with the
+  definitions of ℝ, "Cauchy" and "limit" as implemented in Mathlib.
+
+  However, the two key lemmas IMPLY that "e" agrees with the real number e,
+  so that you don't need to take this on faith.
+
+  In the rest of this worksheet, you don't use the definition of e, but
+  the two key lemmas.
 -/
 
-
--- prove that s is Cauchy using s_monotone and s_bounded
 
 theorem s_cauchy : IsCauSeq abs s := by
   have h : ∀ n, n ≥ 0 → |s n| ≤ 3 := by
@@ -349,17 +357,31 @@ theorem s_cauchy : IsCauSeq abs s := by
   apply isCauSeq_of_mono_bounded
   · exact h
   · intro n hn
-    rw [succ_eq_add_one]
-    rel [s_monotone n]
+    rel [s_lt_next n]
 
+def e : ℝ := CauSeq.lim ⟨fun n => s n, s_cauchy⟩
 
-
--- define e as the limit of s
-def e : ℝ := sorry
+lemma e_below_3 : e ≤ 3 := by
+  unfold e
+  sorry
 
 lemma s_below_e (n : ℕ) : s n < e := by
-  unfold e
+  have h : CauSeq.const abs (s (n+1)) ≤ ⟨fun n => s n, s_cauchy⟩ := by
+    apply CauSeq.le_of_exists
+    use n+1
+    intro j hj
+    dsimp
+    by_cases h2 : j = n + 1
+    · rw [h2]
+    · have h3 : j > n+1 := by exact Ne.lt_of_le' h2 hj
+      rel [s_monotone (n + 1) j h3]
+  have h2 : s n < s (n+1) := by rel [s_lt_next n]
+  calc
+    _ < s (n+1) := by rel [h2]
+    _ ≤ e := by exact CauSeq.le_lim h
 
+lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
+  intro ε hε
   sorry
 
 

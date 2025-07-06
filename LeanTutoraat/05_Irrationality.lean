@@ -359,18 +359,20 @@ theorem s_cauchy : IsCauSeq abs s := by
   · intro n hn
     rel [s_lt_next n]
 
-def e : ℝ := CauSeq.lim ⟨fun n => s n, s_cauchy⟩
+def e_seq : CauSeq ℝ abs := ⟨fun n => s n, s_cauchy⟩
 
-lemma e_below_3 : e ≤ 3 := by
-  unfold e
-  sorry
+def e : ℝ := CauSeq.lim e_seq
+
+#check CauSeq.equiv_lim e_seq
+#check CauSeq.const abs e
+#check e_seq
 
 lemma s_below_e (n : ℕ) : s n < e := by
-  have h : CauSeq.const abs (s (n+1)) ≤ ⟨fun n => s n, s_cauchy⟩ := by
+  have h : CauSeq.const abs (s (n+1)) ≤ e_seq := by
     apply CauSeq.le_of_exists
     use n+1
     intro j hj
-    dsimp
+    dsimp [e_seq]
     by_cases h2 : j = n + 1
     · rw [h2]
     · have h3 : j > n+1 := by exact Ne.lt_of_le' h2 hj
@@ -382,6 +384,14 @@ lemma s_below_e (n : ℕ) : s n < e := by
 
 lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro ε hε
+  have h := CauSeq.equiv_def₃ (CauSeq.equiv_lim e_seq) hε
+  obtain ⟨N, hN⟩ := h
+  use N
+  intro n hn
+  exact hN n hn n (by rfl)
+
+lemma e_below_3 : e ≤ 3 := by
+  unfold e
   sorry
 
 

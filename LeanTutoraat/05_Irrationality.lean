@@ -306,7 +306,7 @@ lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
       _ = (a n) * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
 
 
-theorem key_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) - s n ≤ (a n) * 2 := by
   have h : a n > 0 := a_pos n
   calc
@@ -317,7 +317,7 @@ lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
   have h : 1 ≥ 1 := by numbers
   calc
     _ = (s (1 + n) - s 1) + s 1 := by ring
-    _ ≤ (a 1) * 2 + s 1 := by rel [key_bound 1 n h]
+    _ ≤ (a 1) * 2 + s 1 := by rel [key_bound_s 1 n h]
     _ = 1 * 2 + 1 := by rw [a_one, s_one]
     _ = 3 := by numbers
 
@@ -334,17 +334,15 @@ lemma s_bounded (n : ℕ) : s n ≤ 3 := by
 
 /-
   The next part shows that the sequence s n is Cauchy, defines e : ℝ to be its
-  limit, and establishes two key lemma:
-  - s n < e for all n
-  - for all ε > 0, ∃ N : ℕ, ∀ n ≥ N, e < s n + ε
+  limit, and establishes a lemma stating that s n converges to e.
+
   The proofs have been pre-filled, since they require working closely with the
-  definitions of ℝ, "Cauchy" and "limit" as implemented in Mathlib.
+  definitions of ℝ, "Cauchy" and "limit" as implemented in Mathlib. However,
+  we only need to use the lemma `s_tends_to_e`, which guarantees that no matter
+  how `e : ℝ` was defined, it agrees with the real number e as you know it.
 
-  However, the two key lemmas IMPLY that "e" agrees with the real number e,
-  so that you don't need to take this on faith.
-
-  In the rest of this worksheet, you don't use the definition of e, but
-  the two key lemmas.
+  In partiacul, in the remainder of the worksheet you can ignore the definition
+  and only need to use the lemma `s_tends_to_e`.
 -/
 
 
@@ -359,13 +357,9 @@ theorem s_cauchy : IsCauSeq abs s := by
   · intro n hn
     rel [s_lt_next n]
 
-def e_seq : CauSeq ℝ abs := ⟨fun n => s n, s_cauchy⟩
+def e_seq : CauSeq ℝ abs := ⟨fun n ↦ s n, s_cauchy⟩
 
 def e : ℝ := CauSeq.lim e_seq
-
-#check CauSeq.equiv_lim e_seq
-#check CauSeq.const abs e
-#check e_seq
 
 lemma s_below_e (n : ℕ) : s n < e := by
   have h : CauSeq.const abs (s (n+1)) ≤ e_seq := by
@@ -390,8 +384,30 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro n hn
   exact hN n hn n (by rfl)
 
-lemma e_below_3 : e ≤ 3 := by
-  unfold e
+
+
+/-
+  Deduce some bounds on e
+-/
+
+open Classical
+
+lemma s_lt_e (n : ℕ) : s n < e := by
+  by_contra h
+  rw [not_lt] at h
+  have h2 : e < s (n+1) := by addarith [h, s_lt_next n]
+  let ε := s (n+1) - e
+  have hε : ε > 0 := by dsimp; addarith [h2]
+  obtain ⟨N, hN⟩ := s_tends_to_e ε hε
+  let m := max N (n+1)
+  have hm : m ≥ N := by exact Nat.le_max_left N (n+1)
+  have hm2 : m ≥ n+1 := by exact Nat.le_max_right N (n+1)
+  specialize hN m hm
+
+  sorry
+
+theorem key_bound_e (n : ℕ) : e ≤ s n + 2 * (a n) := by
+
   sorry
 
 
@@ -421,6 +437,11 @@ lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
   addarith [s_below_e n]
 
+
+lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by
+  rw [t_def]
+
+  sorry
 
 lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * nat_fac (q - 1) := by
   have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq

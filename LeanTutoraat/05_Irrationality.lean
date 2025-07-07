@@ -203,6 +203,13 @@ lemma s_monotone (n : ℕ) (m : ℕ) (hm : m > n) : s n < s m := by
     _ < s k := by rel [IH]
     _ < s (k + 1) := by rel [s_lt_next k]
 
+lemma s_monotone' (n : ℕ) (m : ℕ) (hm : m ≥ n) : s n ≤ s m := by
+  induction_from_starting_point m, hm with k hk IH
+  · rfl
+  · calc
+    _ ≤ s k := by rel [IH]
+    _ ≤ s (k + 1) := by rel [s_lt_next k]
+
 lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
   simple_induction n with n IH
   · rw [s_zero]
@@ -361,20 +368,6 @@ def e_seq : CauSeq ℝ abs := ⟨fun n ↦ s n, s_cauchy⟩
 
 def e : ℝ := CauSeq.lim e_seq
 
-lemma s_below_e (n : ℕ) : s n < e := by
-  have h : CauSeq.const abs (s (n+1)) ≤ e_seq := by
-    apply CauSeq.le_of_exists
-    use n+1
-    intro j hj
-    dsimp [e_seq]
-    by_cases h2 : j = n + 1
-    · rw [h2]
-    · have h3 : j > n+1 := by exact Ne.lt_of_le' h2 hj
-      rel [s_monotone (n + 1) j h3]
-  have h2 : s n < s (n+1) := by rel [s_lt_next n]
-  calc
-    _ < s (n+1) := by rel [h2]
-    _ ≤ e := by exact CauSeq.le_lim h
 
 lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro ε hε
@@ -403,8 +396,14 @@ lemma s_lt_e (n : ℕ) : s n < e := by
   have hm : m ≥ N := by exact Nat.le_max_left N (n+1)
   have hm2 : m ≥ n+1 := by exact Nat.le_max_right N (n+1)
   specialize hN m hm
+  contrapose hN
+  push_neg
+  calc
+    _ = s (n + 1) - e := by rfl
+    _ ≤ s m - e := by addarith [s_monotone' (n + 1) m hm2]
+    _ ≤ |s m - e| := by exact le_abs_self (s m - e)
 
-  sorry
+
 
 theorem key_bound_e (n : ℕ) : e ≤ s n + 2 * (a n) := by
 

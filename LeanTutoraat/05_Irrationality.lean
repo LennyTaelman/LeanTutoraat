@@ -459,7 +459,6 @@ lemma e_lt_3 : e < 3 := by
    calc
     e ≤ s 3 + 2 * (a 3) := by exact key_bound_e 3 (by numbers)
     _ = 5 / 2 + 2 * (1 / 6) := by rw [s_three, a_three]
-    _ = 17 / 6 := by numbers
     _ < 3 := by numbers
 
 

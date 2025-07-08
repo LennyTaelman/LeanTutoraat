@@ -42,6 +42,8 @@ lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]; numbers
 
 lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]; numbers
 
+lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]; numbers
+
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
   simple_induction n with n IH
   · rw [fac_zero]
@@ -154,6 +156,10 @@ lemma a_zero : a 0 = 1 := by rw [a_def, fac_zero]; numbers
 
 lemma a_one : a 1 = 1 := by rw [a_def, fac_one]; numbers
 
+lemma a_two : a 2 = 1 / 2 := by rw [a_def, fac_two]; numbers
+
+lemma a_three : a 3 = 1 / 6 := by rw [a_def, fac_three]; numbers
+
 lemma a_mul_fac_eq_one (n : ℕ) : a n * fac n = 1 := by
   rw [a_def]
   apply inv_mul_cancel
@@ -190,6 +196,10 @@ lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by
   rw [s_def]
 
 lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
+
+lemma s_two : s 2 = 2 := by rw [s_succ, s_one, a_one]; numbers
+
+lemma s_three : s 3 = 5 / 2 := by rw [s_succ, s_two, a_two]; numbers
 
 
 lemma s_lt_next (n : ℕ) : s n < s (n + 1) := by
@@ -296,37 +306,46 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
 
 
 lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) - s n ≤ (a n) * ∑ i in range k, c ^ i := by
+    s (n + k) ≤ s n + (a n) * ∑ i in range k, c ^ i := by
   simple_induction k with k IH
   · -- base case
     rw [sum_range_zero]
-    rw [add_zero, sub_self, mul_zero] -- TODO: make this a tactic?
+    rw [add_zero, mul_zero] -- TODO: make this a tactic?
+    addarith []
   · -- inductive step
     calc
-      _ = s ((n + k) + 1) - s n := by ring
-      _ = s (n + k) + a (n + k) - s n := by rw [s_succ]
-      _ = (s (n + k) - s n) + a (n + k) := by ring
-      _ ≤ (a n) * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
-      _ ≤ (a n) * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
-      _ = (a n) * ∑ i in range k, c ^ i + c ^ k * (a n) := by rw [a_def]
-      _ = (a n) * (∑ i in range k, c ^ i + c ^ k) := by ring
-      _ = (a n) * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
+      _ = s (n + k + 1) := by ring
+      _ = s (n + k) + a (n + k) := by rw [s_succ]
+      _ ≤ s n + (a n) * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
+      _ ≤ s n + (a n) * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
+      _ = s n + (a n) * ∑ i in range k, c ^ i + c ^ k * (a n) := by rw [a_def]
+      _ = s n + (a n) * (∑ i in range k, c ^ i + c ^ k) := by ring
+      _ = s n + (a n) * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
 
 
 theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) - s n ≤ (a n) * 2 := by
+    s (n + k) ≤ s n + 2 * (a n)  := by
   have h : a n > 0 := a_pos n
   calc
-    _ ≤ (a n) * ∑ i in range k, c ^ i := by rel [s_under_geometric n k hn]
-    _ ≤ (a n) * 2 := by rel [geometric_sum_lt_2 k]
+    _ ≤ s n + (a n) * ∑ i in range k, c ^ i := by rel [s_under_geometric n k hn]
+    _ ≤ s n + (a n) * 2 := by rel [geometric_sum_lt_2 k]
+    _ = s n + 2 * (a n) := by ring
+
+lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
+    s m ≤ s n + 2 * (a n)  := by
+  let k := m - n
+  have hk : m = n + k := by exact (Nat.sub_eq_iff_eq_add' hm).mp rfl
+  calc
+    _ = s (n + k)  := by rw [hk]
+    _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
+    _ = s n + 2 * (a n) := by ring
 
 lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
   have h : 1 ≥ 1 := by numbers
   calc
-    _ = (s (1 + n) - s 1) + s 1 := by ring
-    _ ≤ (a 1) * 2 + s 1 := by rel [key_bound_s 1 n h]
-    _ = 1 * 2 + 1 := by rw [a_one, s_one]
-    _ = 3 := by numbers
+    _ = s (1 + n) := by ring
+    _ ≤ s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
+    _ = 3 := by rw [a_one, s_one]; numbers
 
 -- trick: can use `simple_induction` to distinguish
 -- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
@@ -423,12 +442,25 @@ lemma e_le_of_s_le (c : ℝ) (N : ℕ) (h : ∀ n ≥ N, s n ≤ c) : e ≤ c :=
     _ = |- (e - s n )| := by rw [abs_neg]
     _ = |s n - e| := by ring
 
-theorem key_bound_e (n : ℕ) : e ≤ s n + 2 * (a n) := by
+theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
   apply e_le_of_s_le _ 1
   intro m hm
+  by_cases h : m ≥ n
+  · exact key_bound_s' n m h hn
+  · push_neg at h
+    have h3 : a n ≥ 0 := by addarith [a_pos n]
+    have h2 : 2 * (a n) ≥ 0 := by positivity
+    calc
+      _ ≤ s n := by rel [s_monotone m n h]
+      _ ≤ s n + 2 * (a n) := by addarith [h2] -- TODO: should be able to do addarith [a_pos n]
 
 
-  sorry
+lemma e_lt_3 : e < 3 := by
+   calc
+    e ≤ s 3 + 2 * (a 3) := by exact key_bound_e 3 (by numbers)
+    _ = 5 / 2 + 2 * (1 / 6) := by rw [s_three, a_three]
+    _ = 17 / 6 := by numbers
+    _ < 3 := by numbers
 
 
 /-

@@ -24,7 +24,7 @@ noncomputable section
   - fac_succ : fac (n + 1) = (n + 1) * fac n
 -/
 
-def fac (n : ℕ) : ℝ :=
+def fac (n : ℕ) : ℕ :=
   match n with
   | 0 => 1
   | n + 1 => (n + 1) * fac n
@@ -38,19 +38,28 @@ lemma fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by rfl
   Prove some basic facts about the factorial function.
 -/
 
-lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]; numbers
+lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]
 
-lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]; numbers
+lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]
 
-lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]; numbers
+lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]
 
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
   simple_induction n with n IH
   · rw [fac_zero]
-  · have h : (n : ℝ) + 1 ≥ 1 := by addarith []
+  · have h : n + 1 ≥ 1 := by addarith []
     calc fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
       _ ≥ 1 * fac n := by rel [h]
       _ ≥ 1 := by addarith [IH]
+
+lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
+  induction_from_starting_point m, hm with k hk IH
+  · rfl
+  · have h : k + 1 ≥ 1 := by addarith []
+    calc fac (k + 1) = (k + 1) * fac k := by rw [fac_succ]
+      _ ≥ 1 * fac k := by rel [h]
+      _ = fac k := by ring
+      _ ≥ fac n := by rel [IH]
 
 lemma fac_gt_zero (n : ℕ) : fac n > 0 := by
   calc fac n ≥ 1 := by apply fac_ge_one
@@ -59,30 +68,9 @@ lemma fac_gt_zero (n : ℕ) : fac n > 0 := by
 lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
   addarith [fac_gt_zero n]
 
-
-/-
-  Natural factorial
--/
-
-def nat_fac (n : ℕ) : ℕ :=
-  match n with
-  | 0 => 1
-  | n + 1 => (n + 1) * nat_fac n
-
-lemma nat_fac_zero : nat_fac 0 = 1 := by rfl
-
-lemma nat_fac_succ (n : ℕ) : nat_fac (n + 1) = (n + 1) * nat_fac n := by rfl
-
-lemma fac_eq_nat_fac (n : ℕ) : fac n = nat_fac n := by
-  simple_induction n with n IH
-  · rw [fac_zero]
-    rw [nat_fac_zero]
-    numbers
-  · rw [fac_succ]
-    rw [nat_fac_succ]
-    rw [IH]
-    norm_cast -- should be ring?
-
+lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
+  calc fac n ≥ fac 2 := fac_monotone 2 n hn
+    _ = 2 := by rw [fac_two]
 
 
 /-
@@ -103,11 +91,10 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     calc fac (n + 0) = fac n := by ring
       _ ≥ 1 * fac n := by addarith []
   · -- inductive step
-    have h : (n : ℝ) + (k : ℝ) + 1 ≥ 2 := by norm_cast; addarith [hn]
-    have h2 : (2 : ℝ) ^ k > 0 := by positivity
-    have h3 : 2 ^ k * fac n > 0 := by exact aux n k
+    have h : n + k + 1 ≥ 2 := by addarith [hn]
+    have h2 : fac n > 0 := by exact fac_gt_zero n
     calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
-      _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]; norm_cast
+      _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
       _ ≥ 2 * (2 ^ k * fac n) := by rel [h]
       _ = 2 ^ (k + 1) * fac n := by ring
@@ -148,9 +135,9 @@ lemma geometric_sum_lt_2 (k : ℕ) : ∑ i in range k, c ^ i < 2 := by
 
 -- type the exponent -1 using \inv
 
-def a (n : ℕ) := (fac n)⁻¹
+def a (n : ℕ) := (fac n : ℝ)⁻¹
 
-lemma a_def (n : ℕ) : a n = (fac n)⁻¹ := by rfl
+lemma a_def (n : ℕ) : a n = (fac n : ℝ)⁻¹ := by rfl
 
 lemma a_zero : a 0 = 1 := by rw [a_def, fac_zero]; numbers
 
@@ -163,20 +150,31 @@ lemma a_three : a 3 = 1 / 6 := by rw [a_def, fac_three]; numbers
 lemma a_mul_fac_eq_one (n : ℕ) : a n * fac n = 1 := by
   rw [a_def]
   apply inv_mul_cancel
+  norm_cast
   exact fac_ne_zero n
 
 lemma a_pos (n : ℕ) : 0 < a n  := by
   rw [a_def]
   -- TODO: find better tactic to do this (addarith? variation)
   rw [inv_pos]
+  norm_cast
   exact fac_gt_zero n
 
-lemma a_succ (n : ℕ) : a (n + 1) = ((n : ℝ) + 1)⁻¹ *  a n  := by
+lemma a_succ (n : ℕ) : a (n + 1) = (n + 1 : ℝ)⁻¹ *  a n  := by
   rw [a_def]
   rw [fac_succ]
   rw [a_def]
-  simp only [mul_inv_rev]
+  rw [← mul_inv_rev]
+  congr
+  norm_cast
   ring
+
+
+lemma a_le_1 (n : ℕ) : a n ≤ 1 := by
+  rw [a_def]
+  apply inv_le_one
+  norm_cast
+  exact fac_ge_one n
 
 /-
   De partiele sommen s_n = ∑_{i=0}^{n-1} a_i van de reeks ∑_{i=0}^{∞} a_i
@@ -228,18 +226,22 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 /-
   Establish that n ! * s (n + 1) is an integer.
+  TODO: clean this up! This is probably the most tricky part of this worksheet.
 -/
 
 
-lemma factorial_s_succ (n : ℕ) :
-    (fac (n + 1)) * s (n + 2) = (n + 1) * (fac n) * s (n + 1) + 1 := by
-  calc
-    _ = fac (n + 1) * ( s (n + 1) + a (n + 1)) := by rw [s_succ]
-    _ = fac (n + 1) * s (n + 1) + fac (n + 1) * a (n + 1) := by ring
-    _ = (n + 1) * fac n * s (n + 1) + fac (n + 1) * a (n + 1) := by rw [fac_succ]
-    _ = (n + 1) * fac n * s (n + 1) + a (n + 1) * fac (n + 1) := by ring
-    _ = (n + 1) * fac n * s (n + 1) + 1 := by rw [a_mul_fac_eq_one]
 
+lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
+    ∃ N : ℕ, (a n) * (fac m) = N := by
+  induction_from_starting_point m, h with k hk IH
+  · use 1
+    norm_cast
+    exact a_mul_fac_eq_one n
+  · obtain ⟨N, hN⟩ := IH
+    use (k + 1) * N
+    rw [fac_succ]
+    norm_cast
+    sorry
 
 lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
   simple_induction n with n IH
@@ -250,9 +252,10 @@ lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
     numbers
   · obtain ⟨m, hm⟩ := IH -- obtain an m from the ∃ in the inductive hypothesis
     use (n + 1) * m + 1
-    rw [factorial_s_succ, mul_assoc]
-    rw [hm]
-    norm_cast -- TODO: user will expect 'ring' here
+    rw [s_succ]
+
+    sorry
+
 
 
 /-
@@ -455,12 +458,13 @@ theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
       _ ≤ s n + 2 * (a n) := by addarith [h2] -- TODO: should be able to do addarith [a_pos n]
 
 
-lemma e_lt_3 : e < 3 := by
+theorem e_lt_3 : e < 3 := by
    calc
     e ≤ s 3 + 2 * (a 3) := by exact key_bound_e 3 (by numbers)
     _ = 5 / 2 + 2 * (1 / 6) := by rw [s_three, a_three]
     _ < 3 := by numbers
 
+#print axioms e_lt_3
 
 /-
   We will now prove that e is irrational. Consider the tail
@@ -488,19 +492,27 @@ lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
   addarith [s_lt_e n]
 
-
-
-
-lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by
+lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   rw [t_def]
+  addarith [key_bound_e n hn]
 
-  sorry
 
-lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * nat_fac (q - 1) := by
+lemma fac_mul_t_succ_lt_1 (n : ℕ) : (a n) * (t (n + 1)) < 1 := by
+  have h : n + 1 ≥ 1 := by addarith []
+  have h2 : a n > 0 := by addarith [a_pos n]
+  have h3 : a (n + 1) > 0 := by addarith [a_pos (n + 1)]
+  calc
+   _ ≤ (a n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h]
+   _ ≤ 1 * (2 * a (n + 1)) := by rel [a_le_1 n]
+   _ = 2 * a (n + 1) := by ring
+   _ < 1 := by sorry
+
+
+
+lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * fac (q - 1) := by
   have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq
   rw [← h]
   rw [fac_succ]
-  rw [fac_eq_nat_fac]
   norm_cast -- should be ring or numbers
 
 
@@ -513,7 +525,7 @@ lemma e_rational_factorial :
   · addarith [hq]
   · rw [he]
     rw [fac_succ]
-    use nat_fac (q - 1) * p * (q + 1)
+    use fac (q - 1) * p * (q + 1)
     rw [fac_div_integral]
     norm_cast
     field_simp

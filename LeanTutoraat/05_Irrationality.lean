@@ -383,7 +383,6 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   Deduce some bounds on e
 -/
 
-open Classical
 
 lemma s_lt_e (n : ℕ) : s n < e := by
   by_contra h
@@ -403,9 +402,31 @@ lemma s_lt_e (n : ℕ) : s n < e := by
     _ ≤ s m - e := by addarith [s_monotone' (n + 1) m hm2]
     _ ≤ |s m - e| := by exact le_abs_self (s m - e)
 
-
+-- if s n ≤ c for all n, then e ≤ c
+lemma e_le_of_s_le (c : ℝ) (N : ℕ) (h : ∀ n ≥ N, s n ≤ c) : e ≤ c := by
+  by_contra h2
+  push_neg at h2
+  let ε := e - c
+  have hε : ε > 0 := by dsimp; addarith [h2]
+  obtain ⟨m, hm⟩ := s_tends_to_e ε hε
+  let n := max N m
+  have hn : n ≥ N := by exact Nat.le_max_left N m
+  have hn2 : n ≥ m := by exact Nat.le_max_right N m
+  specialize h n hn
+  specialize hm n hn2
+  contrapose hm
+  push_neg
+  calc
+    _ = e - c := by rfl
+    _ ≤ e - s n := by addarith [h]
+    _ ≤ |e - s n| := by exact le_abs_self (e - s n)
+    _ = |- (e - s n )| := by rw [abs_neg]
+    _ = |s n - e| := by ring
 
 theorem key_bound_e (n : ℕ) : e ≤ s n + 2 * (a n) := by
+  apply e_le_of_s_le _ 1
+  intro m hm
+
 
   sorry
 
@@ -436,23 +457,7 @@ lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
   addarith [s_lt_e n]
 
--- if s n ≤ c for all n, then e ≤ c
-lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
-  by_contra h2
-  push_neg at h2
-  let ε := e - c
-  have hε : ε > 0 := by dsimp; addarith [h2]
-  obtain ⟨N, hN⟩ := s_tends_to_e ε hε
-  specialize h N
-  specialize hN N (by rfl)
-  contrapose hN
-  push_neg
-  calc
-    _ = e - c := by rfl
-    _ ≤ e - s N := by addarith [h]
-    _ ≤ |e - s N| := by exact le_abs_self (e - s N)
-    _ = |- (e - s N )| := by rw [abs_neg]
-    _ = |s N - e| := by ring
+
 
 
 lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by

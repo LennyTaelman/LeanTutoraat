@@ -434,7 +434,25 @@ lemma t_def (n : ℕ) : t n = e - s n := by rfl
 
 lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
-  addarith [s_below_e n]
+  addarith [s_lt_e n]
+
+-- if s n ≤ c for all n, then e ≤ c
+lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
+  by_contra h2
+  push_neg at h2
+  let ε := e - c
+  have hε : ε > 0 := by dsimp; addarith [h2]
+  obtain ⟨N, hN⟩ := s_tends_to_e ε hε
+  specialize h N
+  specialize hN N (by rfl)
+  contrapose hN
+  push_neg
+  calc
+    _ = e - c := by rfl
+    _ ≤ e - s N := by addarith [h]
+    _ ≤ |e - s N| := by exact le_abs_self (e - s N)
+    _ = |- (e - s N )| := by rw [abs_neg]
+    _ = |s N - e| := by ring
 
 
 lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by

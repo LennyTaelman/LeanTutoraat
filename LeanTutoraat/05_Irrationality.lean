@@ -226,7 +226,9 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 /-
   Establish that n ! * s (n + 1) is an integer.
-  TODO: clean this up! This is probably the most tricky part of this worksheet.
+  TODO: clean this up! This is probably the most tricky part of this worksheet;
+  casting and pushing the casts around is a mess;
+  may need specific tooling!
 -/
 
 
@@ -240,18 +242,23 @@ lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
   · obtain ⟨N, hN⟩ := IH
     use (k + 1) * N
     rw [fac_succ]
-    norm_cast
-    sorry
+    calc
+    _ = (a n * fac k) * (k + 1) := by push_cast; ring
+    _ = N * (k + 1) := by rw [hN]
+    _ = (k + 1) * N := by ring
+    _ = _ := by norm_cast
+
+
 
 lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
   simple_induction n with n IH
   · use 1
-    rw [s_succ]
-    rw [fac_zero]
-    rw [s_zero, a_zero]
+    rw [s_one, fac_zero]
     numbers
   · obtain ⟨m, hm⟩ := IH -- obtain an m from the ∃ in the inductive hypothesis
-    use (n + 1) * m + 1
+    obtain ⟨N, hN⟩ := fac_mul_a_integral (n + 1) (n + 1) (by rfl)
+
+
     rw [s_succ]
 
     sorry

@@ -147,9 +147,9 @@ lemma a_two : a 2 = 1 / 2 := by rw [a_def, fac_two]; numbers
 
 lemma a_three : a 3 = 1 / 6 := by rw [a_def, fac_three]; numbers
 
-lemma a_mul_fac_eq_one (n : ℕ) : a n * fac n = 1 := by
+lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   rw [a_def]
-  apply inv_mul_cancel
+  apply mul_inv_cancel
   norm_cast
   exact fac_ne_zero n
 
@@ -234,34 +234,34 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 
 lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
-    ∃ N : ℕ, (a n) * (fac m) = N := by
+    ∃ N : ℕ, (fac m) * (a n)= N := by
   induction_from_starting_point m, h with k hk IH
   · use 1
     norm_cast
-    exact a_mul_fac_eq_one n
+    exact fac_mul_a_eq_one n
   · obtain ⟨N, hN⟩ := IH
     use (k + 1) * N
     rw [fac_succ]
     calc
-    _ = (a n * fac k) * (k + 1) := by push_cast; ring
-    _ = N * (k + 1) := by rw [hN]
-    _ = (k + 1) * N := by ring
+    _ = (k + 1) * ((fac k) * (a n)) := by push_cast; ring
+    _ = (k + 1) * N := by rw [hN]
     _ = _ := by norm_cast
 
 
-
-lemma s_integrality (n : ℕ) : ∃ m : ℕ, (fac n) * s (n + 1) = m := by
+lemma s_integrality (n : ℕ) (m : ℕ) (h : n < m):
+    ∃ N : ℕ, (fac m) * s n = N := by
   simple_induction n with n IH
-  · use 1
-    rw [s_one, fac_zero]
-    numbers
-  · obtain ⟨m, hm⟩ := IH -- obtain an m from the ∃ in the inductive hypothesis
-    obtain ⟨N, hN⟩ := fac_mul_a_integral (n + 1) (n + 1) (by rfl)
-
-
+  · rw [s_zero]
+    use 0
+    ring
+  · have h' : n < m := by addarith [h]
+    obtain ⟨N, hN⟩ := IH h' -- obtain an m from the ∃ in the inductive hypothesis
+    obtain ⟨N2, hN2⟩ := fac_mul_a_integral n m (by addarith [h])
     rw [s_succ]
-
-    sorry
+    use N + N2
+    push_cast
+    rw [←hN, ←hN2]
+    ring
 
 
 
@@ -359,6 +359,7 @@ lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
 
 -- trick: can use `simple_induction` to distinguish
 -- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
+-- TODO: don't do this!
 lemma s_bounded (n : ℕ) : s n ≤ 3 := by
   simple_induction n with k IH
   · rw [s_zero]
@@ -503,16 +504,15 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   rw [t_def]
   addarith [key_bound_e n hn]
 
-
-lemma fac_mul_t_succ_lt_1 (n : ℕ) : (a n) * (t (n + 1)) < 1 := by
+-- terrible as formulated now; think a bit more about this
+-- also current name makes no sense
+lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by
   have h : n + 1 ≥ 1 := by addarith []
   have h2 : a n > 0 := by addarith [a_pos n]
   have h3 : a (n + 1) > 0 := by addarith [a_pos (n + 1)]
   calc
-   _ ≤ (a n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h]
-   _ ≤ 1 * (2 * a (n + 1)) := by rel [a_le_1 n]
-   _ = 2 * a (n + 1) := by ring
-   _ < 1 := by sorry
+  _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h]
+  _ < 1 := by sorry -- FALSE for n=0 !
 
 
 

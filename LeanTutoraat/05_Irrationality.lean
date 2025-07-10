@@ -177,21 +177,23 @@ lemma a_le_1 (n : ℕ) : a n ≤ 1 := by
   exact fac_ge_one n
 
 /-
-  De partiele sommen s_n = ∑_{i=0}^{n-1} a_i van de reeks ∑_{i=0}^{∞} a_i
+  The partial sums s n, convering to e:
 
-  s n = a 0 + a 1 + ... + a (n-1)   (n termen)
+  s n = a 0 + a 1 + ... + a (n-1)   (n terms)
+
+  Defined recursively:
+    s 0 = 0
+    s (n + 1) = s n + a n
 -/
 
-def s (n : ℕ) := ∑ i in range n, a i
-
-lemma s_def (n : ℕ) : s n = ∑ i in range n, a i := by rfl
+def s (n : ℕ) :=
+  match n with
+  | 0 => 0
+  | n + 1 => s n + a n
 
 lemma s_zero : s 0 = 0 := by rfl
 
-lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by
-  rw [s_def]
-  rw [sum_range_succ]
-  rw [s_def]
+lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by rfl
 
 lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
 
@@ -291,7 +293,7 @@ lemma n_plus_one_inv_le_c (n : ℕ) (hn : n ≥ 1) : ((n : ℝ) + 1)⁻¹ ≤ c 
 lemma a_halving (n : ℕ) (hn : n ≥ 1) : a (n + 1) ≤ c * a n  := by
   have h : a n > 0 := a_pos n
   calc
-    _ = ((n:ℝ) + 1)⁻¹ * a n := by rw [a_succ]
+    a (n + 1) = ((n : ℝ) + 1)⁻¹ * a n := by rw [a_succ]
     _ ≤ c * a n := by rel [n_plus_one_inv_le_c n hn]
 
 
@@ -304,15 +306,10 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     rfl
   · -- inductive step
     calc
-      _ = a ((n + k) + 1) := by ring
+      a (n + (k + 1)) = a ((n + k) + 1) := by ring
       _ ≤ c * a (n + k)  := by apply a_halving; addarith [hn]
       _ ≤ c * (c ^ k * a n) := by rel [IH]
       _ = c ^ (k + 1) * a n := by ring
-
-
-
-
-
 
 
 lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
@@ -506,13 +503,23 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
 
 -- terrible as formulated now; think a bit more about this
 -- also current name makes no sense
-lemma fac_mul_t_succ_lt_1 (n : ℕ) : (fac n) * (t (n + 1)) < 1 := by
-  have h : n + 1 ≥ 1 := by addarith []
+lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
+    (fac n) * (t (n + 1)) < 1 := by
+  have h1 : n + 1 ≥ 1 := by addarith [hn]
   have h2 : a n > 0 := by addarith [a_pos n]
   have h3 : a (n + 1) > 0 := by addarith [a_pos (n + 1)]
+  have h4 : ((n : ℝ) + 1)⁻¹ ≤ 3⁻¹ := by
+    apply inv_le_of_inv_le
+    · numbers
+    · norm_num; norm_cast; addarith [hn]
   calc
-  _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h]
-  _ < 1 := by sorry -- FALSE for n=0 !
+  _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
+  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rw [a_succ]
+  _ = ((fac n) * a n) * (2 * ((n : ℝ) + 1)⁻¹) := by ring
+  _ = 1 * (2 * ((n : ℝ) + 1)⁻¹) := by rw [fac_mul_a_eq_one n]
+  _ = 2 * ((n : ℝ) + 1)⁻¹ := by ring
+  _ ≤ 2 * (3)⁻¹ := by rel [h4]
+  _ < 1 := by numbers
 
 
 

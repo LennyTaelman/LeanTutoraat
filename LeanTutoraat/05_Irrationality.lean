@@ -469,7 +469,6 @@ theorem e_lt_3 : e < 3 := by
     _ = 5 / 2 + 2 * (1 / 6) := by rw [s_three, a_three]
     _ < 3 := by numbers
 
-#print axioms e_lt_3
 
 /-
   We will now prove that e is irrational. Consider the tail
@@ -531,7 +530,7 @@ lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * fac (q - 1) := by
 
 
 lemma e_rational_factorial :
-    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ n > 1, ∃ m : ℕ, (fac n) * e = m) := by
+    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ n > 1, ∃ N : ℕ, (fac n) * e = N) := by
   intro h
   obtain ⟨p, q, hq, he⟩ := h
   use q + 1
@@ -551,7 +550,8 @@ lemma e_rational_factorial :
 
   theorem e_irrational : ¬ ∃ p q : ℕ, q > 0 ∧ e = p / q := by
   intro h
-  obtain ⟨n, hn, m, hm⟩ := e_rational_factorial h
+  obtain ⟨n, hn, N, hN⟩ := e_rational_factorial h
+
 
 
   sorry

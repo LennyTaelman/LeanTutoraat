@@ -81,7 +81,7 @@ lemma aux (n : ℕ) (k : ℕ) :
     0 < 2 ^ k * fac n := by
   apply mul_pos
   · positivity
-  · exact fac_gt_zero n
+  · exact fac_pos n
 
 
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :

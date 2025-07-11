@@ -61,12 +61,12 @@ lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
       _ = fac k := by ring
       _ ≥ fac n := by rel [IH]
 
-lemma fac_gt_zero (n : ℕ) : fac n > 0 := by
+lemma fac_pos (n : ℕ) : fac n > 0 := by
   calc fac n ≥ 1 := by apply fac_ge_one
     _ > 0 := by numbers
 
 lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
-  addarith [fac_gt_zero n]
+  addarith [fac_pos n]
 
 lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
   calc fac n ≥ fac 2 := fac_monotone 2 n hn
@@ -92,7 +92,7 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
       _ ≥ 1 * fac n := by addarith []
   · -- inductive step
     have h : n + k + 1 ≥ 2 := by addarith [hn]
-    have h2 : fac n > 0 := by exact fac_gt_zero n
+    have h2 : fac n > 0 := by exact fac_pos n
     calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
       _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
@@ -158,7 +158,7 @@ lemma a_pos (n : ℕ) : 0 < a n  := by
   -- TODO: find better tactic to do this (addarith? variation)
   rw [inv_pos]
   norm_cast
-  exact fac_gt_zero n
+  exact fac_pos n
 
 lemma a_succ (n : ℕ) : a (n + 1) = (n + 1 : ℝ)⁻¹ *  a n  := by
   rw [a_def]
@@ -250,13 +250,13 @@ lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
     _ = _ := by norm_cast
 
 
-lemma s_integrality (n : ℕ) (m : ℕ) (h : n < m):
-    ∃ N : ℕ, (fac m) * s n = N := by
+lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
+    ∃ N : ℤ, (fac m) * s n = N := by
   simple_induction n with n IH
   · rw [s_zero]
     use 0
     ring
-  · have h' : n < m := by addarith [h]
+  · have h' : m + 1 ≥ n := by addarith [h]
     obtain ⟨N, hN⟩ := IH h' -- obtain an m from the ∃ in the inductive hypothesis
     obtain ⟨N2, hN2⟩ := fac_mul_a_integral n m (by addarith [h])
     rw [s_succ]
@@ -486,6 +486,9 @@ theorem e_lt_3 : e < 3 := by
 
   This is a contradiction with the fact that n! * t (n + 1) < 1.
 
+  BAH, stuff below is a mess. Write out argument *very carefully*
+  on paper first!
+
 -/
 
 def t (n : ℕ) := e - s n
@@ -500,8 +503,13 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   rw [t_def]
   addarith [key_bound_e n hn]
 
--- terrible as formulated now; think a bit more about this
--- also current name makes no sense
+
+-- KEY INGREDIENT 1:
+lemma fac_mul_s_succ_integral (n : ℕ) :
+    ∃ N : ℤ, (fac n) * s (n + 1) = N := by
+  exact s_integrality (n + 1) n (by rfl)
+
+-- KEY INGREDIENT 2:
 lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
     (fac n) * (t (n + 1)) < 1 := by
   have h1 : n + 1 ≥ 1 := by addarith [hn]
@@ -520,13 +528,57 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   _ ≤ 2 * (3)⁻¹ := by rel [h4]
   _ < 1 := by numbers
 
+-- KEY INGREDIENT 3:
+lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
+  apply mul_pos
+  · norm_cast; exact fac_pos n
+  · exact t_pos (n + 1)
+
+
+-- source of contradiction
+lemma no_int_between_0_and_1 (N : ℤ) (hN : N > 0) (hN2 : N < 1) : False := by
+  have h : N ≥ 1 := by exact hN
+  have h2 : ¬ N < 1 := by exact Int.not_lt.mpr hN
+  contradiction
+
+
+example (N : ℤ) (h : 0 < (N : ℝ)) : 0 < N := by
+  simp_all only [Int.cast_pos]
+
+example (N : ℤ) (h : (N : ℝ) < 1) : N < 1 := by
+  norm_cast at *
+
+
+-- KEY STEP: show that n! * e cannot be an integer!
+lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
+    (fac n) * e ≠ N := by
+  intro hN
+  obtain ⟨N2, hN2⟩ := fac_mul_s_succ_integral n
+  let N3 := N - N2
+  have N3_def : N3 = N - N2 := by rfl
+  have h : (fac n) * t (n + 1) = N3 := by
+    rw [N3_def, t_def]
+    push_cast
+    rw  [←hN, ←hN2]
+    ring
+  have h2 : (N3 : ℝ) > 0 := by
+    rw [←h]
+    exact fac_mul_t_succ_pos n
+  norm_cast at h2
+  have h3 : (N3 : ℝ) < 1 := by
+    rw [←h]
+    exact fac_mul_t_succ_lt_1 n hn
+  norm_cast at h3
+  exact no_int_between_0_and_1 N3 h2 h3
+
+#print axioms fac_mul_e_not_integral
 
 
 lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * fac (q - 1) := by
   have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq
   rw [← h]
   rw [fac_succ]
-  norm_cast -- should be ring or numbers
+  norm_cast -- TODO: should be ring or numbers
 
 
 lemma e_rational_factorial :
@@ -551,9 +603,20 @@ lemma e_rational_factorial :
   theorem e_irrational : ¬ ∃ p q : ℕ, q > 0 ∧ e = p / q := by
   intro h
   obtain ⟨n, hn, N, hN⟩ := e_rational_factorial h
-
-
-
+  have h : (n - 1) + 1 = n := by exact Nat.sub_add_cancel (by addarith [hn])
+  have h2: ∃ N2 : ℤ, (fac n) * s (n - 1) = N2 := by exact s_integrality (n - 1) n (by addarith [h])
+  obtain ⟨N2, hN2⟩ := h2
+  have h3 : ∃ N3 : ℤ, (fac n) * t (n - 1) = N3 := by
+    rw [t_def]
+    use N - N2
+    push_cast
+    rw [←hN, ←hN2]
+    ring
+  obtain ⟨N3, hN3⟩ := h3
+  have h4 : (N3 : ℝ) < 1 := by
+    rw [← hN3]
+    -- apply fac_mul_t_succ_lt_1
+    sorry
   sorry
 
 #print axioms e_irrational

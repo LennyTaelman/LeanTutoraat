@@ -60,3 +60,13 @@ elab "math2001_init" : command => do
     ⟨`instance, #[`Int.instDivInt_1,`Int.instDivInt, `Nat.instDivNat]⟩,
     ⟨`norm_num, #[`Mathlib.Meta.NormNum.evalNatDvd, `Mathlib.Meta.NormNum.evalIntDvd]⟩
   ]
+
+
+/-
+  add custom "exercise" command, behaving like "example"
+-/
+
+open Lean.Elab.Command in
+
+elab "exercise" hyps:bracketedBinder* ":" thm:term ":=" prf:term : command
+  => do elabCommand (← `(command|example $(hyps):bracketedBinder* : $thm := $prf))

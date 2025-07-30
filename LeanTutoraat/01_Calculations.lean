@@ -8,57 +8,99 @@ math2001_init
 
 
 
-/-! # Proving equalities and inequalities
+/- # Exercise sheet 1: Proving equalities and inequalities -/
+
+/- ## Purely numerical statements using `numbers` -/
 
 
- -/
+/-
+  The tactic `numbers` proves equalities between "numerical" expressions
+  not involving any variables
+-/
+example : 1 + 1 = 2 := by
+  numbers
+
+-- `numbers` can also prove inequalities
+example : 5 + 1 > 5 := by
+  numbers
+
+-- replace the word `sorry` with the correct justification
+example : 2 ^ 7 > 5 ^ 3 := by
+  sorry
+
+-- replace the word `sorry` with the correct justification
+example : (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) ^ 2 = 2025 := by
+  sorry
+
+-- see what happens when you try to prove a statement that is false
+example : 1 + 1 = 3 := by
+  sorry
 
 
-/-! ## Identities involving addition and multiplication with `ring` -/
 
 
-example {a b : ℝ} : a + b = b + a := by
+/- ## Identities involving addition and multiplication with `ring` -/
+
+/-
+  In the following example, the expression `(a : ℝ)` before the `:` means that
+  `a` denotes an (arbitrary) real number. So the example states that for all real
+  numbers `a` the identity `(a + 1) * (a - 1) = a ^ 2 - 1` holds.
+
+  The `ring` tactic can prove this.
+-/
+example (a : ℝ) : (a + 1) * (a - 1) = a ^ 2 - 1 := by
   ring
 
-example {a : ℝ} : (a * b) * c = a * (b * c) := by
+example (a b : ℤ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
   ring
 
-example {a b : ℤ} : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
+example (a b c : ℕ) : (a + b) * c = a * c + b * c := by
   ring
 
--- Exc: replace the word "sorry" with the correct Lean justification.
-example {a b : ℚ} : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
+-- Replace the word `sorry` with the correct Lean justification.
+example (a b : ℚ) : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
   sorry
 
--- Exc: replace the word "sorry" with the correct Lean justification.
-example {a b : ℝ} : (a - b) ^ 2 = a ^ 2 - 2 * a * b + b ^ 2 := by
+-- Replace the word `sorry` with the correct Lean justification.
+example (a b : ℝ) : (a - b) ^ 2 = a ^ 2 - 2 * a * b + b ^ 2 := by
   sorry
 
--- Exc: replace the word "sorry" with the correct Lean justification.
-example {a b c : ℝ} :
-     a ^ 2 + b ^ 2 + c ^ 2 = (a + b + c) ^ 2 - 2 * (a * b + b * c + c * a) := by
+-- Check that `ring` does *not* work here (why?)
+example (a b : ℤ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 := by
   sorry
 
--- this does NOT work because it is not true
-example {a b c : ℤ} : (a + b) ^ 2 = a ^ 2 + b ^ 2 := by
-  sorry
-
--- this is true but "ring" cannot prove it
-example {a : ℝ} : a ^ 2 ≥ 0 := by
+-- This is true, but `ring` cannot prove it. We'll learn how to prove it later.
+example (a : ℝ) : a ^ 2 ≥ 0 := by
   sorry
 
 
-/-! ## Substituting with `rw` -/
+/-
+  Now state and prove the theorem that for all real numbers `a`, `b`, `c`
+  the identity `a ^ 2 + b ^ 2 + c ^ 2 = (a + b + c) ^ 2 - 2 * (a * b + b * c + c * a)`
+  holds.
 
-example {a : ℚ} (h : a = 2) : a ^ 2 = 4 := by
+  To write the symbol ℝ, use `\R` or `\real`.
+-/
+
+
+
+/- ## Substituting with `rw` -/
+
+/-
+  In the following example, `h` is the hypothesis that `a = 2`.
+  To prove that `a ^ 2 = 4` we use the `rw` tactic (for *rewrite*)
+  to substitute `a` with `2` in the goal.
+-/
+
+example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
   rw [h] -- this uses hypothesis h to substitute a with 2
-  ring
+  numbers
 
-example {a b : ℝ} (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
+example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
   rw [h]
   ring
 
-example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
+example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
   rw [ha]
   rw [hb]
   ring
@@ -72,15 +114,15 @@ example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
 
 /- ## Chaining equalities together with `calc` -/
 
-example {a b : ℚ} (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
+example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
   calc
     (a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) := by ring
     _ = 4 ^ 2 + 4 * 1 := by rw [h1, h2]
-    _ = 20 := by ring
+    _ = 20 := by numbers
 
 -- Example 1.2.2.
 -- Exercise: replace the words "sorry" with the correct Lean justification.
-example {r s : ℝ} (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
+example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
   calc
     r = r + 2 * s - 2 * s := by sorry
     _ = -1 - 2 * s := by sorry

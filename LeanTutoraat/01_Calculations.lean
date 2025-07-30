@@ -90,6 +90,8 @@ example (a : ℝ) : a ^ 2 ≥ 0 := by
   In the following example, `h` is the hypothesis that `a = 2`.
   To prove that `a ^ 2 = 4` we use the `rw` tactic (for *rewrite*)
   to substitute `a` with `2` in the goal.
+
+  Note that we've already used the `rw` tactic in the introductory session.
 -/
 
 example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
@@ -100,60 +102,75 @@ example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
   rw [h]
   ring
 
-example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
-  rw [ha]
-  rw [hb]
-  ring
-
--- alternative:
+-- One can also use `rw` to do multiple substitutions in one go.
 example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
   rw [ha,hb]
-  ring
+  numbers
 
+-- replace `sorry` with a correct proof
+example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
+  sorry
 
 
 /- ## Chaining equalities together with `calc` -/
 
+/-
+  The `calc` tactic can be used to prove an equality of the form
+  `LHS = RHS` by proving `LHS = ... = ... = ... = RHS`.
+  Each individual equality must be justified with its own proof.
+
+  The following example shows how to use it to prove that `(a + b) ^ 2 = 20`
+  given that `a - b = 4` and `a * b = 1`. The proof boils down to the chain
+  of equalities
+  `(a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) = 4 ^ 2 + 4 * 1 = 20`.
+-/
 example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
   calc
     (a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) := by ring
     _ = 4 ^ 2 + 4 * 1 := by rw [h1, h2]
     _ = 20 := by numbers
 
--- Example 1.2.2.
--- Exercise: replace the words "sorry" with the correct Lean justification.
+-- Replace the words "sorry" with the correct Lean justification.
 example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
   calc
-    r = r + 2 * s - 2 * s := by sorry
+    r = (r + 2 * s) - 2 * s := by sorry
     _ = -1 - 2 * s := by sorry
     _ = -1 - 2 * 3 := by sorry
     _ = -7 := by sorry
 
--- Example 1.2.3
--- Exercise: replace the words "sorry" with the correct Lean justification.
-example {a b m n : ℤ} (h1 : a * m + b * n = 1) (h2 : b ^ 2 = 2 * a ^ 2) :
-    (2 * a * n + b * m) ^ 2 = 2 :=
+-- Replace the words "sorry" with the correct Lean justification.
+example (x y z : ℤ) (h1 : x + y + z = 0) (h2 : x * y + y * z + z * x = 0) :
+  x ^ 2 + y ^ 2 + z ^ 2 = 0 := by
   calc
-    (2 * a * n + b * m) ^ 2
-      = 2 * (a * m + b * n) ^ 2 + (m ^ 2 - 2 * n ^ 2) * (b ^ 2 - 2 * a ^ 2) := by sorry
-    _ = 2 * 1 ^ 2 + (m ^ 2 - 2 * n ^ 2) * (2 * a ^ 2 - 2 * a ^ 2) := by sorry
-    _ = 2 := by sorry
+    x ^ 2 + y ^ 2 + z ^ 2 = (x + y + z) ^ 2 - 2 * (x * y + y * z + z * x) := by sorry
+    _ = 0 ^ 2 - 2 * 0 := by sorry
+    _ = 0 := by sorry
 
--- Example 1.2.4.
--- Exercise: type out the whole proof printed in the text as a Lean proof.
-example {a b c d e f : ℤ} (h1 : a * d = b * c) (h2 : c * f = d * e) :
-    d * (a * f - b * e) = 0 :=
+
+/-
+  Now it is time to write your own `calc` proofs. The syntax can be a bit
+  finnicky at first, but it gets easier with practice.
+
+  Here is an example of a "chain" proof.
+
+  hypothesis: `a + b = s` and `a * b = t`
+  claim: `(b - a) ^ 2 = s ^ 2 - 4 * t`
+
+  proof by calculation:
+  `(b - a) ^ 2 = (a + b) ^ 2 - 4 * (a * b) = s ^ 2 - 4 * t`
+-/
+example (a b : ℝ) (h1 : a + b = s) (h2 : a * b = t) : (b - a) ^ 2 = s ^ 2 - 4 * t := by
   sorry
 
-example {x y : ℝ} (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 :=
-  sorry
-
+-- Replace `sorry` with a correct proof
 example {a b : ℤ} (h : a - b = 0) : a = b :=
   sorry
 
+-- Replace `sorry` with a correct proof
 example {x y : ℤ} (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 :=
   sorry
 
+-- Replace `sorry` with a correct proof
 example {p q : ℚ} (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 :=
   sorry
 

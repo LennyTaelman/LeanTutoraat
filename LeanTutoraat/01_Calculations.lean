@@ -14,18 +14,17 @@ math2001_init
 
 
 /-
-  The tactic `numbers` proves equalities between "numerical" expressions
-  not involving any variables
+  The tactic `numbers` proves equalities and inequalities
+  between "numerical" expressions  without variables.
 -/
 example : 1 + 1 = 2 := by
   numbers
 
--- `numbers` can also prove inequalities
-example : 5 + 1 > 5 := by
+example : 2 > 1 := by
   numbers
 
 -- replace the word `sorry` with the correct justification
-example : 2 ^ 7 > 5 ^ 3 := by
+example : 2 ^ 7 ≥ 5 ^ 3 := by
   sorry
 
 -- replace the word `sorry` with the correct justification
@@ -170,35 +169,65 @@ example (a b : ℝ) (h1 : a + b = s) (h2 : a * b = t) : (b - a) ^ 2 = s ^ 2 - 4 
   sorry
 
 -- Replace `sorry` with a correct proof
-example {a b : ℤ} (h : a - b = 0) : a = b :=
+example (a b : ℤ) (h : a - b = 0) : a = b := by
   sorry
 
 -- Replace `sorry` with a correct proof
-example {x y : ℤ} (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 :=
+example (x y : ℤ) (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 := by
   sorry
 
 -- Replace `sorry` with a correct proof
-example {p q : ℚ} (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 :=
+example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
   sorry
 
 
 
 /-! ## Proving inequalities with `rel` -/
 
-example {a : ℝ} (h : a ≥ b) : a + 1 ≥ b + 1 := by
+
+/-
+  The tactic `rel` is somewhat similar to `rw`, but is used to prove
+  inequalities.
+-/
+
+
+example (a : ℝ) (h : a ≥ b) : a + 1 ≥ b + 1 := by
   rel [h]
 
-example {a b : ℝ} (h : a > b) : a + 1 ≥ b + 1 := by
+example (a b c : ℝ) (h : a > b) : a + c > b + c := by
   rel [h]
 
--- CAREFUL: "rel [h2]" here *sees* the hypothesis h : a > 0, which is
--- NEEDED to deduce that a * b > a * c.
-example {a b : ℝ} (h : a > 0) (h2 : b > c) : a * b > a * c := by
+/-
+  Warning: in the example below, the tactic `rel [h2]` *sees* the hypothesis h : a > 0, which is
+  *needed* to deduce that a * b > a * c.
+-/
+example (a b c : ℝ) (h : a > 0) (h2 : b > c) : a * b > a * c := by
   rel [h2]
 
--- indeed: check that the following does not work:
-example {a b : ℝ} (h2 : b > c) : a * b > a * c := by
-  sorry
+-- indeed: check that `rel` does not prove the following (false) claim
+example (a b c : ℝ) (h2 : b > c) : a * b > a * c := by
+  sorry -- FALSE
+
+/-
+  Inequalities and equalities can be chained together using calc again.
+  Fill in the justifications for each of the 4 steps in the proof below.
+-/
+example (a b c : ℝ) (h1 : b ≥ 0) (h2 : c > 0): (a + b) + c > a := by
+  calc
+    (a + b) + c > a + b + 0 := by sorry
+    _ = a + b := by sorry
+    _ ≥ a + 0 := by sorry
+    _ = a := by sorry
+
+
+/-
+  Hint: write `≤` using `\le` (for less than or equal to) and similarly
+  write `≥` using `\ge` (for greater than or equal to).
+-/
+
+
+
+
 
 
 -- Example 1.4.1

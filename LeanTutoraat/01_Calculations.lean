@@ -98,9 +98,16 @@ example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
   rw [h] -- this uses hypothesis h to substitute a with 2
   numbers
 
-example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
-  rw [h]
-  ring
+
+example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
+  rw [ha]
+  rw [hb]
+  numbers
+
+/-
+  Try placing the cursor at various points in the above proof, and inspect the
+  infoview on the right.
+-/
 
 -- One can also use `rw` to do multiple substitutions in one go.
 example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by

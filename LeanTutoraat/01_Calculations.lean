@@ -10,42 +10,44 @@ math2001_init
 
 /- # Exercise sheet 1: Proving equalities and inequalities -/
 
-/- ## Purely numerical statements using `numbers` -/
+/- ## Numerical statements using `numbers` -/
 
 
 /-
   The tactic `numbers` proves equalities and inequalities
   between "numerical" expressions  without variables.
 -/
+
 example : 1 + 1 = 2 := by
   numbers
 
 example : 2 > 1 := by
   numbers
 
--- replace the word `sorry` with the correct justification
+/-
+  The tactic `sorry` is used to skip a proof. ("Sorry, I'll do this later!").
+  In the two examples below, replace `sorry` with `numbers`, and see what happens.
+-/
+
 example : 2 ^ 7 ≥ 5 ^ 3 := by
   sorry
 
--- replace the word `sorry` with the correct justification
 example : (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) ^ 2 = 2025 := by
   sorry
 
--- see what happens when you try to prove a statement that is false
+-- Now see what happens when you try to use `numbers` to prove a false statement
 example : 1 + 1 = 3 := by
   sorry
 
 
 
 
-/- ## Identities involving addition and multiplication with `ring` -/
+/- ## Algebraic idendities using `ring` -/
 
 /-
   In the following example, the expression `(a : ℝ)` before the `:` means that
   `a` denotes an (arbitrary) real number. So the example states that for all real
   numbers `a` the identity `(a + 1) * (a - 1) = a ^ 2 - 1` holds.
-
-  The `ring` tactic can prove this.
 -/
 example (a : ℝ) : (a + 1) * (a - 1) = a ^ 2 - 1 := by
   ring
@@ -182,8 +184,71 @@ example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
 
 
 
-/-! ## Proving inequalities with `rel` -/
+/- ## Simple inequalities with `extra` and `positivity` -/
 
+/-
+  The tactic `extra` proves inequalities of the form `a + e > a`
+  or `a + e ≥ a`. It detects the "extra" term `e` that is added
+  and tries to automatically deduce that `e > 0` or `e ≥ 0`.
+-/
+
+example (a : ℝ) : a + 2 > a := by
+  extra
+
+example (a b : ℤ) (h : a ≥ 0) : a + b ≥ b := by
+  extra
+
+-- check that `extra` cannot prove the following (why?)
+example (a b : ℝ) : a + b ≥ b := by
+  sorry
+
+-- check that `extra` *can* prove the following (why?)
+example (k n : ℕ) (h : n ≥ 0) : n + k ≥ n := by
+  sorry
+
+example (a : ℝ) (b : ℝ) : a + b ^ 2 ≥ a := by
+  sorry
+
+
+/-
+  Note that parentheses matter! Only one of the two statements below can be
+  proven by `extra`. Decide which one before checking...
+-/
+
+example (a b c : ℝ) (h1 : a ≥ 0) : (c + a ^ 2) + 1 > c := by
+  sorry
+
+example (a b c : ℝ) (h1 : a ≥ 0) : c + (a ^ 2 + 1) > c := by
+  sorry
+
+
+/-
+  Inequalities and equalities can be chained together using `calc` again. Fill
+  in the justifications for each of the 4 steps in the proof below.
+-/
+
+example (a : ℝ) : a - 1 < a := by
+  calc
+    a - 1 < (a - 1) + 1 := by sorry
+    _ = a := by sorry
+
+-- Note: in the above proof, the result of chaining a `<` and a `=` is a `<`
+
+/-
+  Now write your own `calc` proof for the following inequality.
+  Hint: type `≤` using `\le` (less than or equal) and `≥` using `\ge` (greater than or equal).
+-/
+example (a : ℝ) : a + 2 ≥ a + 1 := by
+  sorry
+
+-- finally, prove the inequality with the parentheses in the wrong place
+example (a b c : ℝ) (h1 : a ≥ 0) : (c + a ^ 2) + 1 > c := by
+  sorry
+
+
+
+
+/-! ## Substituting inequalities with `rel` -/
 
 /-
   The tactic `rel` is somewhat similar to `rw`, but is used to prove
@@ -197,101 +262,43 @@ example (a : ℝ) (h : a ≥ b) : a + 1 ≥ b + 1 := by
 example (a b c : ℝ) (h : a > b) : a + c > b + c := by
   rel [h]
 
+example (a b c : ℝ) (h : a > b) : c - a < c - b := by
+  rel [h]
+
+example (a b : ℝ) (h : a ≥ b) : 3 * a ≥ 3 * b := by
+  rel [h]
+
 /-
   Warning: in the example below, the tactic `rel [h2]` *sees* the hypothesis h : a > 0, which is
   *needed* to deduce that a * b > a * c.
 -/
-example (a b c : ℝ) (h : a > 0) (h2 : b > c) : a * b > a * c := by
-  rel [h2]
+example (a b c : ℝ) (h1 : a > b) (h2 : c > 0) : a * c > b * c := by
+  rel [h1]
 
 -- indeed: check that `rel` does not prove the following (false) claim
-example (a b c : ℝ) (h2 : b > c) : a * b > a * c := by
+example (a b c : ℝ) (h1 : a > b) :  a * c > b * c := by
   sorry -- FALSE
 
-/-
-  Inequalities and equalities can be chained together using calc again.
-  Fill in the justifications for each of the 4 steps in the proof below.
--/
-example (a b c : ℝ) (h1 : b ≥ 0) (h2 : c > 0): (a + b) + c > a := by
-  calc
-    (a + b) + c > a + b + 0 := by sorry
-    _ = a + b := by sorry
-    _ ≥ a + 0 := by sorry
-    _ = a := by sorry
 
 
-/-
-  Hint: write `≤` using `\le` (for less than or equal to) and similarly
-  write `≥` using `\ge` (for greater than or equal to).
--/
-
-
-
-
-
-
--- Example 1.4.1
-example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 :=
-  calc
-    y = y + 2 * x - 2 * x := by ring
-    _ ≥ 3 - 2 * x := by rel [hy]
-    _ = 9 - 2 * (x + 3) := by ring
-    _ ≥ 9 - 2 * 2 := by rel [hx]
-    _ > 3 := by numbers
-
--- Exercise: replace the words "sorry" with the correct Lean justification.
-example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 := by
-  calc
-    r = (s + r + r - s) / 2 := by ring
-    _ ≤ (3 + (s + 3) - s) / 2 := by addarith [h1, h2]
-    _ = 3 := by ring
-
--- Example 1.4.3
--- Exercise: type out the whole proof printed in the text as a Lean proof.
-example {x y : ℝ} (h1 : y ≤ x + 5) (h2 : x ≤ -2) : x + y < 2 :=
-  sorry
-
-
--- Example 1.4.5
--- Exercise: replace the words "sorry" with the correct Lean justification.
-example {t : ℚ} (ht : t ≥ 10) : t ^ 2 - 3 * t - 17 ≥ 5 :=
-  calc
-    t ^ 2 - 3 * t - 17
-      = t * t - 3 * t - 17 := by sorry
-    _ ≥ 10 * t - 3 * t - 17 := by sorry
-    _ = 7 * t - 17 := by sorry
-    _ ≥ 7 * 10 - 17 := by sorry
-    _ ≥ 5 := by sorry
-
--- Example 1.4.6
--- Exercise: type out the whole proof printed in the text as a Lean proof.
-example {n : ℤ} (hn : n ≥ 5) : n ^ 2 > 2 * n + 11 :=
-  sorry
-
-
-
--- Example 1.4.8
--- Exercise: replace the words "sorry" with the correct Lean justification.
-example {x y : ℝ} (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 < 3 :=
+-- Justify each step in the proof below.
+example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
   calc
     (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by sorry
     _ = 2 * (x ^ 2 + y ^ 2) := by sorry
     _ ≤ 2 * 1 := by sorry
-    _ < 3 := by sorry
+    _ = 2 := by sorry
 
 
-
-example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
+/-
+  Replace `sorry` with a correct `calc` proof. Hint, one proof uses the chain:
+  `n * n ≥ 5 * n = 2 * n + 3 * n ≥ 2 * n + 15`
+  but you might need to provide more intermediate steps...
+-/
+example (n : ℤ) (hn : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
   sorry
 
-example {n : ℤ} (h1 : n ≥ 5) : n ^ 2 - 2 * n + 3 > 14 :=
-  sorry
 
-example {x : ℚ} : x ^ 2 - 2 * x ≥ -1 :=
-  sorry
-
-example (a b : ℝ) : a ^ 2 + b ^ 2 ≥ 2 * a * b :=
-  sorry
 
 
 /-! ## Proving inequalities with `addarith` -/

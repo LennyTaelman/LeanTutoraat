@@ -10,6 +10,34 @@ math2001_init
 /-! ## Establishing intermediate results with `have` -/
 
 
+
+
+
+-- intro
+
+
+-- useful, since you can call them in `rw` and `rel`
+-- also useful as they are also silently available (e.g. when the positivity of
+-- something is needed)
+
+
+
+/-
+  The inequality below is called the "rearrangement inequality". It abstracts
+  the following intuitively obvious fact: if `b > a`, and you need to
+  choose between either
+  - picking `b` valuable and `a` worthless items, or
+  - picking `a` valuable and `b` worthless items,
+  then the first option is clearly better.
+-/
+example (x y a b : ℝ) (h1 : y ≥ x) (h2 : b ≥ a) : a * y + b * x ≤ a * x + b * y := by
+  have h1' : y - x ≥ 0 := by addarith [h1]
+  have h2' : b - a ≥ 0 := by addarith [h2]
+  calc
+    a * y + b * x ≤ (a * y + b * x) + (b - a) * (y - x) := by extra
+    _ = a * x + b * y := by ring
+
+
 example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 := by
   have hb : b = 1 := by addarith [h2]
   calc

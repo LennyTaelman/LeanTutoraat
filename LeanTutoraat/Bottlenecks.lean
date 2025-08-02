@@ -9,6 +9,11 @@ open Real
 noncomputable section
 
 
+
+/-
+  Various field inequalities
+-/
+
 example (x : ℝ) (h : x > 0) : x⁻¹ > 0 := by exact inv_pos.mpr h
 example (x : ℝ) (h : x > 0) : x⁻¹ > 0 := by positivity
 example (x : ℝ) (h : x > 0) : x⁻¹ > 0 := by apply inv_pos.mpr; exact h
@@ -21,3 +26,12 @@ example (x : ℝ) (h : x > 0) (h2 : y ≥ 0) : x * y ≥ 0 := by simp_all only [
 example (n : ℕ) : 2 / ((n:ℝ) + 1) > 0 := by positivity
 
 example (n : ℕ) : 3 / ((5 : ℝ) ^ n) > 0 := by positivity
+
+
+/-
+  Things specific to natural and integers
+-/
+
+example (n : ℕ) (h : n > 0) : n ≥ 1 := by apply h
+
+example (n : ℤ) (h : n > 0) : n ≥ 1 := by apply h

@@ -2,7 +2,7 @@
 import Mathlib
 import Library.Basic
 
--- NOTE: this also establishes a basic simp tactic
+-- NOTE: this now also establishes a basic simp tactic
 math2001_init
 
 open Nat Finset Real BigOperators
@@ -12,8 +12,12 @@ noncomputable section
 
 /-
   In this worksheet, we will prove that e is irrational. This is intended as a
-  group project, where participants can work on different parts of the proof
+  larger group project, where participants can work on different parts of the proof
   in parallel.
+
+  The author has written out a skeleton proof, dividing the argument in many
+  smaller lemmas. The class will work on those in parallel, replacing all the
+  `sorry`s with actual proofs.
 -/
 
 
@@ -47,16 +51,19 @@ lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
   simple_induction n with n IH
   · rw [fac_zero]
-  · have h : n + 1 ≥ 1 := by addarith []
-    calc fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
+  · have h : n + 1 ≥ 1 := by extra
+    calc
+      fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
       _ ≥ 1 * fac n := by rel [h]
-      _ ≥ 1 := by addarith [IH]
+      _ = fac n := by ring
+      _ ≥ 1 := by apply IH
 
 lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
   induction_from_starting_point m, hm with k hk IH
-  · rfl
-  · have h : k + 1 ≥ 1 := by addarith []
-    calc fac (k + 1) = (k + 1) * fac k := by rw [fac_succ]
+  · extra
+  · have h : k + 1 ≥ 1 := by extra
+    calc
+      fac (k + 1) = (k + 1) * fac k := by rw [fac_succ]
       _ ≥ 1 * fac k := by rel [h]
       _ = fac k := by ring
       _ ≥ fac n := by rel [IH]
@@ -66,7 +73,8 @@ lemma fac_pos (n : ℕ) : fac n > 0 := by
     _ > 0 := by numbers
 
 lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
-  addarith [fac_pos n]
+  have h : fac n > 0 := by apply fac_pos
+  positivity
 
 lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
   calc fac n ≥ fac 2 := fac_monotone 2 n hn
@@ -77,26 +85,27 @@ lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
   The key lower bound on the factorial function
 -/
 
-lemma aux (n : ℕ) (k : ℕ) :
-    0 < 2 ^ k * fac n := by
-  apply mul_pos
-  · positivity
-  · exact fac_pos n
+lemma aux (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
+  have h : fac n > 0 := by apply fac_pos
+  positivity
 
-
+/-
+  The following is the key inequality in the proof of irrationality of e.
+  I recommend you write out the proof in detail on paper first.
+-/
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     fac (n + k) ≥ 2 ^ k * fac n := by
   simple_induction k with k IH
   · -- base case
-    calc fac (n + 0) = fac n := by ring
-      _ ≥ 1 * fac n := by addarith []
+    calc fac (n + 0) = 1 * fac n := by ring
+      _ ≥ 1 * fac n := by extra
   · -- inductive step
-    have h : n + k + 1 ≥ 2 := by addarith [hn]
-    have h2 : fac n > 0 := by exact fac_pos n
+    have h1 : n + k + 1 ≥ 2 := by addarith [hn]
+    have h2 : fac n > 0 := by apply fac_pos
     calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
       _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
-      _ ≥ 2 * (2 ^ k * fac n) := by rel [h]
+      _ ≥ 2 * (2 ^ k * fac n) := by rel [h1]
       _ = 2 ^ (k + 1) * fac n := by ring
 
 
@@ -104,77 +113,101 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
   Propositie: ∑_{i=0}^{k-1} 1 / (2 ^ i : ℝ) ≤ 2
 -/
 
-def c : ℝ := 1 / (2 : ℝ)
 
-lemma c_def : c = 1 / (2 : ℝ) := by rfl
+def c (k : ℕ) : ℝ :=
+  match k with
+  | 0 => 1
+  | k + 1 => c k / 2
 
-lemma c_pos : c > 0 := by rw [c_def]; positivity
+lemma c_zero : c 0 = 1 := by rfl
 
+lemma c_succ (k : ℕ) : c (k + 1) = c k / 2 := by rfl
 
-lemma geometric_sum (k : ℕ) : ∑ i in range k, c ^ i = 2 - 2 * c ^ k := by
+lemma c_pos (k : ℕ) : c k > 0 := by
   simple_induction k with k IH
-  · -- base case
-    rw [sum_range_zero]
-    ring
+  · rw [c_zero]
+    positivity
+  · rw [c_succ]
+    positivity
+
+
+def g (k : ℕ) : ℝ :=
+  match k with
+  | 0 => 0
+  | k + 1 => g k + c k
+
+lemma g_zero : g 0 = 0 := by rfl
+
+lemma g_succ (k : ℕ) : g (k + 1) = g k + c k := by rfl
+
+
+lemma geometric_sum (k : ℕ) : g k = 2 - 2 * c k := by
+  simple_induction k with k IH
+  · rw [g_zero, c_zero]
+    numbers
   · -- inductive step
-    rw [Finset.sum_range_succ]
+    rw [g_succ, c_succ]
     rw [IH]
-    rw [c_def]
     ring
 
-lemma geometric_sum_lt_2 (k : ℕ) : ∑ i in range k, c ^ i < 2 := by
+lemma geometric_sum_lt_2 (k : ℕ) : g k < 2 := by
   rw [geometric_sum]
-  simp
-  rw [c_def]
-  positivity
+  have h : c k > 0 := by apply c_pos
+  calc
+    _ < (2 - 2 * c k) + 2 * c k := by extra
+    _ = 2 := by ring
+
 
 
 /-
-  De rij a_n = 1 / fac n
+  The sequence a_n = 1 / fac n
 -/
 
--- type the exponent -1 using \inv
+-- def a (n : ℕ) : ℝ := (fac n : ℝ)⁻¹
 
-def a (n : ℕ) := (fac n : ℝ)⁻¹
+def a (n : ℕ) : ℝ :=
+  match n with
+  | 0 => 1
+  | n + 1 => a n / (n + 1)
 
-lemma a_def (n : ℕ) : a n = (fac n : ℝ)⁻¹ := by rfl
+lemma a_zero : a 0 = 1 := by rfl
 
-lemma a_zero : a 0 = 1 := by rw [a_def, fac_zero]; numbers
+lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by rfl
 
-lemma a_one : a 1 = 1 := by rw [a_def, fac_one]; numbers
+lemma a_one : a 1 = 1 := by rw [a_succ, a_zero]; numbers
 
-lemma a_two : a 2 = 1 / 2 := by rw [a_def, fac_two]; numbers
+lemma a_two : a 2 = 1 / 2 := by rw [a_succ, a_one]; numbers
 
-lemma a_three : a 3 = 1 / 6 := by rw [a_def, fac_three]; numbers
-
-lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
-  rw [a_def]
-  apply mul_inv_cancel
-  norm_cast
-  exact fac_ne_zero n
+lemma a_three : a 3 = 1 / 6 := by rw [a_succ, a_two]; numbers
 
 lemma a_pos (n : ℕ) : 0 < a n  := by
-  rw [a_def]
-  -- TODO: find better tactic to do this (addarith? variation)
-  rw [inv_pos]
-  norm_cast
-  exact fac_pos n
+  simple_induction n with n IH
+  · rw [a_zero]
+    positivity
+  · rw [a_succ]
+    positivity
 
-lemma a_succ (n : ℕ) : a (n + 1) = (n + 1 : ℝ)⁻¹ *  a n  := by
-  rw [a_def]
-  rw [fac_succ]
-  rw [a_def]
-  rw [← mul_inv_rev]
-  congr
-  norm_cast
+lemma a_succ' (n : ℕ) : (n + 1) * a (n + 1) = a n := by
+  rw [a_succ]
+  field_simp -- bottleneck
   ring
 
+lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
+  simple_induction n with n IH
+  · rw [a_zero, fac_zero]
+    numbers
+  · calc
+      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; norm_cast
+      _ = fac n * ((n + 1) * (a (n + 1))) := by ring
+      _ = fac n * a n := by rw [a_succ']
+      _ = 1 := by rw [IH]
 
 lemma a_le_1 (n : ℕ) : a n ≤ 1 := by
-  rw [a_def]
-  apply inv_le_one
-  norm_cast
-  exact fac_ge_one n
+  simple_induction n with n IH
+  · rw [a_zero]
+  · rw [a_succ]
+    norm_cast
+    sorry -- BOTTLENECK
 
 /-
   The partial sums s n, convering to e:
@@ -240,6 +273,7 @@ lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
   induction_from_starting_point m, h with k hk IH
   · use 1
     norm_cast
+
     exact fac_mul_a_eq_one n
   · obtain ⟨N, hN⟩ := IH
     use (k + 1) * N
@@ -282,60 +316,41 @@ lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
 
 
 
-
-lemma n_plus_one_inv_le_c (n : ℕ) (hn : n ≥ 1) : ((n : ℝ) + 1)⁻¹ ≤ c := by
-  rw [c_def]
-  apply inv_le_of_inv_le
-  · numbers
-  · norm_num; norm_cast; addarith [hn] -- TODO: import norm_cast into addarith?
-
-
-lemma a_halving (n : ℕ) (hn : n ≥ 1) : a (n + 1) ≤ c * a n  := by
-  have h : a n > 0 := a_pos n
-  calc
-    a (n + 1) = ((n : ℝ) + 1)⁻¹ * a n := by rw [a_succ]
-    _ ≤ c * a n := by rel [n_plus_one_inv_le_c n hn]
-
-
 lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    a (n + k) ≤  c^ k * (a n)  := by
-  have h : c > 0 := by exact c_pos
+    a (n + k) ≤  (c k) * (a n) := by
   simple_induction k with k IH
   · -- base case
-    simp
-    rfl
-  · -- inductive step
+    rw [c_zero]
     calc
-      a (n + (k + 1)) = a ((n + k) + 1) := by ring
-      _ ≤ c * a (n + k)  := by apply a_halving; addarith [hn]
-      _ ≤ c * (c ^ k * a n) := by rel [IH]
-      _ = c ^ (k + 1) * a n := by ring
+      a (n + 0) = 1 * a n := by ring
+      _ ≤ 1 * a n := by extra
+  · -- inductive step
+    sorry
 
 
 lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) ≤ s n + (a n) * ∑ i in range k, c ^ i := by
+    s (n + k) ≤ s n + (a n) * (g k) := by
   simple_induction k with k IH
   · -- base case
-    rw [sum_range_zero]
-    rw [add_zero, mul_zero] -- TODO: make this a tactic?
-    addarith []
+    rw [g_zero]
+    simp
+    extra
   · -- inductive step
     calc
       _ = s (n + k + 1) := by ring
       _ = s (n + k) + a (n + k) := by rw [s_succ]
-      _ ≤ s n + (a n) * ∑ i in range k, c ^ i + a (n + k) := by rel [IH]
-      _ ≤ s n + (a n) * ∑ i in range k, c ^ i + c ^ k * a n := by rel [a_bound n k hn]
-      _ = s n + (a n) * ∑ i in range k, c ^ i + c ^ k * (a n) := by rw [a_def]
-      _ = s n + (a n) * (∑ i in range k, c ^ i + c ^ k) := by ring
-      _ = s n + (a n) * (∑ i in range (k + 1), c ^ i) := by rw [sum_range_succ]
+      _ ≤ s n + (a n) * (g k) + a (n + k) := by rel [IH]
+      _ ≤ s n + (a n) * (g k) + (c k) * a n := by rel [a_bound n k hn]
+      _ = s n + (a n) * ((g k) + (c k)) := by ring
+      _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
 
 
 theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) ≤ s n + 2 * (a n)  := by
+    s (n + k) < s n + 2 * (a n)  := by
   have h : a n > 0 := a_pos n
   calc
-    _ ≤ s n + (a n) * ∑ i in range k, c ^ i := by rel [s_under_geometric n k hn]
-    _ ≤ s n + (a n) * 2 := by rel [geometric_sum_lt_2 k]
+    _ ≤ s n + (a n) * (g k) := by apply s_under_geometric n k hn
+    _ < s n + (a n) * 2 := by rel [geometric_sum_lt_2 k]
     _ = s n + 2 * (a n) := by ring
 
 lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
@@ -347,22 +362,26 @@ lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
     _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
     _ = s n + 2 * (a n) := by ring
 
-lemma s_bounded' (n : ℕ) : s (n + 1) ≤ 3 := by
+lemma s_bounded' (n : ℕ) : s (n + 1) < 3 := by
   have h : 1 ≥ 1 := by numbers
   calc
     _ = s (1 + n) := by ring
-    _ ≤ s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
+    _ < s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
     _ = 3 := by rw [a_one, s_one]; numbers
 
 -- trick: can use `simple_induction` to distinguish
 -- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
 -- TODO: don't do this!
-lemma s_bounded (n : ℕ) : s n ≤ 3 := by
+lemma s_bounded (n : ℕ) : s n < 3 := by
   simple_induction n with k IH
   · rw [s_zero]
     numbers
   · apply s_bounded'
 
+lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
+  rw [abs_of_nonneg]
+  · rel [s_bounded n]
+  · apply s_nonneg
 
 
 
@@ -381,15 +400,13 @@ lemma s_bounded (n : ℕ) : s n ≤ 3 := by
 
 
 theorem s_cauchy : IsCauSeq abs s := by
-  have h : ∀ n, n ≥ 0 → |s n| ≤ 3 := by
-    intro n _
-    rw [abs_of_nonneg]
-    apply s_bounded
-    apply s_nonneg
   apply isCauSeq_of_mono_bounded
-  · exact h
+  · intro n hn
+    exact s_abs_bounded n
   · intro n hn
     rel [s_lt_next n]
+  · use 0
+
 
 def e_seq : CauSeq ℝ abs := ⟨fun n ↦ s n, s_cauchy⟩
 
@@ -460,7 +477,7 @@ theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
     have h2 : 2 * (a n) ≥ 0 := by positivity
     calc
       _ ≤ s n := by rel [s_monotone m n h]
-      _ ≤ s n + 2 * (a n) := by addarith [h2] -- TODO: should be able to do addarith [a_pos n]
+      _ ≤ s n + 2 * (a n) := by extra
 
 
 theorem e_lt_3 : e < 3 := by
@@ -521,7 +538,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
     · norm_num; norm_cast; addarith [hn]
   calc
   _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
-  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rw [a_succ]
+  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rw [a_succ]; ring
   _ = ((fac n) * a n) * (2 * ((n : ℝ) + 1)⁻¹) := by ring
   _ = 1 * (2 * ((n : ℝ) + 1)⁻¹) := by rw [fac_mul_a_eq_one n]
   _ = 2 * ((n : ℝ) + 1)⁻¹ := by ring

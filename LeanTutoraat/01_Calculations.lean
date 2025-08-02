@@ -3,7 +3,7 @@
 import Mathlib.Data.Real.Basic
 import Library.Basic
 
-math2001_init
+-- math2001_init
 
 
 
@@ -66,7 +66,7 @@ example (a b : ℚ) : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
 example (a b : ℝ) : (a - b) ^ 2 = a ^ 2 - 2 * a * b + b ^ 2 := by
   sorry
 
--- Check that `ring` does *not* work here (why?)
+-- Check that `ring` does _not_ work here (why?)
 example (a b : ℤ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 := by
   sorry
 
@@ -99,16 +99,18 @@ example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
   rw [h] -- this uses hypothesis h to substitute a with 2
   numbers
 
+/-
+  Place the cursor before the `rw` tactic above. The goal will be `⊢ a ^ 2 = 4`.
+  Now place the cursor after the `rw` tactic, and observe that the goal changes
+  to `⊢ 2 ^ 2 = 4`.
+-/
 
-example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
+-- Here is another example. Try placing the cursor at various points in the proof.
+example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
   rw [ha]
   rw [hb]
   numbers
 
-/-
-  Try placing the cursor at various points in the above proof, and inspect the
-  infoview on the right.
--/
 
 -- One can also use `rw` to do multiple substitutions in one go.
 example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
@@ -118,6 +120,14 @@ example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
 -- replace `sorry` with a correct proof
 example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
   sorry
+
+-- /- ## Cancelling a common factor with `cancel` -/
+
+-- example (a b : ℝ) (h : 3 * a = 3 * b) : a = b := by
+--   cancel 3 at h
+
+-- example (a b c : ℝ) (h1 : c ≠ 0) (h2 : c * a = c * b) : a = b := by
+--   cancel c at h2
 
 
 /- ## Chaining equalities together with `calc` -/
@@ -138,7 +148,7 @@ example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
     _ = 4 ^ 2 + 4 * 1 := by rw [h1, h2]
     _ = 20 := by numbers
 
--- Replace the words "sorry" with the correct Lean justification.
+-- Replace each `sorry` with a valid justification.
 example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
   calc
     r = (r + 2 * s) - 2 * s := by sorry
@@ -146,7 +156,7 @@ example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
     _ = -1 - 2 * 3 := by sorry
     _ = -7 := by sorry
 
--- Replace the words "sorry" with the correct Lean justification.
+-- Replace each `sorry` with a valid justification.
 example (x y z : ℤ) (h1 : x + y + z = 0) (h2 : x * y + y * z + z * x = 0) :
   x ^ 2 + y ^ 2 + z ^ 2 = 0 := by
   calc
@@ -159,26 +169,23 @@ example (x y z : ℤ) (h1 : x + y + z = 0) (h2 : x * y + y * z + z * x = 0) :
   Now it is time to write your own `calc` proofs. The syntax can be a bit
   finnicky at first, but it gets easier with practice.
 
-  Here is an example of a "chain" proof.
-
-  hypothesis: `a + b = s` and `a * b = t`
-  claim: `(b - a) ^ 2 = s ^ 2 - 4 * t`
-
-  proof by calculation:
+  Replace `sorry` with a correct `calc` proof. Hint:
   `(b - a) ^ 2 = (a + b) ^ 2 - 4 * (a * b) = s ^ 2 - 4 * t`
 -/
 example (a b : ℝ) (h1 : a + b = s) (h2 : a * b = t) : (b - a) ^ 2 = s ^ 2 - 4 * t := by
   sorry
 
--- Replace `sorry` with a correct proof
+-- Replace `sorry` with a correct `calc` proof
 example (a b : ℤ) (h : a - b = 0) : a = b := by
   sorry
 
--- Replace `sorry` with a correct proof
+-- Replace `sorry` with a correct `calc` proof
 example (x y : ℤ) (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 := by
+
+
   sorry
 
--- Replace `sorry` with a correct proof
+-- Replace `sorry` with a correct `calc` proof
 example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
   sorry
 
@@ -187,10 +194,25 @@ example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
 /- ## Simple inequalities with `extra` and `positivity` -/
 
 /-
+  The tactic `positivity` tries to automatically prove goals of the form
+  `a > 0` or `a ≥ 0`.
+
   The tactic `extra` proves inequalities of the form `a + e > a`
   or `a + e ≥ a`. It detects the "extra" term `e` that is added
-  and tries to automatically deduce that `e > 0` or `e ≥ 0`.
+  and tries to automatically prove that `e > 0` or `e ≥ 0`.
 -/
+
+example (a : ℝ) (h : a > 1) : a > 0 := by
+  positivity
+
+example (a : ℝ) : a ^ 2 ≥ 0 := by
+  positivity
+
+example (a b : ℝ) (h1 : a > 0) (h2 : b ≥ 0) : a * b ≥ 0 := by
+  positivity
+
+example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a * b > 0 := by
+  positivity
 
 example (a : ℝ) : a + 2 > a := by
   extra
@@ -203,7 +225,7 @@ example (a b : ℝ) : a + b ≥ b := by
   sorry
 
 -- check that `extra` *can* prove the following (why?)
-example (k n : ℕ) (h : n ≥ 0) : n + k ≥ n := by
+example (a b : ℕ) : a + b ≥ b := by
   sorry
 
 example (a : ℝ) (b : ℝ) : a + b ^ 2 ≥ a := by
@@ -215,16 +237,16 @@ example (a : ℝ) (b : ℝ) : a + b ^ 2 ≥ a := by
   proven by `extra`. Decide which one before checking...
 -/
 
-example (a b c : ℝ) (h1 : a ≥ 0) : (c + a ^ 2) + 1 > c := by
+example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
   sorry
 
-example (a b c : ℝ) (h1 : a ≥ 0) : c + (a ^ 2 + 1) > c := by
+example (a b c : ℝ) : c + (a ^ 2 + 1) > c := by
   sorry
 
 
 /-
   Inequalities and equalities can be chained together using `calc` again. Fill
-  in the justifications for each of the 4 steps in the proof below.
+  in the justifications for both steps in the proof below.
 -/
 
 example (a : ℝ) : a - 1 < a := by
@@ -242,7 +264,7 @@ example (a : ℝ) : a + 2 ≥ a + 1 := by
   sorry
 
 -- finally, prove the inequality with the parentheses in the wrong place
-example (a b c : ℝ) (h1 : a ≥ 0) : (c + a ^ 2) + 1 > c := by
+example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
   sorry
 
 

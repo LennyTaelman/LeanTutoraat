@@ -15,9 +15,10 @@ noncomputable section
   larger group project, where participants can work on different parts of the proof
   in parallel.
 
-  The author has written out a skeleton proof, dividing the argument in many
+  Below is a detailed skeleton proof, with the argument already split into many
   smaller lemmas. The class will work on those in parallel, replacing all the
-  `sorry`s with actual proofs.
+  `sorry`s with actual proofs, until the proof of the main theorem
+  no longer uses any `sorry`.
 -/
 
 
@@ -153,9 +154,7 @@ lemma geometric_sum (k : ℕ) : g k = 2 - 2 * c k := by
 lemma geometric_sum_lt_2 (k : ℕ) : g k < 2 := by
   rw [geometric_sum]
   have h : c k > 0 := by apply c_pos
-  calc
-    _ < (2 - 2 * c k) + 2 * c k := by extra
-    _ = 2 := by ring
+  extra
 
 
 
@@ -206,8 +205,63 @@ lemma a_le_1 (n : ℕ) : a n ≤ 1 := by
   simple_induction n with n IH
   · rw [a_zero]
   · rw [a_succ]
-    norm_cast
-    sorry -- BOTTLENECK
+    have h : ↑n + 1 ≥ 1 := by extra
+    calc
+      a n / (n + 1) ≤ a n := by sorry
+      _ ≤ 1 := by apply IH
+
+
+/-
+  Integrality
+-/
+
+def isInt (a : ℝ) : Prop := ∃ N : ℤ, a = N
+
+lemma isInt_zero : isInt 0 := by use 0; numbers
+
+lemma isInt_one : isInt 1 := by use 1; numbers
+
+lemma isInt_nat (n : ℕ) : isInt (n : ℝ) := by use n; rfl
+
+lemma isInt_add (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a + b) := by
+  obtain ⟨N, hN⟩ := ha
+  obtain ⟨M, hM⟩ := hb
+  use N + M
+  rw [hN, hM]
+  norm_cast
+
+lemma isInt_mul (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a * b) := by
+  obtain ⟨N, hN⟩ := ha
+  obtain ⟨M, hM⟩ := hb
+  use N * M
+  rw [hN, hM]
+  norm_cast
+
+lemma isInt_nat_mul (a : ℝ) (h : isInt a) (n : ℕ) : isInt (n * a) := by
+  obtain ⟨N, hN⟩ := h
+  use n * N
+  rw [hN]
+  norm_cast
+
+-- m! * a n is integral as soon as m ≥ n
+
+lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
+  induction_from_starting_point m, h with k hk IH
+  · rw [fac_mul_a_eq_one]
+    apply isInt_one
+  · -- bottleneck: make clear that k+1 is a nat!
+    -- bottleneck: instinct should be to do rw [fac_succ] FIRST!
+    have h2 : fac (k + 1) * a n = (k + 1 : ℕ) * (fac k * a n) := by
+      rw [fac_succ]
+      -- bottleneck!
+      push_cast
+      ring
+    rw [h2]
+    apply isInt_nat_mul
+    exact IH
+
+
+
 
 /-
   The partial sums s n, convering to e:
@@ -402,7 +456,7 @@ lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
 theorem s_cauchy : IsCauSeq abs s := by
   apply isCauSeq_of_mono_bounded
   · intro n hn
-    exact s_abs_bounded n
+    apply s_abs_bounded n
   · intro n hn
     rel [s_lt_next n]
   · use 0
@@ -535,7 +589,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   have h4 : ((n : ℝ) + 1)⁻¹ ≤ 3⁻¹ := by
     apply inv_le_of_inv_le
     · numbers
-    · norm_num; norm_cast; addarith [hn]
+    · field_simp; norm_cast; addarith [hn]
   calc
   _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
   _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rw [a_succ]; ring

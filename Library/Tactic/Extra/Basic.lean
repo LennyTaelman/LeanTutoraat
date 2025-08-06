@@ -26,12 +26,15 @@ lemma IneqExtra.neg_le_sub_self_of_nonneg [LinearOrderedAddCommGroup G] {a b : G
   rw [sub_eq_add_neg]
   apply le_add_of_nonneg_left h
 
+
+
 attribute [aesop safe (rule_sets [extra]) (apply (transparency := instances))]
   le_add_of_nonneg_right le_add_of_nonneg_left
   lt_add_of_pos_right lt_add_of_pos_left
+  sub_lt_self sub_le_self
   IneqExtra.neg_le_sub_self_of_nonneg
-  add_le_add_left add_le_add_right add_lt_add_left add_lt_add_right
-  sub_le_sub_left sub_le_sub_right sub_lt_sub_left sub_lt_sub_right
+  -- add_le_add_left add_le_add_right add_lt_add_left add_lt_add_right
+  -- sub_le_sub_left sub_le_sub_right sub_lt_sub_left sub_lt_sub_right
   le_refl
 
 def extra.Positivity : Lean.Elab.Tactic.TacticM Unit :=

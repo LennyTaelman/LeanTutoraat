@@ -205,12 +205,6 @@ example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
 example (a : ℝ) (h : a > 1) : a > 0 := by
   positivity
 
-example (a : ℝ) : a ^ 2 ≥ 0 := by
-  positivity
-
-example (a b : ℝ) (h1 : a > 0) (h2 : b ≥ 0) : a * b ≥ 0 := by
-  positivity
-
 example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a * b > 0 := by
   positivity
 
@@ -228,19 +222,31 @@ example (a b : ℝ) : a + b ≥ b := by
 example (a b : ℕ) : a + b ≥ b := by
   sorry
 
+
+/-
+  In the following examples, replace `sorry` by either `positivity` or `extra`.
+-/
+
+
 example (a : ℝ) (b : ℝ) : a + b ^ 2 ≥ a := by
   sorry
 
+example (a : ℝ) : a - 1 < a := by
+  sorry
 
-/-
-  Note that parentheses matter! Only one of the two statements below can be
-  proven by `extra`. Decide which one before checking...
--/
+example (a : ℝ) : a ^ 2 ≥ 0 := by
+  sorry
 
-example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
+example (a b : ℚ) (h1 : a ≥ 0) (h2 : b ≥ 0) : a * b + 1 > 0 := by
+  sorry
+
+example (a b : ℝ) (h : e ≥ 0) : a - e ≤ a := by
   sorry
 
 example (a b c : ℝ) : c + (a ^ 2 + 1) > c := by
+  sorry
+
+example (a b : ℝ) (h1 : a > 0) (h2 : b ≥ 0) : a * b ≥ 0 := by
   sorry
 
 
@@ -249,12 +255,13 @@ example (a b c : ℝ) : c + (a ^ 2 + 1) > c := by
   in the justifications for both steps in the proof below.
 -/
 
-example (a : ℝ) : a - 1 < a := by
-  calc
-    a - 1 < (a - 1) + 1 := by sorry
-    _ = a := by sorry
 
--- Note: in the above proof, the result of chaining a `<` and a `=` is a `<`
+example (a b : ℝ) : a ^ 2 + b ^ 2 - 2 * a * b ≥ 0 := by
+  calc
+    a ^ 2 + b ^ 2 - 2 * a * b = (a - b) ^ 2 := by sorry
+    _ ≥ 0 := by sorry
+
+-- Note: in the above proof, the result of chaining a `=` and a `≥` is a `≥`
 
 /-
   Now write your own `calc` proof for the following inequality.
@@ -263,7 +270,7 @@ example (a : ℝ) : a - 1 < a := by
 example (a : ℝ) : a + 2 ≥ a + 1 := by
   sorry
 
--- finally, prove the inequality with the parentheses in the wrong place
+-- Note that `extra` cannot directly prove this (why?). Give a proof using `calc`.
 example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
   sorry
 
@@ -291,7 +298,7 @@ example (a b : ℝ) (h : a ≥ b) : 3 * a ≥ 3 * b := by
   rel [h]
 
 /-
-  Warning: in the example below, the tactic `rel [h2]` *sees* the hypothesis h : a > 0, which is
+  Warning: in the example below, the tactic `rel [h1]` *sees* the hypothesis h : a > 0, which is
   *needed* to deduce that a * b > a * c.
 -/
 example (a b c : ℝ) (h1 : a > b) (h2 : c > 0) : a * c > b * c := by
@@ -317,18 +324,76 @@ example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
   `n * n ≥ 5 * n = 2 * n + 3 * n ≥ 2 * n + 15`
   but you might need to provide more intermediate steps...
 -/
-example (n : ℤ) (hn : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
+example (n : ℤ) (h : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
   sorry
 
 
 
 
-/-! ## Proving inequalities with `addarith` -/
 
 
-example {x : ℤ} (h1 : x + 4 = 2) : x = -2 := by
-  addarith [h1]
+/- ## THINGS TO INTEGRATE SOMEWHERE -/
 
 
-example {s t : ℝ} (h : t = 4 - s * t) : t + s * t > 0 := by
-  addarith [h]
+
+-- various things related to division/multiplication and inequalities
+
+example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a / b > 0 := by positivity
+
+-- hint: use that a = c / b
+example (a b : ℝ) (h1 : a * b = c) (h2 : b > 0) (h3 : c > 0) : a > 0 := by
+  calc
+    a = (a * b) / b := by field_simp
+    _ = c / b := by rw [h1]
+    _ > 0 := by positivity
+
+example (a : ℝ) (h : a > 1) : 1 / a < 1 := by
+  calc
+    1 / a = 1 * (1 / a) := by ring
+    _ < a * (1 / a) := by rel [h]
+    _ = 1 := by field_simp
+
+example (a b : ℝ) (h1 : a * b = 1) (h2 : a ≥ 1) : b ≤ 1 := by
+  -- tricky: we don't have b>0 yet, so cannot say b ≤ a * b
+  have h : a * b ≤ a * 1 := by
+    calc
+      a * b = 1  := by rw [h1]
+      _ ≤ a := by rel [h2]
+      _ = a * 1 := by ring
+  cancel a at h
+
+
+-- things with division
+
+-- this is horrible now; what is the proper idomatic way to do this?
+example (a b : ℝ) (h1 : a > 0) (h2 : b > 1) : a / b < a := by
+  have h : a / b > 0 := by positivity
+  calc
+    a / b = (a / b) * 1 := by ring
+    _ < (a / b) * b := by rel [h2]
+    _ = a := by field_simp
+
+example (a b : ℝ) (h2 : b ≠ 0) : b * a / b = a := by field_simp; ring
+
+
+-- first attempts at  using simp/field_simp
+
+example (a : ℝ) (b : ℝ) (h : a = 1) : a - 1 = 0  * b := by
+  -- simp
+  rw [h]
+  simp
+
+example (a b c : ℝ) (h : c ≠ 0) : a / (1 / c) + b = a * c + b := by
+  field_simp
+
+
+-- more division "identities"
+
+-- note that field_simp does not work if you comment out the h1 or h2
+-- since cannot cancel a or b unless we know they are nonzero
+lemma test (a b : ℝ) (h : a * b = 1) : 1 / a + 1 / b = a + b := by
+  have h1 : a ≠ 0 := by exact left_ne_zero_of_mul_eq_one h
+  have h2 : b ≠ 0 := by exact right_ne_zero_of_mul_eq_one h
+  calc
+    1 / a + 1 / b = (a * b) / a + (a * b) / b := by rw [h]
+    _ = a + b := by field_simp; ring

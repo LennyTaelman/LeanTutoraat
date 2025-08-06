@@ -196,7 +196,7 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   · rw [a_zero, fac_zero]
     numbers
   · calc
-      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; norm_cast
+      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; push_cast; ring
       _ = fac n * ((n + 1) * (a (n + 1))) := by ring
       _ = fac n * a n := by rw [a_succ']
       _ = 1 := by rw [IH]
@@ -228,20 +228,20 @@ lemma isInt_add (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a + b) := by
   obtain ⟨M, hM⟩ := hb
   use N + M
   rw [hN, hM]
-  norm_cast
+  push_cast; ring
 
 lemma isInt_mul (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a * b) := by
   obtain ⟨N, hN⟩ := ha
   obtain ⟨M, hM⟩ := hb
   use N * M
   rw [hN, hM]
-  norm_cast
+  push_cast; ring
 
 lemma isInt_nat_mul (a : ℝ) (h : isInt a) (n : ℕ) : isInt (n * a) := by
   obtain ⟨N, hN⟩ := h
   use n * N
   rw [hN]
-  norm_cast
+  push_cast; ring
 
 -- m! * a n is integral as soon as m ≥ n
 
@@ -326,18 +326,18 @@ lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
     ∃ N : ℕ, (fac m) * (a n)= N := by
   induction_from_starting_point m, h with k hk IH
   · use 1
-    norm_cast
-
-    exact fac_mul_a_eq_one n
+    rw [fac_mul_a_eq_one]
+    push_cast; ring
   · obtain ⟨N, hN⟩ := IH
     use (k + 1) * N
     rw [fac_succ]
     calc
     _ = (k + 1) * ((fac k) * (a n)) := by push_cast; ring
     _ = (k + 1) * N := by rw [hN]
-    _ = _ := by norm_cast
+    _ = _ := by push_cast; ring
 
 
+-- TODO: rewrite using integrality lemmas?
 lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
     ∃ N : ℤ, (fac m) * s n = N := by
   simple_induction n with n IH
@@ -600,6 +600,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   _ < 1 := by numbers
 
 -- KEY INGREDIENT 3:
+-- major bottleneck, make this idiomatic!
 lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
   apply mul_pos
   · norm_cast; exact fac_pos n
@@ -645,11 +646,13 @@ lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
 #print axioms fac_mul_e_not_integral
 
 
+-- TODO: make this idiomatic!
 lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * fac (q - 1) := by
   have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq
   rw [← h]
   rw [fac_succ]
-  norm_cast -- TODO: should be ring or numbers
+  rw [h]
+
 
 
 lemma e_rational_factorial :
@@ -663,7 +666,7 @@ lemma e_rational_factorial :
     rw [fac_succ]
     use fac (q - 1) * p * (q + 1)
     rw [fac_div_integral]
-    norm_cast
+    push_cast
     field_simp
     ring
     exact hq

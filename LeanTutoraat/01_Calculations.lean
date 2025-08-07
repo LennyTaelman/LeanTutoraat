@@ -277,7 +277,7 @@ example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
 
 
 
-/-! ## Substituting inequalities with `rel` -/
+/- ## Substituting inequalities with `rel` -/
 
 /-
   The tactic `rel` is somewhat similar to `rw`, but is used to prove

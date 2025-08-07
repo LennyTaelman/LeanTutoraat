@@ -26,6 +26,12 @@ example (c : ℝ) (h : c > 1) : 1 / c < 1 := by
 example (c : ℝ) (h : c ≠ 0) : c * (1 / c) = 1 := by algebra
 
 
+-- this should be `rel [h]` or sth similar?
+-- think about inequalities and casts!
+example (n : ℕ) (h : n ≥ 5) : (n : ℝ) ≥ 5 := by
+  norm_cast
+
+
 /-
   The examples below feel satisfactory
 -/

@@ -56,7 +56,7 @@ lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
     calc
       fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
       _ ≥ 1 * fac n := by rel [h]
-      _ = fac n := by ring
+      _ = fac n := by algebra
       _ ≥ 1 := by apply IH
 
 lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
@@ -66,7 +66,7 @@ lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
     calc
       fac (k + 1) = (k + 1) * fac k := by rw [fac_succ]
       _ ≥ 1 * fac k := by rel [h]
-      _ = fac k := by ring
+      _ = fac k := by algebra
       _ ≥ fac n := by rel [IH]
 
 lemma fac_pos (n : ℕ) : fac n > 0 := by
@@ -98,16 +98,16 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     fac (n + k) ≥ 2 ^ k * fac n := by
   simple_induction k with k IH
   · -- base case
-    calc fac (n + 0) = 1 * fac n := by ring
+    calc fac (n + 0) = 1 * fac n := by algebra
       _ ≥ 1 * fac n := by extra
   · -- inductive step
     have h1 : n + k + 1 ≥ 2 := by addarith [hn]
     have h2 : fac n > 0 := by apply fac_pos
-    calc fac (n + (k + 1)) = fac (n + k + 1) := by ring
+    calc fac (n + (k + 1)) = fac (n + k + 1) := by algebra
       _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
       _ ≥ 2 * (2 ^ k * fac n) := by rel [h1]
-      _ = 2 ^ (k + 1) * fac n := by ring
+      _ = 2 ^ (k + 1) * fac n := by algebra
 
 
 /-
@@ -149,7 +149,7 @@ lemma geometric_sum (k : ℕ) : g k = 2 - 2 * c k := by
   · -- inductive step
     rw [g_succ, c_succ]
     rw [IH]
-    ring
+    algebra
 
 lemma geometric_sum_lt_2 (k : ℕ) : g k < 2 := by
   rw [geometric_sum]
@@ -188,16 +188,15 @@ lemma a_pos (n : ℕ) : 0 < a n  := by
 
 lemma a_succ' (n : ℕ) : (n + 1) * a (n + 1) = a n := by
   rw [a_succ]
-  field_simp -- bottleneck
-  ring
+  algebra
 
 lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   simple_induction n with n IH
   · rw [a_zero, fac_zero]
     numbers
   · calc
-      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; push_cast; ring
-      _ = fac n * ((n + 1) * (a (n + 1))) := by ring
+      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; algebra
+      _ = fac n * ((n + 1) * (a (n + 1))) := by algebra
       _ = fac n * a n := by rw [a_succ']
       _ = 1 := by rw [IH]
 
@@ -228,20 +227,20 @@ lemma isInt_add (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a + b) := by
   obtain ⟨M, hM⟩ := hb
   use N + M
   rw [hN, hM]
-  push_cast; ring
+  algebra
 
 lemma isInt_mul (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a * b) := by
   obtain ⟨N, hN⟩ := ha
   obtain ⟨M, hM⟩ := hb
   use N * M
   rw [hN, hM]
-  push_cast; ring
+  algebra
 
 lemma isInt_nat_mul (a : ℝ) (h : isInt a) (n : ℕ) : isInt (n * a) := by
   obtain ⟨N, hN⟩ := h
   use n * N
   rw [hN]
-  push_cast; ring
+  algebra
 
 -- m! * a n is integral as soon as m ≥ n
 
@@ -253,9 +252,7 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
     -- bottleneck: instinct should be to do rw [fac_succ] FIRST!
     have h2 : fac (k + 1) * a n = (k + 1 : ℕ) * (fac k * a n) := by
       rw [fac_succ]
-      -- bottleneck!
-      push_cast
-      ring
+      algebra
     rw [h2]
     apply isInt_nat_mul
     exact IH
@@ -323,18 +320,18 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 
 lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
-    ∃ N : ℕ, (fac m) * (a n)= N := by
+    ∃ N : ℤ, (fac m) * (a n)= N := by
   induction_from_starting_point m, h with k hk IH
   · use 1
     rw [fac_mul_a_eq_one]
-    push_cast; ring
+    algebra
   · obtain ⟨N, hN⟩ := IH
     use (k + 1) * N
     rw [fac_succ]
     calc
-    _ = (k + 1) * ((fac k) * (a n)) := by push_cast; ring
+    _ = (k + 1) * ((fac k) * (a n)) := by algebra
     _ = (k + 1) * N := by rw [hN]
-    _ = _ := by push_cast; ring
+    _ = _ := by algebra
 
 
 -- TODO: rewrite using integrality lemmas?
@@ -345,13 +342,15 @@ lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
     use 0
     ring
   · have h' : m + 1 ≥ n := by addarith [h]
-    obtain ⟨N, hN⟩ := IH h' -- obtain an m from the ∃ in the inductive hypothesis
-    obtain ⟨N2, hN2⟩ := fac_mul_a_integral n m (by addarith [h])
+    obtain ⟨sN, hsN⟩ := IH h' -- obtain an m from the ∃ in the inductive hypothesis
+    obtain ⟨aN, haN⟩ := fac_mul_a_integral n m (by addarith [h])
     rw [s_succ]
-    use N + N2
-    push_cast
-    rw [←hN, ←hN2]
-    ring
+    use sN + aN
+    calc
+      (fac m) * (s n + a n) = (fac m) * s n + (fac m) * a n := by algebra
+      _ = (fac m) * s n + aN := by rw [haN]
+      _ = sN + aN := by rw [hsN]
+      _ = (sN + aN : ℤ) := by algebra
 
 
 
@@ -375,11 +374,21 @@ lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
   simple_induction k with k IH
   · -- base case
     rw [c_zero]
-    calc
-      a (n + 0) = 1 * a n := by ring
-      _ ≤ 1 * a n := by extra
+    simp; rfl
   · -- inductive step
+    have h : a (n + (k + 1)) = a (n + k + 1) := by ring
+    have h2 : (n + k) + 1 ≥ (2 : ℝ) := by sorry
+    rw [h]
+    rw [a_succ]
+    rw [c_succ]
+    field_simp
     sorry
+
+
+
+
+
+
 
 
 lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
@@ -586,6 +595,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   have h1 : n + 1 ≥ 1 := by addarith [hn]
   have h2 : a n > 0 := by addarith [a_pos n]
   have h3 : a (n + 1) > 0 := by addarith [a_pos (n + 1)]
+  -- this whole proof of h4 is a giant bottleneck!
   have h4 : ((n : ℝ) + 1)⁻¹ ≤ 3⁻¹ := by
     apply inv_le_of_inv_le
     · numbers
@@ -665,11 +675,8 @@ lemma e_rational_factorial :
   · rw [he]
     rw [fac_succ]
     use fac (q - 1) * p * (q + 1)
-    rw [fac_div_integral]
-    push_cast
-    field_simp
-    ring
-    exact hq
+    rw [fac_div_integral q hq]
+    algebra
 
 
 

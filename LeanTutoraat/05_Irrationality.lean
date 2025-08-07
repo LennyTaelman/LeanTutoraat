@@ -59,8 +59,8 @@ lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
       _ = fac n := by algebra
       _ ≥ 1 := by apply IH
 
-lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
-  induction_from_starting_point m, hm with k hk IH
+lemma fac_monotone (n m : ℕ) (h : m ≥ n) : fac m ≥ fac n := by
+  induction_from_starting_point m, h with k hk IH
   · extra
   · have h : k + 1 ≥ 1 := by extra
     calc
@@ -68,6 +68,9 @@ lemma fac_monotone (n : ℕ) (m : ℕ) (hm : m ≥ n) : fac m ≥ fac n := by
       _ ≥ 1 * fac k := by rel [h]
       _ = fac k := by algebra
       _ ≥ fac n := by rel [IH]
+
+lemma fac_gt (n m : ℕ) (h : m > n) : fac m > fac n := by
+  sorry
 
 lemma fac_pos (n : ℕ) : fac n > 0 := by
   calc fac n ≥ 1 := by apply fac_ge_one
@@ -108,6 +111,99 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
       _ ≥ 2 * (2 ^ k * fac n) := by rel [h1]
       _ = 2 ^ (k + 1) * fac n := by algebra
+
+
+/-
+  We will define `e` as `∑ 1 / fac n`. There is a subtlety here:
+  we have defined `fac n` as a natural number, and we want to consider
+  its inverse as a real number. We'll do some trick to avoid complications
+  later on.
+-/
+
+def nat_inv (n : ℕ) : ℝ := 1 / (n : ℝ)
+
+lemma nat_inv_def (n : ℕ) : nat_inv n = 1 / (n : ℝ) := by rfl
+
+lemma nat_inv_one : nat_inv 1 = 1 := by
+  rw [nat_inv_def]
+  numbers
+
+lemma nat_inv_pos (n : ℕ) (hn : n > 0) : nat_inv n > 0 := by
+  rw [nat_inv_def n]
+  positivity
+
+lemma nat_inv_mul (n m : ℕ) : nat_inv (n * m) = nat_inv n * nat_inv m := by
+  rw [nat_inv_def, nat_inv_def, nat_inv_def]
+  algebra
+
+lemma nat_inv_le (n m : ℕ) (h : n ≥ m) (hm : m > 0) : nat_inv n ≤ nat_inv m := by
+  rw [nat_inv_def n, nat_inv_def m]
+  have hn : n > 0 := by
+    calc
+      n ≥ m := by exact h
+      _ > 0 := by exact hm
+  sorry
+
+lemma nat_inv_lt (n m : ℕ) (h : n > m) (hm : m > 0) : nat_inv n < nat_inv m := by
+  rw [nat_inv_def n, nat_inv_def m]
+  have hn : n > 0 := by
+    calc
+      n > m := by exact h
+      _ > 0 := by exact hm
+  sorry
+
+lemma nat_inv_le_one (n : ℕ) (hn : n > 0) : nat_inv n ≤ 1 := by
+  rw [← nat_inv_one]
+  apply nat_inv_le
+  exact hn
+  numbers
+
+
+/-
+  Now define `b n := nat_inf fac n`, so `b n = 1 / n !`
+-/
+
+def b (n : ℕ) : ℝ := nat_inv (fac n)
+
+lemma b_def (n : ℕ) : b n = nat_inv (fac n) := by rfl
+
+lemma b_zero : b 0 = 1 := by
+  rw [b_def, fac_zero, nat_inv_one]
+
+lemma b_one : b 1 = 1 := by
+  rw [b_def, fac_one, nat_inv_one]
+
+lemma b_two : b 2 = 1 / 2 := by
+  rw [b_def, fac_two, nat_inv_def]
+  numbers
+
+lemma b_three : b 3 = 1 / 6 := by
+  rw [b_def, fac_three, nat_inv_def]
+  numbers
+
+lemma b_pos (n : ℕ) : b n > 0 := by
+  rw [b_def]
+  apply nat_inv_pos
+  apply fac_pos
+
+lemma b_le_one (n : ℕ) : b n ≤ 1 := by
+  rw [b_def]
+  apply nat_inv_le_one
+  apply fac_pos
+
+lemma b_le (n m : ℕ) (h : n ≥ m) : b n ≤ b m := by
+  rw [b_def]
+  apply nat_inv_le
+  apply fac_monotone
+  apply h
+  apply fac_pos
+
+lemma b_lt (n m : ℕ) (h : n > m) (hn : n > 0) : b n < b m := by
+  rw [b_def]
+  apply nat_inv_lt
+  apply fac_gt
+  exact h
+  apply fac_pos
 
 
 /-

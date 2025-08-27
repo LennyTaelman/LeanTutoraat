@@ -38,8 +38,8 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
   apply le_of_sub_nonneg
 
   /-
-    Note that if you place your cursor here, the goal has changed! What happened?
-    Well, the lemma `le_of_sub_nonneg` (which is proven somewhere in Lean's library of lemmas)
+    Note that if you place your cursor after the `apply` command, the goal has changed!
+    The lemma `le_of_sub_nonneg` (which is proven somewhere in Lean's library)
     states that `a ≤ b` follows from `0 ≤ b - a`. Applying this lemma we now have transformed our
     goal from `a ≤ b` to `0 ≤ b - a`.
   -/

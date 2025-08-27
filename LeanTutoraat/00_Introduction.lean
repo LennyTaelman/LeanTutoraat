@@ -10,7 +10,7 @@ import Library.Basic
 
 
 /-
-  # An example proof
+  ## An example proof
 
   First we are going to have a look at an example proof, without going
   into the syntactic details. You'll just move your cursor around in the proof
@@ -48,7 +48,7 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 
   /-
     Now the goal is unchanged, but we *have* something new:
-    `h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2`
+    `h : b - a = (x * v - y * u) ^ 2`
     Namely, we have the hypothesis `h` that we can now use in the proof. We can use it because
     we have proven it using the `algebra` tactic which automatically proves algebraic identities.
   -/
@@ -56,18 +56,17 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
   rw [h]
 
   /-
-    What happened? Well we wanted to show `0 ≤ a - b`, and we used the hypothesis `a - b = c` to
-    replace (rewrite or `rw`) `a - b` with `c`.
+    What happened? Well we wanted to show `0 ≤ b - a`, and we used the hypothesis `h` to
+    replace (rewrite or `rw`) `b - a` with `(x * v - y * u) ^ 2`.
   -/
 
   apply sq_nonneg
 
   /-
-    The `No goals` message means that we are done! We finished the proof by applying the lemma
-    `sq_nonneg` which states that `a ^ 2 ≥ 0` for all real numbers `a`.
+    The `No goals` message means that we are done! We finished the proof by applying the library
+    lemma `sq_nonneg` which states that squares of real numbers are non-negative.
   -/
 
-  done
 
 
 

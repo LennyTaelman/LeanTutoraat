@@ -113,6 +113,18 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 
 
 
+def IsEven (n : ℕ) : Prop := ∃ k, n = 2 * k
+
+example (n₁ n₂ : ℕ) (h₁ : IsEven n₁) (h₂ : IsEven n₂) : IsEven (n₁ + n₂) := by
+  unfold IsEven at *
+  obtain ⟨k₁, h₁'⟩ := h₁
+  obtain ⟨k₂, h₂'⟩ := h₂
+  use k₁ + k₂
+  rw [h₁']
+  rw [h₂']
+  algebra
+
+
 /-
   ## Your first Lean proof
 
@@ -128,3 +140,21 @@ example (a b c : ℝ) : (a + b) + c = (a + c) + b := by
   rw [add_assoc]
   rw [add_comm b c]
   rw [add_assoc]
+
+example (a b c : ℝ) : (a + b) + c = b + (c + a) := by
+  rw [add_comm a b]
+  rw [add_assoc]
+  rw [add_comm a c]
+
+example (a : ℝ) : a * a = a ^ 2 := by rw [sq]
+
+example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
+  rw [sq, sq]
+  rw [add_mul]
+  rw [mul_add, mul_add]
+  rw [add_assoc]
+  rw [← add_assoc (a * b) (b * a) (b * b)]
+  rw [mul_comm b a]
+  rw [two_mul, add_mul]
+
+  sorry

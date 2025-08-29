@@ -3,6 +3,22 @@
 import Mathlib.Data.Real.Basic
 import Library.Basic
 
+open Lean PrettyPrinter Delaborator SubExpr
+
+@[delab app.HAdd.hAdd]
+def delabAddWithParens : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 6)
+
+  let lhs := e.getArg! 4
+  let rhs := e.getArg! 5
+
+  guard (lhs.isAppOfArity ``HAdd.hAdd 6)
+
+  let lhsStx ← delab lhs
+  let rhsStx ← delab rhs
+  `(($lhsStx) + $rhsStx)
+
 -- math2001_init
 
 
@@ -100,5 +116,15 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 /-
   ## Your first Lean proof
 
+   Let's do some `rw` proofs inspired by the NNG!
 
 -/
+
+
+
+
+
+example (a b c : ℝ) : (a + b) + c = (a + c) + b := by
+  rw [add_assoc]
+  rw [add_comm b c]
+  rw [add_assoc]

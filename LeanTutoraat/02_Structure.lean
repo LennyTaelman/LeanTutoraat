@@ -1,8 +1,10 @@
-/- Copyright (c) Heather Macbeth, 2022.  All rights reserved. -/
+/- Copyright (c) Lenny Taelman, 2025.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
 import Library.Basic
 
 math2001_init
+
+namespace worksheet_02
 
 /-! # Proofs with structure -/
 
@@ -30,38 +32,55 @@ math2001_init
   - picking `a` valuable and `b` worthless items,
   then the first option is clearly better.
 -/
-example (x y a b : ℝ) (h1 : y ≥ x) (h2 : b ≥ a) : a * y + b * x ≤ a * x + b * y := by
-  have h1' : y - x ≥ 0 := by addarith [h1]
-  have h2' : b - a ≥ 0 := by addarith [h2]
+
+
+example (x y a b : ℝ) (h1 : x ≤ y) (h2 : a ≤ b) : a * y + b * x ≤ a * x + b * y := by
+  -- we first show that y - x ≥ 0
+  have h1' : y - x ≥ 0 := by
+    calc
+      0 ≤ x - x := by algebra
+      _ ≤ y - x := by rel [h1]
+  -- similarly, b - a ≥ 0
+  have h2' : b - a ≥ 0 := by
+    calc
+      0 ≤ a - a := by algebra
+      _ ≤ b - a := by rel [h2]
+  -- now `extra` will be able to deduce that (b - a) * (y - x) ≥ 0
   calc
     a * y + b * x ≤ (a * y + b * x) + (b - a) * (y - x) := by extra
-    _ = a * x + b * y := by ring
+    _ = a * x + b * y := by algebra
 
+/-
+  This looks inefficient! We are doing the same proof twice. We should extract the
+  repeated part into a lemma. Replace the `sorry` below with a correct proof.
+-/
 
-example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 := by
-  have hb : b = 1 := by addarith [h2]
+lemma sub_nonneg (x y : ℝ) (h : y ≥ x) : 0 ≤ y - x := by
+  sorry
+
+example (x y a b : ℝ) (h1 : x ≤ y) (h2 : b ≥ a) : a * y + b * x ≤ a * x + b * y := by
+  have h1' : y - x ≥ 0 := by sorry
+  have h2' : b - a ≥ 0 := by sorry
   calc
-    a = a - 5 * b + 5 * b := by ring
-    _ = 4 + 5 * 1 := by rw [h1, hb]
-    _ = 9 := by ring
+    a * y + b * x ≤ (a * y + b * x) + (b - a) * (y - x) := by extra
+    _ = a * x + b * y := by algebra
+
+-- and we can re-use the lemma in other proofs:
+
+-- TODO: example!
 
 
-example {m n : ℤ} (h1 : m + 3 ≤ 2 * n - 1) (h2 : n ≤ 5) : m ≤ 6 := by
-  have h3 :=
-  calc
-    m + 3 ≤ 2 * n - 1 := by rel [h1]
-    _ ≤ 2 * 5 - 1 := by rel [h2]
-    _ = 9 := by numbers
-  addarith [h3]
+
+
 
 
 example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 := by
-  have h3 : r ≤ 3 + s := by sorry -- justify with one tactic
-  have h4 : r ≤ 3 - s := by sorry -- justify with one tactic
+  have h3 : r ≤ 3 + s := by addarith [h1]
+  have h4 : r ≤ 3 - s := by addarith [h2]
   calc
-    r = (r + r) / 2 := by sorry -- justify with one tactic
-    _ ≤ (3 - s + (3 + s)) / 2 := by sorry -- justify with one tactic
-    _ = 3 := by sorry -- justify with one tactic
+    r = (r + r) / 2 := by ring
+    _ ≤ (3 - s + (3 + s)) / 2 := by addarith [h3, h4]
+    _ = 3 := by ring
 
 example {t : ℝ} (h1 : t ^ 2 = 3 * t) (h2 : t ≥ 1) : t ≥ 2 := by
   have h3 :=

@@ -10,7 +10,7 @@ import Library.Basic
 
 
 /-
-  ## An example proof
+  ## A first example of a Lean proof
 
   First we are going to have a look at an example proof, without going
   into the syntactic details. You'll just move your cursor around in the proof
@@ -19,14 +19,14 @@ import Library.Basic
   Note: the green text between `/-` and `-/` or after a `--` are comments for you. They
   are ignored by Lean.
 
-  The example below proves  a form of the Cauchy--Schwarz inequality.
+  The example below proves a form of the Cauchy--Schwarz inequality.
 -/
 
 example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) := by
 
   /-
     Place your cursor here, and look in the right panel. It tells us we have 1 goal to prove, and
-    then specifies what the goal is.The things before `⊢` tell us what
+    then specifies what the goal is. The things before `⊢` tell us what
     we *have*, and the things after `⊢` tell us what we *want*. In this case:
 
     - we *have* that `x`, `y`, `u` and `v` are real numbers.
@@ -44,20 +44,21 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
     goal from `a ≤ b` to `0 ≤ b - a`.
   -/
 
-  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by algebra
+  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by
+    algebra
 
   /-
     Now the goal is unchanged, but we *have* something new:
     `h : b - a = (x * v - y * u) ^ 2`
-    Namely, we have the hypothesis `h` that we can now use in the proof. We can use it because
+    This is a new fact `h` that we can now use in the proof. We can use it because
     we have proven it using the `algebra` tactic which automatically proves algebraic identities.
   -/
 
-  rw [h]
+  rewrite [h]
 
   /-
     What happened? Well we wanted to show `0 ≤ b - a`, and we used the hypothesis `h` to
-    replace (rewrite or `rw`) `b - a` with `(x * v - y * u) ^ 2`.
+    replace  `b - a` with `(x * v - y * u) ^ 2`.
   -/
 
   apply sq_nonneg
@@ -77,16 +78,27 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 
 example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) := by
   apply le_of_sub_nonneg
-  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by algebra
-  rw [h]
+  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by
+    algebra
+  rewrite [h]
   apply sq_nonneg
 
 /-
   And here is the same proof in human language:
 
-  We will show that `(x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2)`.
+  We will show that `(x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2)`:
     It suffices to show that `0 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2`.
-    By algebra, the right hand side equals `(x * v - y * u) ^ 2`.
+    We now show that the right hand side equals `(x * v - y * u) ^ 2`:
+      This follows from basic algebra.
     So it suffices to show that `0 ≤ (x * v - y * u) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
+-/
+
+
+
+
+/-
+  ## Your first Lean proof
+
+
 -/

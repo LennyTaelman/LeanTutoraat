@@ -50,10 +50,10 @@ example : 1 + 1 = 3 := by
   numbers `a` the identity `(a + 1) * (a - 1) = a ^ 2 - 1` holds.
 -/
 example (a : ℝ) : (a + 1) * (a - 1) = a ^ 2 - 1 := by
-  ring
+  algebra
 
 example (a b : ℤ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
-  ring
+  algebra
 
 example (a b c : ℕ) : (a + b) * c = a * c + b * c := by
   ring
@@ -89,7 +89,7 @@ example (a : ℝ) : a ^ 2 ≥ 0 := by
 
 /-
   In the following example, `h` is the hypothesis that `a = 2`.
-  To prove that `a ^ 2 = 4` we use the `rw` tactic (for *rewrite*)
+  To prove that `a ^ 2 = 4` we use the `rw` tactic (short for *rewrite*)
   to substitute `a` with `2` in the goal.
 
   Note that we've already used the `rw` tactic in the introductory session.
@@ -113,21 +113,18 @@ example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
 
 
 -- One can also use `rw` to do multiple substitutions in one go.
-example {a b : ℝ} (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
+example {a b c : ℝ} (ha : a = c) (hb : b = -c) : a + b = 0 := by
   rw [ha,hb]
-  numbers
+  algebra
 
 -- replace `sorry` with a correct proof
 example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
   sorry
 
--- /- ## Cancelling a common factor with `cancel` -/
+-- replace `sorry` with a correct proof
+example (a b c d : ℤ) (h1 : c = a + b) (h2 : d = b - a) : c * d = b ^ 2 - a ^ 2 := by
+  sorry
 
--- example (a b : ℝ) (h : 3 * a = 3 * b) : a = b := by
---   cancel 3 at h
-
--- example (a b c : ℝ) (h1 : c ≠ 0) (h2 : c * a = c * b) : a = b := by
---   cancel c at h2
 
 
 /- ## Chaining equalities together with `calc` -/
@@ -181,8 +178,6 @@ example (a b : ℤ) (h : a - b = 0) : a = b := by
 
 -- Replace `sorry` with a correct `calc` proof
 example (x y : ℤ) (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 := by
-
-
   sorry
 
 -- Replace `sorry` with a correct `calc` proof
@@ -200,6 +195,8 @@ example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
   The tactic `extra` proves inequalities of the form `a + e > a`
   or `a + e ≥ a`. It detects the "extra" term `e` that is added
   and tries to automatically prove that `e > 0` or `e ≥ 0`.
+
+  TODO: consider eliminating `positivity`, as it is subsumed by `extra`.
 -/
 
 example (a : ℝ) (h : a > 1) : a > 0 := by
@@ -330,6 +327,17 @@ example (n : ℤ) (h : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
 
 
 
+/-
+  Congratulations! You have completeed the first worksheet. You
+  have learned to write proofs using the following tactics:
+
+  - `numbers` and `algebra` for automatically proving simple identities
+  - `rw` for substituting equalities
+  - `calc` for chaining together equalities and/or inequalities
+  - `extra` and `positivity` for automatically proving simple inequalities
+  - `rel` for substituting inequalities
+-/
+
 
 
 /- ## THINGS TO INTEGRATE SOMEWHERE -/
@@ -343,7 +351,7 @@ example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a / b > 0 := by positivity
 -- hint: use that a = c / b
 example (a b : ℝ) (h1 : a * b = c) (h2 : b > 0) (h3 : c > 0) : a > 0 := by
   calc
-    a = (a * b) / b := by field_simp
+    a = (a * b) / b := by algebra
     _ = c / b := by rw [h1]
     _ > 0 := by positivity
 
@@ -397,3 +405,11 @@ lemma test (a b : ℝ) (h : a * b = 1) : 1 / a + 1 / b = a + b := by
   calc
     1 / a + 1 / b = (a * b) / a + (a * b) / b := by rw [h]
     _ = a + b := by field_simp; ring
+
+
+-- a simple but surprisingly tricky inequality
+
+example (a b : ℝ) (h : a ≤ b) : 0 ≤ b - a := by
+  calc
+    0 ≤ a - a := by algebra
+    _ ≤ b - a := by rel [h]

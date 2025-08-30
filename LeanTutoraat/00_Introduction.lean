@@ -20,6 +20,20 @@ def delabAddWithParens : Delab := do
   let rhsStx ← delab rhs
   `(($lhsStx) + $rhsStx)
 
+@[delab app.HMul.hMul]
+def delabMulWithParens : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 6)
+
+  let lhs := e.getArg! 4
+  let rhs := e.getArg! 5
+
+  guard (lhs.isAppOfArity ``HMul.hMul 6)
+
+  let lhsStx ← delab lhs
+  let rhsStx ← delab rhs
+  `(($lhsStx) * $rhsStx)
+
 -- math2001_init
 
 
@@ -133,6 +147,23 @@ example (n₁ n₂ : ℕ) (h₁ : IsEven n₁) (h₂ : IsEven n₂) : IsEven (n�
 
 -/
 
+example (x y z : ℝ) (h1 : x = y) (h2 : y = z) : x = z := by
+  rw [h1] -- Goal is now: y = z
+  rw [h2] -- Goal becomes z = z, which Lean accepts as proven
+
+
+-- reverse rewriting
+
+-- rewriting at hypotheses
+
+
+example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
+  rw [add_zero] at h1
+  rw [h1] at h2
+  rw [h2]
+
+
+
 
 
 -- rewriting with lemmas
@@ -167,20 +198,21 @@ example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
   algebra
 
 
--- more ideas for simple proofs for 1st year students?
 
-def Injective (f : ℝ → ℝ) := ∀ x y, f x = f y → x = y
+-- let's also do one with groups...
 
-example (f g : ℝ → ℝ) (h1 : Injective f) (h2 : Injective g) : Injective (g ∘ f) := by
-  unfold Injective at *
-  intro x y h
-  apply h1
-  apply h2
-  apply h
+/-
+  This one reads: "Let `G` be a group and `a` and `b` elements of `G`.
+  Show that `(a * b)⁻¹ = b⁻¹ * a⁻¹`."
 
-example (f g : ℝ → ℝ) (h1 : Injective (g ∘ f)) : Injective f := by
-  unfold Injective at *
-  intro x y h
-  have h2 : g (f x) = g (f y) := by rw [h]
-  apply h1
-  exact h2
+  Hint: to write `a⁻¹` type `a\inv`
+-/
+
+example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
+  -- we first apply the definition of inverse to (a * b)⁻¹
+  apply inv_eq_of_mul_eq_one_left
+  -- the goal is now to show that (b⁻¹ * a⁻¹) * (a * b) = 1
+  rw [← mul_assoc]
+  rw [mul_assoc]
+
+  sorry

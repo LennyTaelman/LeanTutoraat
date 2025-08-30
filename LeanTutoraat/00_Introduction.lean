@@ -203,7 +203,7 @@ example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
 
 /-
   This one reads: "Let `G` be a group and `a` and `b` elements of `G`.
-  Show that `(a * b)⁻¹ = b⁻¹ * a⁻¹`."
+  Show that `(a * b)⁻¹ = b⁻¹ * a⁻¹`." This is the "socks and shoes" law.
 
   Hint: to write `a⁻¹` type `a\inv`
 -/

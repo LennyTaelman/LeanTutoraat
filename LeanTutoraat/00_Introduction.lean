@@ -1,6 +1,7 @@
 /- Copyright (c) Lenny Taelman, 2025. -/
 
 import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.Group.Basic
 import Library.Basic
 
 open Lean PrettyPrinter Delaborator SubExpr
@@ -134,7 +135,16 @@ example (n₁ n₂ : ℕ) (h₁ : IsEven n₁) (h₂ : IsEven n₂) : IsEven (n�
 
 
 
+-- rewriting with lemmas
 
+/-
+  You can use the following lemmas:
+    `add_assoc a b c : (a + b) + c = a + (b + c)`
+    `add_comm a b : a + b = b + a`
+    `mul_add a b c : a * (b + c) = a * b + a * c`
+    `mul_one a : a * 1 = a`
+    `sq a : a ^ 2 = a * a`
+-/
 
 example (a b c : ℝ) : (a + b) + c = (a + c) + b := by
   rw [add_assoc]
@@ -146,15 +156,31 @@ example (a b c : ℝ) : (a + b) + c = b + (c + a) := by
   rw [add_assoc]
   rw [add_comm a c]
 
-example (a : ℝ) : a * a = a ^ 2 := by rw [sq]
+
+-- here is a rather challenging one that could be done with the above lemmas:
 
 example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
-  rw [sq, sq]
-  rw [add_mul]
-  rw [mul_add, mul_add]
-  rw [add_assoc]
-  rw [← add_assoc (a * b) (b * a) (b * b)]
-  rw [mul_comm b a]
-  rw [two_mul, add_mul]
-
   sorry
+
+-- fortunately, such things can be done automatically with the `algebra` tactic
+example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
+  algebra
+
+
+-- more ideas for simple proofs for 1st year students?
+
+def Injective (f : ℝ → ℝ) := ∀ x y, f x = f y → x = y
+
+example (f g : ℝ → ℝ) (h1 : Injective f) (h2 : Injective g) : Injective (g ∘ f) := by
+  unfold Injective at *
+  intro x y h
+  apply h1
+  apply h2
+  apply h
+
+example (f g : ℝ → ℝ) (h1 : Injective (g ∘ f)) : Injective f := by
+  unfold Injective at *
+  intro x y h
+  have h2 : g (f x) = g (f y) := by rw [h]
+  apply h1
+  exact h2

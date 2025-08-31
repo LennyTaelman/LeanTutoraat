@@ -34,7 +34,7 @@ def delabMulWithParens : Delab := do
   let rhsStx ← delab rhs
   `(($lhsStx) * $rhsStx)
 
--- math2001_init
+math2001_init
 
 
 /- # First steps using Lean -/
@@ -163,7 +163,12 @@ example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
   rw [h2]
 
 
-
+/-
+ - `rw [← h]`
+ - `rw [h1, h2]`
+ - `rw [add_assoc]` vs `rw [add_assoc a b c]`
+ - `rw [h1] at h2`
+-/
 
 
 -- rewriting with lemmas
@@ -187,15 +192,35 @@ example (a b c : ℝ) : (a + b) + c = b + (c + a) := by
   rw [add_assoc]
   rw [add_comm a c]
 
+example (a b c : ℝ) : (a + b) * c = c * b + c * a := by
+  rw [add_mul]
+  rw [add_comm]
+  rw [mul_comm b c]
+  rw [mul_comm a c]
 
--- here is a rather challenging one that could be done with the above lemmas:
 
-example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
+
+
+/-
+  If you want a challenge, try proving the following basic algebraic identity.
+  On top of the above, you can also use the lemmas
+  `sq a : a ^ 2 = a * a`
+  `two_mul a : 2 * a = a + a`
+-/
+
+example (a b : ℝ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b := by
   sorry
 
--- fortunately, such things can be done automatically with the `algebra` tactic
-example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
-  algebra
+
+/-
+  Fortunately, Lean provides many forms of automation so that you don't need to
+  waste your time proving simple algebraic identities using long sequences of
+  rewrites.
+  Try replacing the word `sorry` with the command `algebra`.
+-/
+example (a b : ℝ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b := by
+  sorry
+
 
 
 

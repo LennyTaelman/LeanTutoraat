@@ -206,13 +206,20 @@ example (a b : ℝ) : (a + b) * (a + b) = a ^ 2 + b ^ 2 + 2 * a * b := by
   Show that `(a * b)⁻¹ = b⁻¹ * a⁻¹`." This is the "socks and shoes" law.
 
   Hint: to write `a⁻¹` type `a\inv`
+
+  Some useful lemmas (axioms of a group):
+    `mul_assoc a b c : (a * b) * c = a * (b * c)`
+    `mul_right_inv a : a * a⁻¹ = 1`
+    `mul_left_inv a : a⁻¹ * a = 1`
+    `mul_one a : a * 1 = a`
+    `one_mul a : 1 * a = a`
 -/
 
+
 example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
-  -- we first apply the definition of inverse to (a * b)⁻¹
+  -- it suffices to show that (b⁻¹ * a⁻¹) * (a * b) = 1
   apply inv_eq_of_mul_eq_one_left
-  -- the goal is now to show that (b⁻¹ * a⁻¹) * (a * b) = 1
-  rw [← mul_assoc]
-  rw [mul_assoc]
+  -- now finish the proof with a series of rewrites
+
 
   sorry

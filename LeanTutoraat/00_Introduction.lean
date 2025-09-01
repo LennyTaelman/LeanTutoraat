@@ -122,26 +122,69 @@ example (x y z : ℝ) (h1 : x = y) (h2 : y = z) : x = z := by
   rfl -- the goal is true by reflexivity of equality
 
 
--- reverse rewriting
+/-
+  Sometimes you have a hypothesis of the form `h : a = b` and want to replace
+  `b` with `a` in a goal. You can do this with the tactic `rewrite [← h]`.
+
+  To type the `←` you type `\l ` (backslash, ell, space), with l for left.
+-/
+
+example (x y : ℝ) (h : 1 = x) : y + x = y + 1 := by
+  rewrite [← h]
+  rfl
+
+
+/-
+  Rewriting with a lemma
+
+  In the following example, `rewrite [h]` turns the goal into `y + 1 = 1 + y`.
+  This is not something that `rfl` will prove, since it requires a proof! Fortunately,
+  Lean comes with a bunch of useful lemmas that have been proven already and can be used here.
+  In particular, it has the lemma `add_comm` which states that `a + b = b + a`.
+
+  Try `rewrite [add_comm]` to see what happens.
+-/
+
+example (x y : ℝ) (h : x = 1) : y + x = 1 + y := by
+  rewrite [h]
+  rewrite [add_comm]
+  rfl
+
+
+/-
+  In this example, you can use the following lemmas:
+   `add_comm a b : a + b = b + a`
+   `add_zero a : a + 0 = a`
+   `zero_add a : 0 + a = a`
+-/
+
+
+
+
+
+
+/-
+  Rewriting with a lemma and explicit parameters
+
+-/
+
+
+
 
 -- rewriting at hypotheses
 
 
-example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
-  rw [add_zero] at h1
-  rw [h1] at h2
-  rw [h2]
-
-
-/-
- - `rw [← h]`
- - `rw [h1, h2]`
- - `rw [add_assoc]` vs `rw [add_assoc a b c]`
- - `rw [h1] at h2`
--/
-
 
 -- rewriting with lemmas
+
+example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
+  rewrite [add_zero] at h1
+  rewrite [h1] at h2
+  rewrite [h2]
+  rfl
+
+
+
 
 /-
   You can use the following lemmas:
@@ -149,13 +192,13 @@ example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
     `add_comm a b : a + b = b + a`
     `mul_add a b c : a * (b + c) = a * b + a * c`
     `mul_one a : a * 1 = a`
-    `sq a : a ^ 2 = a * a`
 -/
 
 example (a b c : ℝ) : (a + b) + c = (a + c) + b := by
-  rw [add_assoc]
-  rw [add_comm b c]
-  rw [add_assoc]
+  rewrite [add_assoc]
+  rewrite [add_comm b c]
+  rewrite [add_assoc]
+  rfl
 
 example (a b c : ℝ) : (a + b) + c = b + (c + a) := by
   rw [add_comm a b]

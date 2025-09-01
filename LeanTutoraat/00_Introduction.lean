@@ -21,7 +21,7 @@ import Library.Basic
   Here is what the statement and proof look like in Lean:
 -/
 
-example (a b : ℝ) : 2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2 := by
+example (a b : ℝ) : (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
   apply le_of_sub_nonneg
   have h : 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2 := by
     algebra
@@ -31,11 +31,11 @@ example (a b : ℝ) : 2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2 := by
 /-
   And here is a line-by-line translation into English.
 
-  Let `a` and `b` be real numbers. Then `2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2`:
+  Let `a` and `b` be real numbers. Then `(a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2)`. Proof:
     It suffices to show that `0 ≤ 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2`.
-    We claim that `2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2`:
+    We claim that `2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2`. Proof:
       This follows from basic algebra.
-    Using this, we can rewrite the goal as `0 ≤ (a - b) ^ 2`.
+    Using the claim, we can rewrite the goal as `0 ≤ (a - b) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
 
   Now move your cursour around in the Lean proof to see what happens in the right panel.

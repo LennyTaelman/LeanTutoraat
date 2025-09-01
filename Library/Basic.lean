@@ -1,5 +1,8 @@
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.IntervalCases
+import Mathlib.Data.Real.Basic
+import Mathlib.Algebra.Group.Basic
+import Mathlib.Analysis.SpecialFunctions.Exp
 import Library.Config.Constructor
 import Library.Config.Contradiction
 import Library.Config.ExistsDelaborator
@@ -63,13 +66,13 @@ elab "math2001_init" : command => do
 
 
 /-
-  add custom "exercise" command, behaving like "example"
+  Exponential function
 -/
 
-open Lean.Elab.Command in
+noncomputable def exp (x : ℝ) : ℝ := Real.exp x
 
-elab "exercise" hyps:bracketedBinder* ":" thm:term ":=" prf:term : command
-  => do elabCommand (← `(command|example $(hyps):bracketedBinder* : $thm := $prf))
+lemma exp_add (a b : ℝ) : exp (a + b) = exp a * exp b := Real.exp_add a b
+lemma exp_zero : exp 0 = 1 := Real.exp_zero
 
 
 open Lean PrettyPrinter Delaborator SubExpr in

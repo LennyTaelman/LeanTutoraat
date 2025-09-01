@@ -1,52 +1,52 @@
-/- Copyright (c) Lenny Taelman, 2025. -/
-
-import Mathlib.Data.Real.Basic
-import Mathlib.Algebra.Group.Basic
-import Mathlib.Analysis.SpecialFunctions.Exp
 import Library.Basic
 
-math2001_init
 
 
 /- # First steps using Lean -/
+
+/-
+  You'll work through this file gradyallyl from top to bottom, at your own pace.
+
+  The text written in green (such as these lines here) is for you, it will be ignored by
+  Lean.
+-/
 
 
 /-
   ## A first example of a Lean proof
 
-  First we are going to have a look at an example proof. We will show a form of the
-  Cauchy--Schwarz inequality. It states that for vectors `v₁ = (x₁, y₁)` and
-  `v₂ = (x₂, y₂)`, we have that `(v₁ · v₂)² ≤ (v₁ · v₁) (v₂ · v₂)`.
+  First we are going to have a look at an example proof, without worrying too
+  much about the details.
 
-  Here is the proof in Lean:
+  Here is what the statement and proof look like in Lean:
 -/
 
-
-example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) := by
+example (a b : ℝ) : 2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2 := by
   apply le_of_sub_nonneg
-  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
+  have h : 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2 := by
     algebra
   rewrite [h]
   apply sq_nonneg
 
-
 /-
   And here is a line-by-line translation into English.
 
-  Let `x₁, y₁, x₂, y₂` be real numbers.  Then `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`:
-    It suffices to show that `0 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2`.
-    We first show that  `(x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2`:
+  Let `a` and `b` be real numbers. Then `2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2`:
+    It suffices to show that `0 ≤ 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2`.
+    We claim that `2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2`:
       This follows from basic algebra.
-    Using this, we can rewrite our goal as `0 ≤ (x₁ * x₂ - y₁ * y₂) ^ 2`.
+    Using this, we can rewrite the goal as `0 ≤ (a - b) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
 
   Now move your cursour around in the Lean proof to see what happens in the right panel.
 
-  The things before `⊢` tell us what we *have*, and the things after `⊢` tell us what we *want*.
+  At any point in the proof, the things before `⊢` tell us what we *have*, and
+  the things after `⊢` tell us what we *want*.
+
   For example, at the start of the proof, before the first `apply`:
-    - we *have* that `x₁`, `y₁`, `x₂` and `y₂` are real numbers.
-    - we *want* to show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`. This is
-      called the *goal*.
+    - we *have* that `a` and `b` are real numbers.
+    - we *want* to show that `2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2`. This is our *goal*.
+
   The commands such as `apply`, `have`, `rewrite` are called *tactics*. They are used to
   construct a proof. In the right panel you can keep track of your progress as the proof is being
   built.
@@ -57,10 +57,10 @@ example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ 
 
 
 /-
-  ## Basic identities using `numbers` and  `algebra`
+  ## Basic identities using the tactics `numbers` and  `algebra`
 
   You'll now write some proofs yourself. The first two tactics prove
-  trivial identities of two different kinds:
+  trivial identities of two different types:
   - `numbers` proves purely numerical equalities (without variables)
   - `algebra` proves purely algebraic equalities
 -/
@@ -122,24 +122,18 @@ example (x : ℝ) (h : x = 1) : 2 * x = 2 := by
 
 -- Let `n` be a natural number and assume `n = 2`. Then `n ^ 4 = 16`.
 example (n : ℕ) (h : n = 2) : n ^ 4 = 16 := by
-  rw [h]
-  numbers
+  sorry
 
 -- Let `a` and `b` be real numbers and assume `a = b`. Then `(a + b) ^ 2 = 4 * a ^ 2`.
 example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
-  rewrite [h]
-  algebra
+  sorry
 
 
 example (a b : ℝ) (h1 : a = 1) (h2 : b = -2) : (a + b) ^ 2 = 1 := by
-  rewrite [h1]
-  rewrite [h2]
-  numbers
+  sorry
 
 example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
-  rewrite [h2]
-  rewrite [h1]
-  numbers
+  sorry
 
 
 /-
@@ -159,92 +153,99 @@ example (x y : ℝ) (h1 : x + 1 = y) (h2 : x = 0) : y = 1 := by
 
 
 /-
-  ## Substituting with a lemma
+  ## Using `rewrite` with a Lean lemma
 
   In Lean, we write `exp x` for `e ^ x`. (Note that no parenthesis as in
   `exp(x)` are needed.)
 
-  The lemma `exp_add` states that `exp (a + b) = exp a * exp b` for all real numbers `a` and `b`.
-  Now the command `rewrite exp_add` looks for the pattern `exp (_ + _)` in the
-  goal and replaces it with `exp _ * exp _`.
+  We will prove some statements about the exponential function using the lemma
+  `exp_add` which is proven in Lean's library. This lemma states that
+    `exp (a + b) = exp a * exp b` for all real numbers `a` and `b`.
+
+  The command `rewrite [exp_add]` looks for the pattern `exp a + b` in the
+  goal and replaces it with `exp a * exp b`.
 -/
 
--- TODO: delab rexp to exp (or redefine `exp`), include Real and exp in Library.Basic.
-open Real
 
-example (a b : ℝ) (h1 : exp a = 2) : exp (a + b) = 2 * exp b := by
+example (x y : ℝ) (h1 : exp x = 2) : exp (x + y) = 2 * exp y := by
   rewrite [exp_add]
   rewrite [h1]
-  algebra
+  rfl -- stands for "reflexivity", proves things of the form "a = a".
 
+-- now prove this one yourself
 example (x y z : ℝ) : exp (x + y + z) = exp x * exp y * exp z := by
-  rewrite [exp_add]
-  rewrite [exp_add]
-  algebra
+  sorry
 
 /-
-  Let's add two more lemmas to the mix. You can now use:
+  Let's add the lemmas `exp_zero` and `two_mul` to the mix. We have:
   - `exp_add : exp (a + b) = exp a * exp b`
   - `exp_zero : exp 0 = 1`
   - `two_mul : 2 * a = a + a`
 -/
 
 example (x : ℝ) : exp (2 * x) = (exp x) ^ 2 := by
-  rewrite [two_mul]
-  rewrite [exp_add]
-  algebra
+  sorry
 
 example (x y : ℝ) (h : x + y = 0) : (exp x) * (exp y) = 1 := by
-  rewrite [← exp_add]
-  rewrite [h]
-  rewrite [exp_zero]
-  numbers
+  sorry
 
 
 
-
-
-
-
--- rewrite at
-
-
-
-example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
-  rewrite [add_zero] at h1
-  rewrite [h1] at h2
-  rewrite [h2]
-  rfl
-
-
-
-
-
-
-
--- let's also do one with groups...
 
 /-
-  This one reads: "Let `G` be a group and `a` and `b` elements of `G`.
-  Show that `(a * b)⁻¹ = b⁻¹ * a⁻¹`." This is the "socks and shoes" law.
+  ## Using `rewrite` with a Lean lemma and explicit parameters
+-/
 
-  Hint: to write `a⁻¹` type `a\inv`
 
-  Some useful lemmas (axioms of a group):
+
+
+
+/-
+  ## A bit of group theory.
+
+  In theory, Lean can encode anything that is (rigorous) mathematics. Here are a
+  few examples from Group Theory. (We won't be doing group theory in this course.)
+-/
+
+
+example [Group G] (a b : G) : (a * a⁻¹) * b = b := by
+  rewrite [mul_right_inv]
+  rewrite [one_mul]
+  rfl
+
+/-
+  In the rewrites above, we were using the axioms of a group:
     `mul_assoc a b c : (a * b) * c = a * (b * c)`
     `mul_right_inv a : a * a⁻¹ = 1`
     `mul_left_inv a : a⁻¹ * a = 1`
     `mul_one a : a * 1 = a`
     `one_mul a : 1 * a = a`
+
+  Hint: to write `a⁻¹` type `a\inv`
 -/
 
+example [Group G] (a b : G) : a⁻¹ * (a * b) = b := by
+  sorry
 
+example [Group G] (a b c d : G) : (a * b) * (c * d) = a * (b * (c * d)) := by
+  sorry
+
+
+
+/-
+  Let's do a longer proof. This is the "socks and shoes" law.
+-/
 example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
   -- it suffices to show that (b⁻¹ * a⁻¹) * (a * b) = 1
   apply inv_eq_of_mul_eq_one_left
   -- now finish the proof with a series of rewrites
-  rw [mul_assoc]
-  rw [←mul_assoc a⁻¹]
-  rw [mul_left_inv]
-  rw [one_mul]
-  rw [mul_left_inv]
+  sorry
+
+
+/-
+  If you need a bigger challenge, try the following exercise. Use the lemma
+    `sq a : a ^ 2 = a * a`
+-/
+
+example [Group G] (a b : G) : a * b ^ 2 * a⁻¹ = (a * b * a⁻¹) ^ 2 := by
+  sorry

@@ -9,11 +9,10 @@ open Lean PrettyPrinter Delaborator SubExpr
 @[delab app.HAdd.hAdd]
 def delabAddWithParens : Delab := do
   let e ← getExpr
-  guard (e.getAppNumArgs == 6)
+  guard (e.isAppOfArity ``HAdd.hAdd 6)
 
   let lhs := e.getArg! 4
   let rhs := e.getArg! 5
-
   guard (lhs.isAppOfArity ``HAdd.hAdd 6)
 
   let lhsStx ← delab lhs
@@ -23,11 +22,10 @@ def delabAddWithParens : Delab := do
 @[delab app.HMul.hMul]
 def delabMulWithParens : Delab := do
   let e ← getExpr
-  guard (e.getAppNumArgs == 6)
+  guard (e.isAppOfArity ``HMul.hMul 6)
 
   let lhs := e.getArg! 4
   let rhs := e.getArg! 5
-
   guard (lhs.isAppOfArity ``HMul.hMul 6)
 
   let lhsStx ← delab lhs
@@ -245,6 +243,8 @@ example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
   -- it suffices to show that (b⁻¹ * a⁻¹) * (a * b) = 1
   apply inv_eq_of_mul_eq_one_left
   -- now finish the proof with a series of rewrites
-
-
-  sorry
+  rw [mul_assoc]
+  rw [←mul_assoc a⁻¹]
+  rw [mul_left_inv]
+  rw [one_mul]
+  rw [mul_left_inv]

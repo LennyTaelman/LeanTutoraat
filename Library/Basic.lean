@@ -70,3 +70,40 @@ open Lean.Elab.Command in
 
 elab "exercise" hyps:bracketedBinder* ":" thm:term ":=" prf:term : command
   => do elabCommand (← `(command|example $(hyps):bracketedBinder* : $thm := $prf))
+
+
+open Lean PrettyPrinter Delaborator SubExpr in
+
+/-
+  Custom delaborator to print `(a + b) + c` in stead of `a + b + c`
+-/
+@[delab app.HAdd.hAdd]
+def delabAddWithParens : Delab := do
+  let e ← getExpr
+  guard (e.isAppOfArity ``HAdd.hAdd 6)
+
+  let lhs := e.getArg! 4
+  let rhs := e.getArg! 5
+  guard (lhs.isAppOfArity ``HAdd.hAdd 6)
+
+  let lhsStx ← delab lhs
+  let rhsStx ← delab rhs
+  `(($lhsStx) + $rhsStx)
+
+open Lean PrettyPrinter Delaborator SubExpr in
+
+/-
+  Custom delaborator to print `(a * b) * c` in stead of `a * b * c`
+-/
+@[delab app.HMul.hMul]
+def delabMulWithParens : Delab := do
+  let e ← getExpr
+  guard (e.isAppOfArity ``HMul.hMul 6)
+
+  let lhs := e.getArg! 4
+  let rhs := e.getArg! 5
+  guard (lhs.isAppOfArity ``HMul.hMul 6)
+
+  let lhsStx ← delab lhs
+  let rhsStx ← delab rhs
+  `(($lhsStx) * $rhsStx)

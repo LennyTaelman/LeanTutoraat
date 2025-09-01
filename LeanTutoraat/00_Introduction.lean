@@ -13,95 +13,48 @@ math2001_init
 /-
   ## A first example of a Lean proof
 
-  First we are going to have a look at an example proof, without going
-  into the syntactic details. You'll just move your cursor around in the proof
-  to see what happens in the window on the right.
+  First we are going to have a look at an example proof. We will show a form of the
+  Cauchy--Schwarz inequality. It states that for vectors `v₁ = (x₁, y₁)` and
+  `v₂ = (x₂, y₂)`, we have that `(v₁ · v₂)² ≤ (v₁ · v₁) (v₂ · v₂)`.
 
-  Note: the green text between `/-` and `-/` or after a `--` are comments for you. They
-  are ignored by Lean.
-
-  The example below proves a form of the Cauchy--Schwarz inequality. It states that for
-  vectors `v₁ = (x₁, y₁)` and `v₂ = (x₂, y₂)`, we have that `(v₁ · v₂)² ≤ (v₁ · v₁) (v₂ · v₂)`.
+  Here is the proof in Lean:
 -/
 
 
 example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) := by
+  apply le_of_sub_nonneg
+  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
+    algebra
+  rewrite [h]
+  apply sq_nonneg
 
-  /-
-    Place your cursor here, and look in the right panel. It tells us we have 1 goal to prove, and
-    then specifies what the goal is. The things before `⊢` tell us what
-    we *have*, and the things after `⊢` tell us what we *want*. In this case:
 
+/-
+  And here is a line-by-line translation into English.
+
+  Let `x₁, y₁, x₂, y₂` be real numbers.  Then `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`:
+    It suffices to show that `0 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2`.
+    We first show that  `(x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2`:
+      This follows from basic algebra.
+    Using this, we can rewrite our goal as `0 ≤ (x₁ * x₂ - y₁ * y₂) ^ 2`.
+    But this is true, because the square of a real number is always non-negative.
+-/
+
+
+/-
+  Now move your cursour around in the Lean proof to see what happens in the right panel.
+
+  The things before `⊢` tell us what we *have*, and the things after `⊢` tell us what we *want*.
+  For example, at the start of the proof:
     - we *have* that `x₁`, `y₁`, `x₂` and `y₂` are real numbers.
     - we *want* to show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`. This is
       called the *goal*.
-
-    We try to obtain what we want by executing a number of commands that are called *tactics*.
-  -/
-
-  apply le_of_sub_nonneg
-
-  /-
-    Note that if you place your cursor after the `apply` command, the goal has changed!
-    The lemma `le_of_sub_nonneg` (which is proven somewhere in Lean's library)
-    states that `a ≤ b` follows from `0 ≤ b - a`. Applying this lemma we now have transformed our
-    goal from `a ≤ b` to `0 ≤ b - a`.
-  -/
-
-  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
-    algebra
-
-  /-
-    Now the goal is unchanged, but we *have* something new:
-    `h : b - a = (x₁ * x₂ - y₁ * y₂) ^ 2`
-    This is a new fact `h` that we can now use in the proof. We can use it because
-    we have proven it using the `algebra` tactic which automatically proves algebraic identities.
-  -/
-
-  rewrite [h]
-
-  /-
-    What happened? Well we wanted to show `0 ≤ b - a`, and we used the hypothesis `h` to
-    replace  `b - a` with `(x₁ * x₂ - y₁ * y₂) ^ 2`.
-  -/
-
-  apply sq_nonneg
-
-  /-
-    The `No goals` message means that we are done! We finished the proof by applying the library
-    lemma `sq_nonneg` which states that squares of real numbers are non-negative.
-  -/
-
-
-
-
-
-/-
-  Here is the same proof without all the annoying comments ;-)
-  Move your cursour around in the example below to see what happens in the right panel.
+  The commands such as `apply`, `have`, `rewrite` are called *tactics*, they are used to
+  construct a proof. In the right panel you can keep track of your progress as the proof is being
+  built.
 -/
 
-example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) := by
-  apply le_of_sub_nonneg
-  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
-    algebra
-  rewrite [h]
-  apply sq_nonneg
 
-
-/-
-  And here is the same proof in English. Note that every line corresponds to a line in the
-  Lean proof above.
--/
-
-/-
-We will show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`:
-  It suffices to show that `0 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2`.
-  We now show that the right hand side equals `(x₁ * x₂ - y₁ * y₂) ^ 2`:
-    This follows from basic algebra.
-  So it suffices to show that `0 ≤ (x₁ * x₂ - y₁ * y₂) ^ 2`.
-  But this is true, because the square of a real number is always non-negative.
--/
 
 
 

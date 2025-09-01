@@ -20,18 +20,21 @@ math2001_init
   Note: the green text between `/-` and `-/` or after a `--` are comments for you. They
   are ignored by Lean.
 
-  The example below proves a form of the Cauchy--Schwarz inequality.
+  The example below proves a form of the Cauchy--Schwarz inequality. It states that for
+  vectors `v₁ = (x₁, y₁)` and `v₂ = (x₂, y₂)`, we have that `(v₁ · v₂)² ≤ (v₁ · v₁) (v₂ · v₂)`.
 -/
 
-example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) := by
+
+example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) := by
 
   /-
     Place your cursor here, and look in the right panel. It tells us we have 1 goal to prove, and
     then specifies what the goal is. The things before `⊢` tell us what
     we *have*, and the things after `⊢` tell us what we *want*. In this case:
 
-    - we *have* that `x`, `y`, `u` and `v` are real numbers.
-    - we *want* to show that `(x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2)`.
+    - we *have* that `x₁`, `y₁`, `x₂` and `y₂` are real numbers.
+    - we *want* to show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`. This is
+      called the *goal*.
 
     We try to obtain what we want by executing a number of commands that are called *tactics*.
   -/
@@ -45,12 +48,12 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
     goal from `a ≤ b` to `0 ≤ b - a`.
   -/
 
-  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by
+  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
     algebra
 
   /-
     Now the goal is unchanged, but we *have* something new:
-    `h : b - a = (x * v - y * u) ^ 2`
+    `h : b - a = (x₁ * x₂ - y₁ * y₂) ^ 2`
     This is a new fact `h` that we can now use in the proof. We can use it because
     we have proven it using the `algebra` tactic which automatically proves algebraic identities.
   -/
@@ -59,7 +62,7 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 
   /-
     What happened? Well we wanted to show `0 ≤ b - a`, and we used the hypothesis `h` to
-    replace  `b - a` with `(x * v - y * u) ^ 2`.
+    replace  `b - a` with `(x₁ * x₂ - y₁ * y₂) ^ 2`.
   -/
 
   apply sq_nonneg
@@ -75,51 +78,48 @@ example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^
 
 /-
   Here is the same proof without all the annoying comments ;-)
+  Move your cursour around in the example below to see what happens in the right panel.
 -/
 
-example (x y u v : ℝ) : (x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) := by
+example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) := by
   apply le_of_sub_nonneg
-  have h : (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2 = (x * v - y * u) ^ 2 := by
+  have h : (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2 = (x₁ * x₂ - y₁ * y₂) ^ 2 := by
     algebra
   rewrite [h]
   apply sq_nonneg
 
-/-
-  And here is the same proof in human language:
 
-  We will show that `(x * u + y * v) ^ 2 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2)`:
-    It suffices to show that `0 ≤ (x ^ 2 + y ^ 2) * (u ^ 2 + v ^ 2) - (x * u + y * v) ^ 2`.
-    We now show that the right hand side equals `(x * v - y * u) ^ 2`:
-      This follows from basic algebra.
-    So it suffices to show that `0 ≤ (x * v - y * u) ^ 2`.
-    But this is true, because the square of a real number is always non-negative.
+/-
+  And here is the same proof in English. Note that every line corresponds to a line in the
+  Lean proof above.
+-/
+
+/-
+We will show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`:
+  It suffices to show that `0 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2) - (x₁ * y₂ + x₂ * y₁) ^ 2`.
+  We now show that the right hand side equals `(x₁ * x₂ - y₁ * y₂) ^ 2`:
+    This follows from basic algebra.
+  So it suffices to show that `0 ≤ (x₁ * x₂ - y₁ * y₂) ^ 2`.
+  But this is true, because the square of a real number is always non-negative.
 -/
 
 
 
-
-def IsEven (n : ℕ) : Prop := ∃ k, n = 2 * k
-
-example (n₁ n₂ : ℕ) (h₁ : IsEven n₁) (h₂ : IsEven n₂) : IsEven (n₁ + n₂) := by
-  unfold IsEven at *
-  obtain ⟨k₁, h₁'⟩ := h₁
-  obtain ⟨k₂, h₂'⟩ := h₂
-  use k₁ + k₂
-  rw [h₁']
-  rw [h₂']
-  algebra
-
-
 /-
-  ## Your first Lean proof
+  ## Your first Lean proofs
 
-   Let's do some `rw` proofs inspired by the NNG!
+  You'll now write some proofs yourself, using solely the `rewrite` command.
 
+  If `h` is a hypothesis of the form `a = b`
+  then the tactic `rewrite [h]` looks for an `a` in the goal, and replaces it with `b`.
+
+  Here is an example:
 -/
 
 example (x y z : ℝ) (h1 : x = y) (h2 : y = z) : x = z := by
-  rw [h1] -- Goal is now: y = z
-  rw [h2] -- Goal becomes z = z, which Lean accepts as proven
+  rewrite [h1] -- Replace `x` by `y`, new goal is `y = z`
+  rewrite [h2] -- Replace `y` by `z`, new goal is `z = z`
+  rfl -- the goal is true by reflexivity of equality
 
 
 -- reverse rewriting

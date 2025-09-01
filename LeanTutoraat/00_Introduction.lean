@@ -45,11 +45,11 @@ example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ 
   Now move your cursour around in the Lean proof to see what happens in the right panel.
 
   The things before `⊢` tell us what we *have*, and the things after `⊢` tell us what we *want*.
-  For example, at the start of the proof:
+  For example, at the start of the proof, before the first `apply`:
     - we *have* that `x₁`, `y₁`, `x₂` and `y₂` are real numbers.
     - we *want* to show that `(x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ ^ 2 + y₁ ^ 2) * (x₂ ^ 2 + y₂ ^ 2)`. This is
       called the *goal*.
-  The commands such as `apply`, `have`, `rewrite` are called *tactics*, they are used to
+  The commands such as `apply`, `have`, `rewrite` are called *tactics*. They are used to
   construct a proof. In the right panel you can keep track of your progress as the proof is being
   built.
 -/
@@ -124,11 +124,10 @@ example (x y : ℝ) (h : x = 1) : y + x = 1 + y := by
 
 
 
--- rewriting at hypotheses
+
+-- rewrite at
 
 
-
--- rewriting with lemmas
 
 example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
   rewrite [add_zero] at h1

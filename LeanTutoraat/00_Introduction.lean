@@ -2,6 +2,7 @@
 
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.Group.Basic
+import Mathlib.Analysis.SpecialFunctions.Exp
 import Library.Basic
 
 math2001_init
@@ -38,10 +39,7 @@ example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ 
       This follows from basic algebra.
     Using this, we can rewrite our goal as `0 ≤ (x₁ * x₂ - y₁ * y₂) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
--/
 
-
-/-
   Now move your cursour around in the Lean proof to see what happens in the right panel.
 
   The things before `⊢` tell us what we *have*, and the things after `⊢` tell us what we *want*.
@@ -59,67 +57,150 @@ example (x₁ y₁ x₂ y₂ : ℝ) : (x₁ * y₂ + x₂ * y₁) ^ 2 ≤ (x₁ 
 
 
 /-
-  ## Your first Lean proofs
+  ## Basic identities using `numbers` and  `algebra`
 
-  You'll now write some proofs yourself, using solely the `rewrite` command.
-
-  If `h` is a hypothesis of the form `a = b`
-  then the tactic `rewrite [h]` looks for an `a` in the goal, and replaces it with `b`.
-
-  Here is an example:
+  You'll now write some proofs yourself. The first two tactics prove
+  trivial identities of two different kinds:
+  - `numbers` proves purely numerical equalities (without variables)
+  - `algebra` proves purely algebraic equalities
 -/
 
-example (x y z : ℝ) (h1 : x = y) (h2 : y = z) : x = z := by
-  rewrite [h1] -- Replace `x` by `y`, new goal is `y = z`
-  rewrite [h2] -- Replace `y` by `z`, new goal is `z = z`
-  rfl -- the goal is true by reflexivity of equality
+example : 1 + 1 = 2 := by
+  numbers
+
+-- Let `a` and `b` be real numbers. Then `(a + b) * (a - b) = a ^ 2 - b ^ 2`.
+example (a b : ℝ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
+  algebra
+
+
+/-
+  In the following examples, the tactic `sorry` tells Lean to skip the proof
+  and move on to the next example. The user is saying "Sorry, I'll prove this later!".
+
+  Replace `sorry` with a correct one-tactic proof in the following examples
+-/
+
+example : 3 ^ 2 + 4 ^ 2 = 5 ^ 2 := by
+  sorry
+
+example (a : ℤ) : (a + 1) ^ 3 = a ^ 3 + 3 * a ^ 2 + 3 * a + 1 := by
+  sorry
+
+example (a : ℚ) : (a + b + c) ^ 2 = a ^ 2 + b ^ 2 + c ^ 2 + 2 * a * b + 2 * b * c + 2 * c * a := by
+  sorry
+
+example : (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) ^ 2 = 2025 := by
+  sorry
+
+/-
+  Try the next two examples. What happens? Why?
+-/
+
+example : 4 ^ 2 + 5 ^ 2 = 6 ^ 2 := by
+  sorry
+
+example (x : ℝ) : x / x = 1 := by
+  sorry
+
+
+/-
+  ## Substituting with `rewrite`
+
+  If you *have* a hypothesis `h` of the form `a = b`,
+  then the tactic `rewrite [h]` looks for an `a` in the goal, and replaces it with `b`.
+
+  Here is an example. Let `x` be a real number and assume `x = 1`. Then `2 * x = 2`.
+-/
+example (x : ℝ) (h : x = 1) : 2 * x = 2 := by
+  rewrite [h] -- Replace `x` by `1`, new goal is `2 * 1 = 2`
+  numbers
+
+
+/-
+  Now do a few examples yourself. Replace `sorry` with a correct proof.
+-/
+
+-- Let `n` be a natural number and assume `n = 2`. Then `n ^ 4 = 16`.
+example (n : ℕ) (h : n = 2) : n ^ 4 = 16 := by
+  rw [h]
+  numbers
+
+-- Let `a` and `b` be real numbers and assume `a = b`. Then `(a + b) ^ 2 = 4 * a ^ 2`.
+example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
+  rewrite [h]
+  algebra
+
+
+example (a b : ℝ) (h1 : a = 1) (h2 : b = -2) : (a + b) ^ 2 = 1 := by
+  rewrite [h1]
+  rewrite [h2]
+  numbers
+
+example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
+  rewrite [h2]
+  rewrite [h1]
+  numbers
 
 
 /-
   Sometimes you have a hypothesis of the form `h : a = b` and want to replace
-  `b` with `a` in a goal. You can do this with the tactic `rewrite [← h]`.
+  `b` with `a` in stead of `a` with `b`. You can do this with the tactic `rewrite [← h]`.
 
   To type the `←` you type `\l ` (backslash, ell, space), with l for left.
 -/
 
-example (x y : ℝ) (h : 1 = x) : y + x = y + 1 := by
+example (x y z : ℚ) (h : x + y = z) : z ^ 2 = x ^ 2 + 2 * x * y + y ^ 2 := by
   rewrite [← h]
-  rfl
+  algebra
+
+-- replace `sorry` with a correct proof
+example (x y : ℝ) (h1 : x + 1 = y) (h2 : x = 0) : y = 1 := by
+  sorry
 
 
 /-
-  Rewriting with a lemma
+  ## Substituting with a lemma
 
-  In the following example, `rewrite [h]` turns the goal into `y + 1 = 1 + y`.
-  This is not something that `rfl` will prove, since it requires a proof! Fortunately,
-  Lean comes with a bunch of useful lemmas that have been proven already and can be used here.
-  In particular, it has the lemma `add_comm` which states that `a + b = b + a`.
+  In Lean, we write `exp x` for `e ^ x`. (Note that no parenthesis as in
+  `exp(x)` are needed.)
 
-  Try `rewrite [add_comm]` to see what happens.
+  The lemma `exp_add` states that `exp (a + b) = exp a * exp b` for all real numbers `a` and `b`.
+  Now the command `rewrite exp_add` looks for the pattern `exp (_ + _)` in the
+  goal and replaces it with `exp _ * exp _`.
 -/
 
-example (x y : ℝ) (h : x = 1) : y + x = 1 + y := by
+-- TODO: delab rexp to exp (or redefine `exp`), include Real and exp in Library.Basic.
+open Real
+
+example (a b : ℝ) (h1 : exp a = 2) : exp (a + b) = 2 * exp b := by
+  rewrite [exp_add]
+  rewrite [h1]
+  algebra
+
+example (x y z : ℝ) : exp (x + y + z) = exp x * exp y * exp z := by
+  rewrite [exp_add]
+  rewrite [exp_add]
+  algebra
+
+/-
+  Let's add two more lemmas to the mix. You can now use:
+  - `exp_add : exp (a + b) = exp a * exp b`
+  - `exp_zero : exp 0 = 1`
+  - `two_mul : 2 * a = a + a`
+-/
+
+example (x : ℝ) : exp (2 * x) = (exp x) ^ 2 := by
+  rewrite [two_mul]
+  rewrite [exp_add]
+  algebra
+
+example (x y : ℝ) (h : x + y = 0) : (exp x) * (exp y) = 1 := by
+  rewrite [← exp_add]
   rewrite [h]
-  rewrite [add_comm]
-  rfl
+  rewrite [exp_zero]
+  numbers
 
 
-/-
-  In this example, you can use the following lemmas:
-   `add_comm a b : a + b = b + a`
-   `add_zero a : a + 0 = a`
-   `zero_add a : 0 + a = a`
--/
-
-
-
-
-
-
-/-
-  Rewriting with a lemma and explicit parameters
-
--/
 
 
 
@@ -137,54 +218,6 @@ example (x a b : ℕ) (h1 : x + 0 = a) (h2 : x = b) : a = b := by
 
 
 
-
-/-
-  You can use the following lemmas:
-    `add_assoc a b c : (a + b) + c = a + (b + c)`
-    `add_comm a b : a + b = b + a`
-    `mul_add a b c : a * (b + c) = a * b + a * c`
-    `mul_one a : a * 1 = a`
--/
-
-example (a b c : ℝ) : (a + b) + c = (a + c) + b := by
-  rewrite [add_assoc]
-  rewrite [add_comm b c]
-  rewrite [add_assoc]
-  rfl
-
-example (a b c : ℝ) : (a + b) + c = b + (c + a) := by
-  rw [add_comm a b]
-  rw [add_assoc]
-  rw [add_comm a c]
-
-example (a b c : ℝ) : (a + b) * c = c * b + c * a := by
-  rw [add_mul]
-  rw [add_comm]
-  rw [mul_comm b c]
-  rw [mul_comm a c]
-
-
-
-
-/-
-  If you want a challenge, try proving the following basic algebraic identity.
-  On top of the above, you can also use the lemmas
-  `sq a : a ^ 2 = a * a`
-  `two_mul a : 2 * a = a + a`
--/
-
-example (a b : ℝ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b := by
-  sorry
-
-
-/-
-  Fortunately, Lean provides many forms of automation so that you don't need to
-  waste your time proving simple algebraic identities using long sequences of
-  rewrites.
-  Try replacing the word `sorry` with the command `algebra`.
--/
-example (a b : ℝ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 + 2 * a * b := by
-  sorry
 
 
 

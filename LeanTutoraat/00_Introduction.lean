@@ -156,101 +156,94 @@ example (x y : ℝ) (h1 : x + 1 = y) (h2 : x = 0) : y = 1 := by
 /-
   ## Using `rewrite` with a Lean lemma
 
-  In Lean, we write `exp x` for `e ^ x`. (Note that no parenthesis as in
-  `exp(x)` are needed.)
+  In Lean, we write `sin x` and `cos x` in stead of sin(x) and cos(x). In the exercises
+  below, we will *use* a number of (already proven) lemmas:
+  `sin_zero : sin 0 = 0`
+  `sin_pi : sin π = 0`
+  `cos_zero : cos 0 = 1`
+  `cos_pi : cos π = -1`
+  `sin_add x y : sin (x + y) = sin x * cos y + cos x * sin y`
+  `cos_add x y : cos (x + y) = cos x * cos y - sin x * sin y`
+  `sin_sq_add_cos_sq x : sin x ^ 2 + cos x ^ 2 = 1`
+  These can be used as arguments in `rewrite`. For example, if `x` is a real number,
+  then `rewrite [sin_sq_add_cos_sq x]` looks for the pattern `sin x ^ 2 + cos x ^ 2` in the goal
+  and replaces it with `1`.
 
-  We will prove some statements about the exponential function using the lemma
-    `exp_add x y : exp (x + y) = exp x * exp y`
-  which is proven in Lean's library.
-
-  The command `rewrite [exp_add a b]` looks for the pattern `exp a + b` in the
-  goal and replaces it with `exp a * exp b`.
+  Can you guess how to type `π`? (Just think LaTeX...)
 -/
 
+example (x : ℝ) : sin (x + π) = -sin x := by
+  rewrite [sin_add x π]
+  rewrite [sin_pi]
+  rewrite [cos_pi]
+  algebra
 
-example (x y : ℝ) (h1 : exp x = 2) : exp (x + y) = 2 * exp y := by
-  rewrite [exp_add x y]
-  rewrite [h1]
-  rfl -- stands for "reflexivity", proves things of the form "a = a".
-
--- now prove this one yourself
-example (x y z : ℝ) : exp ((x + y) + z) = (exp x * exp y) * exp z := by
+example (x : ℝ) : cos (x + π) = -cos x := by
   sorry
+
+example (x : ℝ) (h : sin x = 0) : (cos x) ^ 2 = 1 := by
+  rw [← sin_sq_add_cos_sq x]
+  rw [h]
+  algebra
 
 /-
-  Let's add the lemmas `exp_zero` and `two_mul` to the mix. We have:
-  - `exp_add a b : exp (a + b) = exp a * exp b`
-  - `exp_zero : exp 0 = 1`
-  - `two_mul a : 2 * a = a + a`
-  Prove the following two examples.
+  Next let's prove a few lemmas. Lemmas are just like examples, but with a name.
+  This name allows you to *use* the lemma in other proofs.
 -/
-
-example (x : ℝ) : exp (2 * x) = (exp x) ^ 2 := by
-  sorry
-
-example (x y : ℝ) (h : x + y = 0) : (exp x) * (exp y) = 1 := by
-  sorry
-
-
-/-
-  One can leave the arguments implicit, and just write `rewrite [exp_add]`. Lean
-  will then search for the first occurence of the pattern `exp (_ + _)` in the
-  goal.
-
-  Tr to do the following example as efficiently as possible
--/
-
-example (x y z t : ℝ) : exp (x + y) * exp (z + t) = exp (x + t) * exp (y + z) := by
-  sorry
-
-
-
--- experiment with trigonometric identities
-
--- tricky: really would love to do some Gröbner stuff, e.g. `algebra [sin_sq_add_cos_sq]`
-
-noncomputable def sin (x : ℝ) : ℝ := Real.sin x
-noncomputable def cos (x : ℝ) : ℝ := Real.cos x
-def sin_add (x y : ℝ) : sin (x + y) = sin x * cos y + cos x * sin y := Real.sin_add x y
-
-def cos_add (x y : ℝ) : cos (x + y) = cos x * cos y - sin x * sin y := Real.cos_add x y
-def sin_zero : sin 0 = 0 := Real.sin_zero
-def cos_zero : cos 0 = 1 := Real.cos_zero
-def sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add_cos_sq x
-
 lemma cos_sq (x : ℝ) : cos x ^ 2 = 1 - sin x ^ 2 := by
   rewrite [← sin_sq_add_cos_sq x]
   algebra
 
+-- try proving this *using* the lemma `cos_sq`
 lemma sin_sq (x : ℝ) : sin x ^ 2 = 1 - cos x ^ 2 := by
   rewrite [cos_sq x]
   algebra
 
+lemma twice (x : ℝ) : 2 * x = x + x := by
+  sorry
+
 lemma sin_two_mul (x : ℝ) : sin (2 * x) = 2 * sin x * cos x := by
-  rewrite [two_mul x]
+  rewrite [twice x]
   rewrite [sin_add x x]
   algebra
 
-lemma cos_two_mul (x : ℝ) : cos (2 * x) = cos x ^ 2 - sin x ^ 2 := by
+
+lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * cos x ^ 2 - 1 := by
   rewrite [two_mul x]
   rewrite [cos_add x x]
+  rewrite [← sin_sq_add_cos_sq x]
   algebra
 
-lemma cos_two_mul' (x : ℝ) : cos (2 * x) = 2 * cos x ^ 2 - 1 := by
-  rewrite [cos_two_mul]
-  rewrite [sin_sq]
+
+
+
+/-
+  One can leave the arguments in lemma implicit, and for example write
+  `rewrite [sin_sq_add_cos_sq]`
+  Lean will then search for the pattern `sin x ^ 2 + cos x ^ 2`, guessing the argument `x`.
+
+  Tr to do the following example as efficiently as possible
+-/
+
+example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
+    cos x * cos y * sin z - sin x * sin y * sin z := by
+  rw [sin_add]
+  rw [sin_add]
+  rw [cos_add]
   algebra
 
-lemma three_mul (x : ℝ) : 3 * x = (x + x) + x := by
+
+
+/-
+  Final trigonometric challenge! Prove the example below. You may need to
+  state and prove a lemma about `3 * x` first....
+-/
+
+lemma thrice (x : ℝ) : 3 * x = (x + x) + x := by
   algebra
 
 example (x : ℝ) : sin (3 * x) = 3 * sin x * cos x ^ 2 - sin x ^ 3 := by
-  rewrite [three_mul x]
-  rewrite [sin_add]
-  rewrite [cos_add]
-  rewrite [sin_add]
-
-  algebra
+  sorry
 
 
 /-

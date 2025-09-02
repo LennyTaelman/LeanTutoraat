@@ -2,7 +2,7 @@ import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.IntervalCases
 import Mathlib.Data.Real.Basic
 import Mathlib.Algebra.Group.Basic
-import Mathlib.Analysis.SpecialFunctions.Exp
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Library.Config.Constructor
 import Library.Config.Contradiction
 import Library.Config.ExistsDelaborator
@@ -66,14 +66,20 @@ elab "math2001_init" : command => do
 
 
 /-
-  Exponential function
+  Trigonometry
 -/
 
-noncomputable def exp (x : ℝ) : ℝ := Real.exp x
+noncomputable def sin (x : ℝ) : ℝ := Real.sin x
+noncomputable def cos (x : ℝ) : ℝ := Real.cos x
+noncomputable def π : ℝ := Real.pi
 
-lemma exp_add (a b : ℝ) : exp (a + b) = exp a * exp b := Real.exp_add a b
-lemma exp_zero : exp 0 = 1 := Real.exp_zero
-
+lemma sin_zero : sin 0 = 0 := Real.sin_zero
+lemma cos_zero : cos 0 = 1 := Real.cos_zero
+lemma sin_pi : sin π = 0 := Real.sin_pi
+lemma cos_pi : cos π = -1 := Real.cos_pi
+lemma sin_add (x y : ℝ) : sin (x + y) = sin x * cos y + cos x * sin y := Real.sin_add x y
+lemma cos_add (x y : ℝ) : cos (x + y) = cos x * cos y - sin x * sin y := Real.cos_add x y
+lemma sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add_cos_sq x
 
 open Lean PrettyPrinter Delaborator SubExpr in
 

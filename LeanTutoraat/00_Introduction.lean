@@ -159,28 +159,29 @@ example (x y : ℝ) (h1 : x + 1 = y) (h2 : x = 0) : y = 1 := by
   `exp(x)` are needed.)
 
   We will prove some statements about the exponential function using the lemma
-  `exp_add` which is proven in Lean's library. This lemma states that
-    `exp (a + b) = exp a * exp b` for all real numbers `a` and `b`.
+    `exp_add x y : exp (x + y) = exp x * exp y`
+  which is proven in Lean's library.
 
-  The command `rewrite [exp_add]` looks for the pattern `exp a + b` in the
+  The command `rewrite [exp_add a b]` looks for the pattern `exp a + b` in the
   goal and replaces it with `exp a * exp b`.
 -/
 
 
 example (x y : ℝ) (h1 : exp x = 2) : exp (x + y) = 2 * exp y := by
-  rewrite [exp_add]
+  rewrite [exp_add x y]
   rewrite [h1]
   rfl -- stands for "reflexivity", proves things of the form "a = a".
 
 -- now prove this one yourself
-example (x y z : ℝ) : exp (x + y + z) = exp x * exp y * exp z := by
+example (x y z : ℝ) : exp ((x + y) + z) = (exp x * exp y) * exp z := by
   sorry
 
 /-
   Let's add the lemmas `exp_zero` and `two_mul` to the mix. We have:
-  - `exp_add : exp (a + b) = exp a * exp b`
+  - `exp_add a b : exp (a + b) = exp a * exp b`
   - `exp_zero : exp 0 = 1`
-  - `two_mul : 2 * a = a + a`
+  - `two_mul a : 2 * a = a + a`
+  Prove the following two examples.
 -/
 
 example (x : ℝ) : exp (2 * x) = (exp x) ^ 2 := by
@@ -190,12 +191,16 @@ example (x y : ℝ) (h : x + y = 0) : (exp x) * (exp y) = 1 := by
   sorry
 
 
-
-
 /-
-  ## Using `rewrite` with a Lean lemma and explicit parameters
+  One can leave the arguments implicit, and just write `rewrite [exp_add]`. Lean
+  will then search for the first occurence of the pattern `exp (_ + _)` in the
+  goal.
+
+  Tr to do the following example as efficiently as possible
 -/
 
+example (x y z t : ℝ) : exp (x + y) * exp (z + t) = exp (x + t) * exp (y + z) := by
+  sorry
 
 
 
@@ -204,17 +209,21 @@ example (x y : ℝ) (h : x + y = 0) : (exp x) * (exp y) = 1 := by
   ## A bit of group theory.
 
   In theory, Lean can encode anything that is (rigorous) mathematics. Here are a
-  few examples from Group Theory. (We won't be doing group theory in this course.)
+  few examples from Group Theory. (We won't be doing more group theory in this course.)
 -/
 
-
+-- Let `G` be a group and `a` and `b` be elements of `G`. Then `(a * a⁻¹) * b = b`.
 example [Group G] (a b : G) : (a * a⁻¹) * b = b := by
   rewrite [mul_right_inv]
   rewrite [one_mul]
   rfl
 
+-- now do this one yourself, *guess* the names of the lemmas that you need.
+example [Group G] (a b : G) : a * (b⁻¹ * b) = a := by
+  sorry
+
 /-
-  In the rewrites above, we were using the axioms of a group:
+  Here is the list of axioms of a group, and Lean's name for them:
     `mul_assoc a b c : (a * b) * c = a * (b * c)`
     `mul_right_inv a : a * a⁻¹ = 1`
     `mul_left_inv a : a⁻¹ * a = 1`
@@ -222,7 +231,10 @@ example [Group G] (a b : G) : (a * a⁻¹) * b = b := by
     `one_mul a : 1 * a = a`
 
   Hint: to write `a⁻¹` type `a\inv`
+
+  Now prove the following two examples.
 -/
+
 
 example [Group G] (a b : G) : a⁻¹ * (a * b) = b := by
   sorry

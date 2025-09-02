@@ -1,15 +1,13 @@
 import Library.Basic
 
--- todo: wrapper around all lemmas and tactic, with limited scope and helpful
--- doc!
 
 /- # First steps using Lean -/
 
 /-
   You'll work through this file gradually from top to bottom, at your own pace.
 
-  The text written in green (such as these lines here) is for you, it will be ignored by
-  Lean.
+  The text written in green (such as these lines here) is only for you, it will be
+  ignored by Lean.
 -/
 
 
@@ -44,13 +42,16 @@ example (a b : ℝ) : (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
   At any point in the proof, the things before `⊢` tell us what we *have*, and
   the things after `⊢` tell us what we *want*.
 
-  For example, at the start of the proof, before the first `apply`:
+  For example, if you place your cursor before the first `apply`, you will see that:
     - we *have* that `a` and `b` are real numbers.
-    - we *want* to show that `2 * (a ^ 2 + b ^ 2) ≥ (a + b) ^ 2`. This is our *goal*.
+    - we *want* to show that `(a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2)`. This is our *goal*.
+  If you place it immediately after the first `apply`, then
+    - we still *have* that `a` and `b` are real numbers.
+    - we now *want* to show that 0 ≤ 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2.
+  After the last `apply` you'll see "No goals", indicating that the proof is complete.
 
   The commands such as `apply`, `have`, `rewrite` are called *tactics*. They are used to
-  construct a proof. In the right panel you can keep track of your progress as the proof is being
-  built.
+  construct a proof.
 -/
 
 
@@ -103,6 +104,12 @@ example : 4 ^ 2 + 5 ^ 2 = 6 ^ 2 := by
 example (x : ℝ) : x / x = 1 := by
   sorry
 
+/-
+  Indeed, if we add `x ≠ 0` to what we have, then `algebra` can prove `x / x = 1`.
+-/
+
+example (x : ℝ) (h : x ≠ 0) : x / x = 1 := by
+  sorry
 
 /-
   ## Substituting with `rewrite`
@@ -126,9 +133,8 @@ example (n : ℕ) (h : n = 2) : n ^ 4 = 16 := by
   sorry
 
 -- Let `a` and `b` be real numbers and assume `a = b`. Then `(a + b) ^ 2 = 4 * a ^ 2`.
-example (a b : ℝ) (h : a = b) : (a + b) ^ 2 = 4 * a ^ 2 := by
+example (a b : ℝ) (h : a = 5 * b) : (a + b) ^ 2 = 36 * b ^ 2 := by
   sorry
-
 
 example (a b : ℝ) (h1 : a = 1) (h2 : b = -2) : (a + b) ^ 2 = 1 := by
   sorry
@@ -141,7 +147,8 @@ example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
   Sometimes you have a hypothesis of the form `h : a = b` and want to replace
   `b` with `a` in stead of `a` with `b`. You can do this with the tactic `rewrite [← h]`.
 
-  To type the `←` you type `\l ` (backslash, ell, space), with l for left.
+  To type the `←` you type `\leftarrow ` or simply `\l `.
+  Try it here, type `← h`:
 -/
 
 example (x y z : ℚ) (h : x + y = z) : z ^ 2 = x ^ 2 + 2 * x * y + y ^ 2 := by
@@ -164,9 +171,9 @@ example (x y : ℝ) (h1 : x + 1 = y) (h2 : x = 0) : y = 1 := by
   `cos_pi : cos π = -1`
   `sin_add x y : sin (x + y) = sin x * cos y + cos x * sin y`
   `cos_add x y : cos (x + y) = cos x * cos y - sin x * sin y`
-  `sin_sq_add_cos_sq x : sin x ^ 2 + cos x ^ 2 = 1`
+  `sin_sq_add_cos_sq x : (sin x) ^ 2 + (cos x) ^ 2 = 1`
   These can be used as arguments in `rewrite`. For example, if `x` is a real number,
-  then `rewrite [sin_sq_add_cos_sq x]` looks for the pattern `sin x ^ 2 + cos x ^ 2` in the goal
+  then `rewrite [sin_sq_add_cos_sq x]` looks for the pattern `(sin x) ^ 2 + (cos x) ^ 2` in the goal
   and replaces it with `1`.
 
   Can you guess how to type `π`? (Just think LaTeX...)
@@ -182,8 +189,8 @@ example (x : ℝ) : cos (x + π) = -cos x := by
   sorry
 
 example (x : ℝ) (h : sin x = 0) : (cos x) ^ 2 = 1 := by
-  rw [← sin_sq_add_cos_sq x]
-  rw [h]
+  rewrite [← sin_sq_add_cos_sq x]
+  rewrite [h]
   algebra
 
 /-
@@ -195,7 +202,7 @@ lemma cos_sq (x : ℝ) : cos x ^ 2 = 1 - sin x ^ 2 := by
   algebra
 
 -- try proving this *using* the lemma `cos_sq`
-lemma sin_sq (x : ℝ) : sin x ^ 2 = 1 - cos x ^ 2 := by
+lemma sin_sq (x : ℝ) : (sin x) ^ 2 = 1 - (cos x) ^ 2 := by
   rewrite [cos_sq x]
   algebra
 
@@ -208,7 +215,7 @@ lemma sin_two_mul (x : ℝ) : sin (2 * x) = 2 * sin x * cos x := by
   algebra
 
 
-lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * cos x ^ 2 - 1 := by
+lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * (cos x) ^ 2 - 1 := by
   rewrite [two_mul x]
   rewrite [cos_add x x]
   rewrite [← sin_sq_add_cos_sq x]
@@ -233,16 +240,16 @@ example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
   algebra
 
 
-
 /-
-  Final trigonometric challenge! Prove the example below. You may need to
-  state and prove a lemma about `3 * x` first....
+  Bonus trigonometric challenge! (Feel free to skip this one!)
+
+  To prove the example below, you will need to state and prove a lemma about `3 * x` first...
 -/
 
 lemma thrice (x : ℝ) : 3 * x = (x + x) + x := by
   algebra
 
-example (x : ℝ) : sin (3 * x) = 3 * sin x * cos x ^ 2 - sin x ^ 3 := by
+example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
   sorry
 
 
@@ -253,7 +260,15 @@ example (x : ℝ) : sin (3 * x) = 3 * sin x * cos x ^ 2 - sin x ^ 3 := by
   few examples from Group Theory. (We won't be doing more group theory in this course.)
 -/
 
--- Let `G` be a group and `a` and `b` be elements of `G`. Then `(a * a⁻¹) * b = b`.
+/-
+  The example below proves the following statement: Let `G` be a group and `a` and `b` be
+  elements of `G`. Then `(a * a⁻¹) * b = b`.
+
+  The proof uses two lemmas:
+    `mul_right_inv a : a * a⁻¹ = 1`
+    `one_mul a : 1 * a = a`
+  These are in fact axioms of a group.
+-/
 example [Group G] (a b : G) : (a * a⁻¹) * b = b := by
   rewrite [mul_right_inv]
   rewrite [one_mul]
@@ -264,7 +279,7 @@ example [Group G] (a b : G) : a * (b⁻¹ * b) = a := by
   sorry
 
 /-
-  Here is the list of axioms of a group, and Lean's name for them:
+  Here is the full list of group axioms.:
     `mul_assoc a b c : (a * b) * c = a * (b * c)`
     `mul_right_inv a : a * a⁻¹ = 1`
     `mul_left_inv a : a⁻¹ * a = 1`
@@ -289,9 +304,9 @@ example [Group G] (a b c d : G) : (a * b) * (c * d) = a * (b * (c * d)) := by
   Let's do a longer proof. This is the "socks and shoes" law.
 -/
 example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
-  -- it suffices to show that (b⁻¹ * a⁻¹) * (a * b) = 1
+  -- this will reduce the proof to showing that (b⁻¹ * a⁻¹) * (a * b) = 1
   apply inv_eq_of_mul_eq_one_left
-  -- now finish the proof with a series of rewrites
+  -- now finish the proof yourself
   sorry
 
 

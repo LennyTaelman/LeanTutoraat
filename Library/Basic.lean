@@ -81,11 +81,36 @@ lemma sin_add (x y : ℝ) : sin (x + y) = sin x * cos y + cos x * sin y := Real.
 lemma cos_add (x y : ℝ) : cos (x + y) = cos x * cos y - sin x * sin y := Real.cos_add x y
 lemma sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add_cos_sq x
 
+
+/-
+  Custom delaborator to print `(sin x) ^ n` and `(cos x) ^ n` in stead of `sin x ^ n` and `cos x ^ n`
+-/
+
 open Lean PrettyPrinter Delaborator SubExpr in
+@[delab app.HPow.hPow]
+def delabTrigPow : Delab := do
+  let e ← getExpr
+  guard (e.isAppOfArity ``HPow.hPow 6)
+
+  let base := e.getArg! 4
+  let exp := e.getArg! 5
+
+  -- Check if base is a sin or cos application (handling both qualified and unqualified names)
+  guard (base.isAppOfArity ``sin 1 || base.isAppOfArity ``cos 1)
+
+  let baseStx ← delab base
+  let expStx ← delab exp
+  `(($baseStx) ^ $expStx)
+
+
+#check sin_sq_add_cos_sq
+#check 4 ^ 2
+
 
 /-
   Custom delaborator to print `(a + b) + c` in stead of `a + b + c`
 -/
+open Lean PrettyPrinter Delaborator SubExpr in
 @[delab app.HAdd.hAdd]
 def delabAddWithParens : Delab := do
   let e ← getExpr
@@ -99,11 +124,11 @@ def delabAddWithParens : Delab := do
   let rhsStx ← delab rhs
   `(($lhsStx) + $rhsStx)
 
-open Lean PrettyPrinter Delaborator SubExpr in
 
 /-
   Custom delaborator to print `(a * b) * c` in stead of `a * b * c`
 -/
+open Lean PrettyPrinter Delaborator SubExpr in
 @[delab app.HMul.hMul]
 def delabMulWithParens : Delab := do
   let e ← getExpr

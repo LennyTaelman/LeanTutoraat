@@ -141,3 +141,20 @@ def delabMulWithParens : Delab := do
   let lhsStx ← delab lhs
   let rhsStx ← delab rhs
   `(($lhsStx) * $rhsStx)
+
+
+/-
+  Custom `exercise` command as alternative to `example`
+-/
+
+open Lean.Elab.Command in
+
+elab "exercise" hyps:bracketedBinder* ":" thm:term ":=" prf:term : command
+  => do elabCommand (← `(command|example $(hyps):bracketedBinder* : $thm := $prf))
+
+
+-- issue: sorry linter will underline entire declaration
+
+example : 1 + 1 = 2 := by sorry
+
+exercise : 1 + 1 = 2 := by sorry

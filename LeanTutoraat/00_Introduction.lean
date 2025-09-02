@@ -1,11 +1,12 @@
 import Library.Basic
 
-
+-- todo: wrapper around all lemmas and tactic, with limited scope and helpful
+-- doc!
 
 /- # First steps using Lean -/
 
 /-
-  You'll work through this file gradyallyl from top to bottom, at your own pace.
+  You'll work through this file gradually from top to bottom, at your own pace.
 
   The text written in green (such as these lines here) is for you, it will be ignored by
   Lean.
@@ -203,6 +204,53 @@ example (x y z t : ℝ) : exp (x + y) * exp (z + t) = exp (x + t) * exp (y + z) 
   sorry
 
 
+
+-- experiment with trigonometric identities
+
+-- tricky: really would love to do some Gröbner stuff, e.g. `algebra [sin_sq_add_cos_sq]`
+
+noncomputable def sin (x : ℝ) : ℝ := Real.sin x
+noncomputable def cos (x : ℝ) : ℝ := Real.cos x
+def sin_add (x y : ℝ) : sin (x + y) = sin x * cos y + cos x * sin y := Real.sin_add x y
+
+def cos_add (x y : ℝ) : cos (x + y) = cos x * cos y - sin x * sin y := Real.cos_add x y
+def sin_zero : sin 0 = 0 := Real.sin_zero
+def cos_zero : cos 0 = 1 := Real.cos_zero
+def sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add_cos_sq x
+
+lemma cos_sq (x : ℝ) : cos x ^ 2 = 1 - sin x ^ 2 := by
+  rewrite [← sin_sq_add_cos_sq x]
+  algebra
+
+lemma sin_sq (x : ℝ) : sin x ^ 2 = 1 - cos x ^ 2 := by
+  rewrite [cos_sq x]
+  algebra
+
+lemma sin_two_mul (x : ℝ) : sin (2 * x) = 2 * sin x * cos x := by
+  rewrite [two_mul x]
+  rewrite [sin_add x x]
+  algebra
+
+lemma cos_two_mul (x : ℝ) : cos (2 * x) = cos x ^ 2 - sin x ^ 2 := by
+  rewrite [two_mul x]
+  rewrite [cos_add x x]
+  algebra
+
+lemma cos_two_mul' (x : ℝ) : cos (2 * x) = 2 * cos x ^ 2 - 1 := by
+  rewrite [cos_two_mul]
+  rewrite [sin_sq]
+  algebra
+
+lemma three_mul (x : ℝ) : 3 * x = (x + x) + x := by
+  algebra
+
+example (x : ℝ) : sin (3 * x) = 3 * sin x * cos x ^ 2 - sin x ^ 3 := by
+  rewrite [three_mul x]
+  rewrite [sin_add]
+  rewrite [cos_add]
+  rewrite [sin_add]
+
+  algebra
 
 
 /-

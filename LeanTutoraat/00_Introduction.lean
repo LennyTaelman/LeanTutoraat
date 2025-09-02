@@ -306,3 +306,13 @@ example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
 
 example [Group G] (a b : G) : a * b ^ 2 * a⁻¹ = (a * b * a⁻¹) ^ 2 := by
   sorry
+
+
+/-
+  Congratulations! You have completed the first worksheet! You have learned to write
+  simple Lean proofs using the following tactics:
+  - `numbers`, `algebra`, `rfl` for automatically proving simple identities
+  - `rewrite` for substituting equalities from hypotheses or Lean lemmas
+  Some of this was awkward and cumbersome. Once we learn more tactics, things
+  will become much easier...
+-/

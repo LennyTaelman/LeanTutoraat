@@ -38,8 +38,7 @@ macro "simp" : tactic => `(tactic|
 
 
 /--
-Configure the environment with the right options and attributes
-for the book *The Mechanics of Proof*.
+This if from *The Mechanics of Proof*. Might not need this...
 
 Tries to perform essentially the following:
 

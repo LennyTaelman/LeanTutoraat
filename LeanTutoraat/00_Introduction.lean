@@ -279,16 +279,14 @@ example [Group G] (a b : G) : a * (b⁻¹ * b) = a := by
   sorry
 
 /-
-  Here is the full list of group axioms.:
+  Here is the full list of group axioms.
     `mul_assoc a b c : (a * b) * c = a * (b * c)`
     `mul_right_inv a : a * a⁻¹ = 1`
     `mul_left_inv a : a⁻¹ * a = 1`
     `mul_one a : a * 1 = a`
     `one_mul a : 1 * a = a`
 
-  Hint: to write `a⁻¹` type `a\inv`
-
-  Now prove the following two examples.
+  Now prove the following two examples. Hint: use `\inv` to type `⁻¹`
 -/
 
 

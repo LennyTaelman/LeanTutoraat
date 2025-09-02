@@ -190,9 +190,7 @@ example (x : ℝ) : cos (x + π) = -cos x := by
 
 -- this one is a bit tricky!
 example (x : ℝ) (h : sin x = 0) : (cos x) ^ 2 = 1 := by
-  rewrite [← sin_sq_add_cos_sq x]
-  rewrite [h]
-  algebra
+  sorry
 
 /-
   Next let's prove a few lemmas. Lemmas are just like examples, but with a name.
@@ -204,30 +202,24 @@ lemma cos_sq (x : ℝ) : cos x ^ 2 = 1 - sin x ^ 2 := by
 
 -- try proving this *using* the lemma `cos_sq`
 lemma sin_sq (x : ℝ) : (sin x) ^ 2 = 1 - (cos x) ^ 2 := by
-  rewrite [cos_sq x]
-  algebra
+  sorry
 
 lemma twice (x : ℝ) : 2 * x = x + x := by
   sorry
 
-lemma sin_two_mul (x : ℝ) : sin (2 * x) = 2 * sin x * cos x := by
-  rewrite [twice x]
-  rewrite [sin_add x x]
-  algebra
 
+lemma sin_two_mul (x : ℝ) : sin (2 * x) = 2 * sin x * cos x := by
+  sorry
 
 lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * (cos x) ^ 2 - 1 := by
-  rewrite [two_mul x]
-  rewrite [cos_add x x]
-  rewrite [← sin_sq_add_cos_sq x]
-  algebra
+  sorry
 
 
 
 
 /-
   One can leave the arguments in lemma implicit, and for example write
-  `rewrite [sin_sq_add_cos_sq]`
+    `rewrite [sin_sq_add_cos_sq]`
   Lean will then search for the pattern `sin x ^ 2 + cos x ^ 2`, guessing the argument `x`.
 
   Tr to do the following examples as efficiently as possible
@@ -247,8 +239,6 @@ example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
   To prove the example below, you will need to state and prove a lemma about `3 * x` first...
 -/
 
-lemma thrice (x : ℝ) : 3 * x = (x + x) + x := by
-  algebra
 
 example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
   sorry

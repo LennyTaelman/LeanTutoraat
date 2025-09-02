@@ -188,6 +188,7 @@ example (x : ℝ) : sin (x + π) = -sin x := by
 example (x : ℝ) : cos (x + π) = -cos x := by
   sorry
 
+-- this one is a bit tricky!
 example (x : ℝ) (h : sin x = 0) : (cos x) ^ 2 = 1 := by
   rewrite [← sin_sq_add_cos_sq x]
   rewrite [h]
@@ -229,15 +230,15 @@ lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * (cos x) ^ 2 - 1 := by
   `rewrite [sin_sq_add_cos_sq]`
   Lean will then search for the pattern `sin x ^ 2 + cos x ^ 2`, guessing the argument `x`.
 
-  Tr to do the following example as efficiently as possible
+  Tr to do the following examples as efficiently as possible
 -/
+
+example (x : ℝ) : sin (x + 2 * π) = sin x := by
+  sorry
 
 example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
     cos x * cos y * sin z - sin x * sin y * sin z := by
-  rw [sin_add]
-  rw [sin_add]
-  rw [cos_add]
-  algebra
+  sorry
 
 
 /-
@@ -257,7 +258,7 @@ example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
   ## A bit of group theory.
 
   In theory, Lean can encode anything that is (rigorous) mathematics. Here are a
-  few examples from Group Theory. (We won't be doing more group theory in this course.)
+  few examples from Group Theory. (We won't be group theory in the rest of this course.)
 -/
 
 /-

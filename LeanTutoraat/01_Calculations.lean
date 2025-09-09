@@ -1,21 +1,17 @@
-/- Copyright (c) Lenny Taelman, 2025. Based on "Mechanics of Proof" by Heather Macbeth. -/
-
-import Mathlib.Data.Real.Basic
 import Library.Basic
-
--- math2001_init
-
+tutoraat_init
 
 
 
 /- # Exercise sheet 1: Proving equalities and inequalities -/
 
-/- ## Numerical statements using `numbers` -/
-
+/- ## Recap: numerical identities with `numbers`  -/
 
 /-
+
   The tactic `numbers` proves equalities and inequalities
-  between "numerical" expressions  without variables.
+  between "numerical" expressions  without variables. We've
+  already seen the "equalities" part in the introductory sheet.
 -/
 
 example : 1 + 1 = 2 := by
@@ -26,7 +22,7 @@ example : 2 > 1 := by
 
 /-
   The tactic `sorry` is used to skip a proof. ("Sorry, I'll do this later!").
-  In the two examples below, replace `sorry` with `numbers`, and see what happens.
+  In the four examples below, replace `sorry` with `numbers`, and see what happens.
 -/
 
 example : 2 ^ 7 ≥ 5 ^ 3 := by
@@ -35,14 +31,14 @@ example : 2 ^ 7 ≥ 5 ^ 3 := by
 example : (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) ^ 2 = 2025 := by
   sorry
 
--- Now see what happens when you try to use `numbers` to prove a false statement
 example : 1 + 1 = 3 := by
   sorry
 
+example (a : ℝ) : a + 1 > a := by
+  sorry
 
 
-
-/- ## Algebraic idendities using `ring` -/
+/- ## Recap: algebraic identities using `algebra` -/
 
 /-
   In the following example, the expression `(a : ℝ)` before the `:` means that
@@ -55,22 +51,19 @@ example (a : ℝ) : (a + 1) * (a - 1) = a ^ 2 - 1 := by
 example (a b : ℤ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
   algebra
 
-example (a b c : ℕ) : (a + b) * c = a * c + b * c := by
-  ring
+/-
+  In the four examples below, replace `sorry` with `algebra`, and see what happens.
+-/
 
--- Replace the word `sorry` with the correct Lean justification.
+example (a b c : ℕ) : (a + b) * c = a * c + b * c := by
+  sorry
+
 example (a b : ℚ) : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
   sorry
 
--- Replace the word `sorry` with the correct Lean justification.
-example (a b : ℝ) : (a - b) ^ 2 = a ^ 2 - 2 * a * b + b ^ 2 := by
-  sorry
-
--- Check that `ring` does _not_ work here (why?)
 example (a b : ℤ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 := by
   sorry
 
--- This is true, but `ring` cannot prove it. We'll learn how to prove it later.
 example (a : ℝ) : a ^ 2 ≥ 0 := by
   sorry
 
@@ -85,18 +78,18 @@ example (a : ℝ) : a ^ 2 ≥ 0 := by
 
 
 
-/- ## Substituting with `rw` -/
+
+
+/- ## Recap: substituting with `rewrite` -/
 
 /-
   In the following example, `h` is the hypothesis that `a = 2`.
-  To prove that `a ^ 2 = 4` we use the `rw` tactic (short for *rewrite*)
+  To prove that `a ^ 2 = 4` we use the `rewrite` tactic
   to substitute `a` with `2` in the goal.
-
-  Note that we've already used the `rw` tactic in the introductory session.
 -/
 
 example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
-  rw [h] -- this uses hypothesis h to substitute a with 2
+  rewrite [h] -- this uses hypothesis h to substitute a with 2
   numbers
 
 /-

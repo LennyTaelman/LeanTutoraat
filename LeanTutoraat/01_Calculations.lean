@@ -133,47 +133,38 @@ example (a b c d : ℤ) (h1 : a + b = c) (h2 : b - a = d) : c * d = b ^ 2 - a ^ 
   of equalities
   `(a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) = 4 ^ 2 + 4 * 1 = 20`.
 -/
+
 example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
   calc
-    (a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) := by ring
-    _ = 4 ^ 2 + 4 * 1 := by rw [h1, h2]
-    _ = 20 := by numbers
+    (a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) := by algebra
+              _ = 4 ^ 2 + 4 * 1             := by rewrite [h1, h2]; numbers
+              _ = 20                        := by numbers
+
 
 -- Replace each `sorry` with a valid justification.
 example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
   calc
     r = (r + 2 * s) - 2 * s := by sorry
-    _ = -1 - 2 * s := by sorry
-    _ = -1 - 2 * 3 := by sorry
-    _ = -7 := by sorry
+    _ = -1 - 2 * s          := by sorry
+    _ = -1 - 2 * 3          := by sorry
+    _ = -7                  := by sorry
 
 -- Replace each `sorry` with a valid justification.
-example (x y z : ℤ) (h1 : x + y + z = 0) (h2 : x * y + y * z + z * x = 0) :
-  x ^ 2 + y ^ 2 + z ^ 2 = 0 := by
+example (x y : ℤ) (h1 : x + y = 2) (h2 : x * y = 1) :
+  x ^ 3 + y ^ 3 = 2 := by
   calc
-    x ^ 2 + y ^ 2 + z ^ 2 = (x + y + z) ^ 2 - 2 * (x * y + y * z + z * x) := by sorry
-    _ = 0 ^ 2 - 2 * 0 := by sorry
-    _ = 0 := by sorry
-
+    x ^ 3 + y ^ 3 = (x + y) ^ 3 - 3 * (x * y) * (x + y) := by sorry
+                _ = 2 ^ 3 - 3 * 1 * 2                   := by sorry
+                _ = 2                                   := by sorry
 
 /-
   Now it is time to write your own `calc` proofs. The syntax can be a bit
   finnicky at first, but it gets easier with practice. I recommend you first
-  write the `calc` block with `sorry`'s, and then fill in the justifications.
-  ```
-  calc
-    LHS = ... := by sorry
-    _ = ... := by sorry
-    _ = ... := by sorry
-    _ = RHS := by sorry
-  ```
-  where `h1`, `h2`, `h3` are hypotheses or lemmas.
+  write the sequence of equalities on a sheet of paper. Then create a `calc`
+  block where each step is justified by a `sorry`. Then fill in the justifications.
 -/
 
-/-
-  Replace `sorry` with a correct `calc` proof. Hint:
-  `(b - a) ^ 2 = (a + b) ^ 2 - 4 * (a * b) = s ^ 2 - 4 * t`
--/
+-- Replace `sorry` with a correct `calc` proof. Hint:
 example (a b : ℝ) (h1 : a + b = s) (h2 : a * b = t) : (b - a) ^ 2 = s ^ 2 - 4 * t := by
   sorry
 

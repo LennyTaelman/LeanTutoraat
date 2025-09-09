@@ -20,21 +20,21 @@ import Library.Basic
   Here is what the statement and proof look like in Lean:
 -/
 
-example (a b : ℝ) : (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
-  apply le_of_sub_nonneg
-  have h : 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2 := by
+example (x y : ℝ) : (x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2) := by
+  apply le_of_difference_nonneg
+  have h : 2 * (x ^ 2 + y ^ 2) - (x + y) ^ 2 = (x - y) ^ 2 := by
     algebra
   rewrite [h]
-  apply sq_nonneg
+  apply zero_le_sq
 
 /-
   And here is a line-by-line translation into English.
 
-  Let `a` and `b` be real numbers. Then `(a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2)`. Proof:
-    It suffices to show that `0 ≤ 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2`.
-    We claim that `2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2 = (a - b) ^ 2`. Proof:
+  Let `x` and `y` be real numbers. Then `(x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2)`. Proof:
+    It suffices to show that `0 ≤ 2 * (x ^ 2 + y ^ 2) - (x + y) ^ 2`.
+    We claim that `2 * (x ^ 2 + y ^ 2) - (x + y) ^ 2 = (x - y) ^ 2`. Proof:
       This follows from basic algebra.
-    Using the claim, we can rewrite the goal as `0 ≤ (a - b) ^ 2`.
+    Using the claim, we can rewrite the goal as `0 ≤ (x - y) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
 
   Now move your cursour around in the Lean proof to see what happens in the right panel.
@@ -43,11 +43,11 @@ example (a b : ℝ) : (a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2) := by
   the things after `⊢` tell us what we *want*.
 
   For example, if you place your cursor before the first `apply`, you will see that:
-    - we *have* that `a` and `b` are real numbers.
-    - we *want* to show that `(a + b) ^ 2 ≤ 2 * (a ^ 2 + b ^ 2)`. This is our *goal*.
+    - we *have* that `x` and `y` are real numbers.
+    - we *want* to show that `(x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2)`. This is our *goal*.
   If you place it immediately after the first `apply`, then
-    - we still *have* that `a` and `b` are real numbers.
-    - we now *want* to show that 0 ≤ 2 * (a ^ 2 + b ^ 2) - (a + b) ^ 2.
+    - we still *have* that `x` and `y` are real numbers.
+    - we now *want* to show that 0 ≤ 2 * (x ^ 2 + y ^ 2) - (x + y) ^ 2.
   After the last `apply` you'll see "No goals", indicating that the proof is complete.
 
   The commands such as `apply`, `have`, `rewrite` are called *tactics*. They are used to

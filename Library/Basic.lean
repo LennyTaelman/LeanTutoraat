@@ -82,6 +82,19 @@ lemma sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add
 
 
 /-
+  Custom lemma names and comments for introductory session
+-/
+
+
+/-- If the difference `b - a` is non-negative, then `a ≤ b`. -/
+lemma le_of_difference_nonneg {a b : ℝ} (h : 0 ≤ b - a) : a ≤ b := by
+  exact sub_nonneg.mp h
+
+/-- The square of a real number is non-negative. -/
+lemma zero_le_sq {a : ℝ} : 0 ≤ a ^ 2 := sq_nonneg a
+
+
+/-
   Custom delaborator to print `(sin x) ^ n` and `(cos x) ^ n` in stead
   of `sin x ^ n` and `cos x ^ n`
 -/

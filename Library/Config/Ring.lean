@@ -17,5 +17,3 @@ macro "algebra" : tactic =>
   `(tactic | first |
     (push_cast; first | ring | (field_simp; ring) | (field_simp; done)) |
     fail "algebra failed. Perhaps the goal is not an algebraic identity, or the identity is false?")
-
--- macro "algebra" : tactic => `(tactic | first | ring | field_simp | (field_simp; ring))

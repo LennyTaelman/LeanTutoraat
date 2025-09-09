@@ -93,28 +93,25 @@ example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
   numbers
 
 /-
-  Place the cursor before the `rw` tactic above. The goal will be `⊢ a ^ 2 = 4`.
-  Now place the cursor after the `rw` tactic, and observe that the goal changes
-  to `⊢ 2 ^ 2 = 4`.
+  Last session, we've seen a few variants of this usage.
+    `rewrite [h]` where `h : a = b`  substitutes `a` with `b` in the goal.
+    `rewrite [←h]` where `h : a = b` substitutes `b` with `a` in the goal.
+    `rewrite [h1, h2]` first substitues using `h1`, then using `h2`
+  Let's add one more variant
+    `rewrite [h1] at h2` substites `h1` into the hypothesis `h2` (and not the goal)
 -/
 
--- Here is another example. Try placing the cursor at various points in the proof.
+-- TODO add example for `rewrite [h1] at h2`
+
 example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
-  rw [ha]
-  rw [hb]
-  numbers
+  sorry
 
+example (a b c : ℝ) (ha : c = a) (hb : b = -c) : a + b = 0 := by
+  sorry
 
--- One can also use `rw` to do multiple substitutions in one go.
-example {a b c : ℝ} (ha : a = c) (hb : b = -c) : a + b = 0 := by
-  rw [ha,hb]
-  algebra
-
--- replace `sorry` with a correct proof
 example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
   sorry
 
--- replace `sorry` with a correct proof
 example (a b c d : ℤ) (h1 : c = a + b) (h2 : d = b - a) : c * d = b ^ 2 - a ^ 2 := by
   sorry
 
@@ -157,8 +154,19 @@ example (x y z : ℤ) (h1 : x + y + z = 0) (h2 : x * y + y * z + z * x = 0) :
 
 /-
   Now it is time to write your own `calc` proofs. The syntax can be a bit
-  finnicky at first, but it gets easier with practice.
+  finnicky at first, but it gets easier with practice. I recommend you first
+  write the `calc` block with `sorry`'s, and then fill in the justifications.
+  ```
+  calc
+    LHS = ... := by sorry
+    _ = ... := by sorry
+    _ = ... := by sorry
+    _ = RHS := by sorry
+  ```
+  where `h1`, `h2`, `h3` are hypotheses or lemmas.
+-/
 
+/-
   Replace `sorry` with a correct `calc` proof. Hint:
   `(b - a) ^ 2 = (a + b) ^ 2 - 4 * (a * b) = s ^ 2 - 4 * t`
 -/

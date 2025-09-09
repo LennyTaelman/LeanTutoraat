@@ -73,7 +73,7 @@ example (a : ℝ) : a ^ 2 ≥ 0 := by
   the identity `a ^ 2 + b ^ 2 + c ^ 2 = (a + b + c) ^ 2 - 2 * (a * b + b * c + c * a)`
   holds.
 
-  To write the symbol ℝ, use `\R` or `\real`.
+  To type the symbol `ℝ`, use `\R` or `\real`.
 -/
 
 
@@ -97,22 +97,26 @@ example (a : ℚ) (h : a = 2) : a ^ 2 = 4 := by
     `rewrite [h]` where `h : a = b`  substitutes `a` with `b` in the goal.
     `rewrite [←h]` where `h : a = b` substitutes `b` with `a` in the goal.
     `rewrite [h1, h2]` first substitues using `h1`, then using `h2`
-  Let's add one more variant
+  Let's add one more variant:
     `rewrite [h1] at h2` substites `h1` into the hypothesis `h2` (and not the goal)
+
+  Now replace the `sorry` below with correct proofs.
 -/
 
--- TODO add example for `rewrite [h1] at h2`
 
-example (a b : ℝ) (ha : a = 1) (hb : b = 0) : (a + b) ^ 8 = 1 := by
+example (a b : ℝ) (h : a + b = 2) : (a + b) ^ 4 = 16 := by
   sorry
 
-example (a b c : ℝ) (ha : c = a) (hb : b = -c) : a + b = 0 := by
+example (a b c : ℝ) (h1 : c = a) (h2 : b = -c) : a + b = 0 := by
   sorry
 
-example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
+example (a b n : ℕ) (h1 : n = a * b) (h2 : a = 2) (h3 : b = 3) : n = 6 := by
   sorry
 
-example (a b c d : ℤ) (h1 : c = a + b) (h2 : d = b - a) : c * d = b ^ 2 - a ^ 2 := by
+example (x y : ℝ) (h1 : x = 3) (h2 : 4 * x - 3 = y) : y = 9 := by
+  sorry
+
+example (a b c d : ℤ) (h1 : a + b = c) (h2 : b - a = d) : c * d = b ^ 2 - a ^ 2 := by
   sorry
 
 

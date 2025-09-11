@@ -235,17 +235,6 @@ example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
   sorry
 
 
-/-
-  Bonus trigonometric challenge! (Feel free to skip this one!)
-
-  To prove the example below, you will need to state and prove a lemma `thrice`
-  about `3 * x` first. To type `ℝ` use `\R`.
--/
-
-
-example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
-  sorry
-
 
 /-
   ## A bit of group theory.
@@ -271,7 +260,10 @@ example (a b : G) : (a * a⁻¹) * b = b := by
   rewrite [one_mul]
   rfl
 
--- now do this one yourself, *guess* the names of the lemmas that you need.
+
+/-
+  The tactic `rfl` proves identities of the form `a = a`.
+-/
 example (a b : G) : a * (b⁻¹ * b) = a := by
   sorry
 

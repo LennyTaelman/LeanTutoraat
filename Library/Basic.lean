@@ -122,6 +122,18 @@ The `sorry` tactic admits the current goal without proof. It is used as a placeh
 macro "sorry" : tactic => `(tactic| sorry)
 
 
+/--
+The `apply` tactic applies a lemma to the current goal, generating new subgoals
+for each of its hypotheses.
+-/
+macro "apply" h:term : tactic => `(tactic| apply $h)
+
+/--
+The `have` tactic introduces a new hypothesis. Use `have h : P := by proof` to
+prove statement `P` and give it the name `h`, which you can then use in the rest of the proof.
+-/
+macro "have" h:ident " : " p:term " := " proof:term : tactic => `(tactic| have $h : $p := $proof)
+
 
 /-
   Custom delaborator to print `(sin x) ^ n` and `(cos x) ^ n` in stead

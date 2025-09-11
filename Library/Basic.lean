@@ -116,6 +116,12 @@ You can use `rewrite [← h]` to replace the right-hand side with the left-hand 
 macro "rewrite" "[" hs:Lean.Parser.Tactic.rwRule,* "]" : tactic => `(tactic| rewrite [$hs,*])
 
 
+/--
+The `sorry` tactic admits the current goal without proof. It is used as a placeholder when you want to skip a proof and continue working on the rest of the file.
+-/
+macro "sorry" : tactic => `(tactic| sorry)
+
+
 
 /-
   Custom delaborator to print `(sin x) ^ n` and `(cos x) ^ n` in stead

@@ -238,7 +238,8 @@ example : sin (x + y + z) = sin x * cos y * cos z + cos x * sin y * cos z +
 /-
   Bonus trigonometric challenge! (Feel free to skip this one!)
 
-  To prove the example below, you will need to state and prove a lemma about `3 * x` first...
+  To prove the example below, you will need to state and prove a lemma `thrice`
+  about `3 * x` first. To type `ℝ` use `\R`.
 -/
 
 

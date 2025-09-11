@@ -51,7 +51,7 @@ example (x y : ℝ) : (x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2) := by
   After the last `apply` you'll see "No goals", indicating that the proof is complete.
 
   The commands such as `apply`, `have`, `rewrite` are called *tactics*. They are used to
-  construct a proof.
+  construct a proof. You can hover your mouse over a tactic to obtain a short description.
 -/
 
 

@@ -49,10 +49,10 @@ theorem Prod.ext' {a1 a2 : A} {b1 b2 : B} (h1 : a1 = a2) (h2 : b1 = b2) : (a1, b
 def Library.Tactic.numbersProdLemmas : List Name := [``Prod.ne_left, ``Prod.ne_right, ``Prod.ext']
 
 /--
-Prove equalities and inequalities between elements of `ℕ`, `ℤ`, `ℚ`,
-`ℝ`. This tactic can prove goals of the form `A = B`, `A ≠ B`, `A < B` and `A ≤ B`,
+The `numbers` tactic attempts to automatically prove equalities and inequalities
+of purely numerical expressions. It can prove goals of the form `A = B`, `A ≠ B`, `A < B` and `A ≤ B`,
 where `A` and `B` are numerical expressions (without variables) involving the
-operations `+` `-` `*` `/` `⁻¹` and `^`.
+operations `+` `-` `*` `/` `⁻¹` and `^` and elements of `ℕ`, `ℤ`, `ℚ`, `ℝ`.
 -/
 elab (name := numbers) "numbers" : tactic =>
   Tactic.liftMetaTactic <| fun g => do

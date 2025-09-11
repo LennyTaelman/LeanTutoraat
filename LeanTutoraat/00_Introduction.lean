@@ -37,7 +37,7 @@ example (x y : ℝ) : (x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2) := by
     Using the claim, we can rewrite the goal as `0 ≤ (x - y) ^ 2`.
     But this is true, because the square of a real number is always non-negative.
 
-  Now move your cursour around in the Lean proof to see what happens in the right panel.
+  Now move your cursor around in the Lean proof to see what happens in the right panel.
 
   At any point in the proof, the things before `⊢` tell us what we *have*, and
   the things after `⊢` tell us what we *want*.

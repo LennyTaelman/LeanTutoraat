@@ -117,7 +117,10 @@ example (x : ℝ) (h : x ≠ 0) : x / x = 1 := by
   If you *have* a hypothesis `h` of the form `a = b`,
   then the tactic `rewrite [h]` looks for an `a` in the goal, and replaces it with `b`.
 
-  Here is an example. Let `x` be a real number and assume `x = 1`. Then `2 * x = 2`.
+  Here is an example. It states:
+    Let `x` be a real number and assume `x = 1`. Then `2 * x = 2`.
+  Move your cursor around in the Lean proof to see what happens in the right panel.
+
 -/
 example (x : ℝ) (h : x = 1) : 2 * x = 2 := by
   rewrite [h] -- Replace `x` by `1`, new goal is `2 * 1 = 2`

@@ -257,7 +257,7 @@ variable (G : Type) [Group G]  -- this tells Lean that `G` denotes a group
 -/
 example (a b : G) : (a * a⁻¹) * b = b := by
   rewrite [mul_right_inv a]
-  rewrite [one_mul]
+  rewrite [one_mul b]
   rfl
 
 

@@ -95,6 +95,29 @@ lemma zero_le_sq {a : ℝ} : 0 ≤ a ^ 2 := sq_nonneg a
 
 
 /-
+  Custom docstrings for tactics
+-/
+
+/--
+The `rfl` tactic proves goals of the form `a = a`, `a ≤ a`, `a ↔ a`, etc. It
+stands for "reflexivity". Example:
+
+```
+example (a : ℝ) : a ≤ a := by
+  rfl
+```
+-/
+macro "rfl" : tactic => `(tactic| rfl)
+
+/--
+The `rewrite [h]` tactic replaces occurrences of the left-hand side of the equality or equivalence `h` in the goal with the right-hand side.
+You can use `rewrite [← h]` to replace the right-hand side with the left-hand side instead.
+-/
+macro "rewrite" "[" hs:Lean.Parser.Tactic.rwRule,* "]" : tactic => `(tactic| rewrite [$hs,*])
+
+
+
+/-
   Custom delaborator to print `(sin x) ^ n` and `(cos x) ^ n` in stead
   of `sin x ^ n` and `cos x ^ n`
 -/

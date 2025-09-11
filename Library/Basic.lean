@@ -68,6 +68,7 @@ elab "tutoraat_init" : command => do
   Trigonometry
 -/
 
+namespace Tutoraat
 noncomputable def sin (x : ℝ) : ℝ := Real.sin x
 noncomputable def cos (x : ℝ) : ℝ := Real.cos x
 noncomputable def π : ℝ := Real.pi
@@ -79,19 +80,43 @@ lemma cos_pi : cos π = -1 := Real.cos_pi
 lemma sin_add (x y : ℝ) : sin (x + y) = sin x * cos y + cos x * sin y := Real.sin_add x y
 lemma cos_add (x y : ℝ) : cos (x + y) = cos x * cos y - sin x * sin y := Real.cos_add x y
 lemma sin_sq_add_cos_sq (x : ℝ) : sin x ^ 2 + cos x ^ 2 = 1 := Real.sin_sq_add_cos_sq x
+end Tutoraat
+
+export Tutoraat (sin_zero cos_zero sin_pi cos_pi sin_add cos_add sin_sq_add_cos_sq)
+
+/-
+  Group theory
+-/
+
+-- namespace Tutoraat
+-- /-- In any group `a * a⁻¹ = 1 ` -/
+-- lemma mul_right_inv {G : Type} [Group G] (a : G) : a * a⁻¹ = 1 := _root_.mul_right_inv a
+-- lemma one_mul {G : Type} [Group G] (a : G) : 1 * a = a := _root_.one_mul a
+-- lemma mul_one {G : Type} [Group G] (a : G) : a * 1 = a := _root_.mul_one a
+-- lemma mul_left_inv {G : Type} [Group G] (a : G) : a⁻¹ * a = 1 := _root_.mul_left_inv a
+-- lemma mul_assoc {G : Type} [Group G] (a b c : G) : (a * b) * c = a * (b * c) := _root_.mul_assoc a b c
+
+-- end Tutoraat
+
+-- export Tutoraat (mul_right_inv one_mul mul_one mul_left_inv mul_assoc)
 
 
 /-
-  Custom lemma names and comments for introductory session
+  Custom docstrings for example proof
 -/
 
+namespace Tutoraat
 
 /-- If the difference `b - a` is non-negative, then `a ≤ b`. -/
-lemma le_of_difference_nonneg {a b : ℝ} (h : 0 ≤ b - a) : a ≤ b := by
+lemma le_of_diff_nonneg (a b : ℝ) (h : 0 ≤ b - a) : a ≤ b := by
   exact sub_nonneg.mp h
 
 /-- The square of a real number is non-negative. -/
-lemma zero_le_sq {a : ℝ} : 0 ≤ a ^ 2 := sq_nonneg a
+lemma zero_le_sq (a : ℝ) : 0 ≤ a ^ 2 := _root_.sq_nonneg a
+
+end Tutoraat
+
+export Tutoraat (le_of_diff_nonneg zero_le_sq)
 
 
 /-
@@ -140,6 +165,8 @@ macro "have" h:ident " : " p:term " := " proof:term : tactic => `(tactic| have $
   of `sin x ^ n` and `cos x ^ n`
 -/
 
+open Tutoraat
+
 open Lean PrettyPrinter Delaborator SubExpr in
 @[delab app.HPow.hPow]
 def delabTrigPow : Delab := do
@@ -159,6 +186,8 @@ def delabTrigPow : Delab := do
 
 #check sin_sq_add_cos_sq -- (sin x) ^ 2 + (cos x) ^ 2 = 1
 #check 4 ^ 2 -- 4 ^ 2
+
+
 
 /-
   Custom delaborator to print `(a + b) + c` in stead of `a + b + c`

@@ -1,5 +1,5 @@
 import Library.Basic
-
+open Tutoraat
 
 /- # First steps using Lean -/
 
@@ -21,7 +21,7 @@ import Library.Basic
 -/
 
 example (x y : ℝ) : (x + y) ^ 2 ≤ 2 * (x ^ 2 + y ^ 2) := by
-  apply le_of_difference_nonneg
+  apply le_of_diff_nonneg
   have h : 2 * (x ^ 2 + y ^ 2) - (x + y) ^ 2 = (x - y) ^ 2 := by
     algebra
   rewrite [h]
@@ -249,9 +249,11 @@ example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
 /-
   ## A bit of group theory.
 
-  In theory, Lean can encode anything that is (rigorous) mathematics. Here are a
-  few examples from Group Theory. (We won't be group theory in the rest of this course.)
+  In principle, Lean can encode all (rigorous) mathematics. Here are a
+  few examples from group theory. (There won't be any group theory in the rest of this course.)
 -/
+
+variable (G : Type) [Group G]  -- this tells Lean that `G` denotes a group
 
 /-
   The example below proves the following statement: Let `G` be a group and `a` and `b` be
@@ -260,15 +262,16 @@ example (x : ℝ) : sin (3 * x) = 3 * sin x * (cos x) ^ 2 - (sin x) ^ 3 := by
   The proof uses two lemmas:
     `mul_right_inv a : a * a⁻¹ = 1`
     `one_mul a : 1 * a = a`
-  These are in fact axioms of a group.
+    These are in fact axioms of a group. As usual, take a moment to move your
+    cursor around in the proof below and see what happens.
 -/
-example [Group G] (a b : G) : (a * a⁻¹) * b = b := by
-  rewrite [mul_right_inv]
+example (a b : G) : (a * a⁻¹) * b = b := by
+  rewrite [mul_right_inv a]
   rewrite [one_mul]
   rfl
 
 -- now do this one yourself, *guess* the names of the lemmas that you need.
-example [Group G] (a b : G) : a * (b⁻¹ * b) = a := by
+example (a b : G) : a * (b⁻¹ * b) = a := by
   sorry
 
 /-
@@ -283,10 +286,10 @@ example [Group G] (a b : G) : a * (b⁻¹ * b) = a := by
 -/
 
 
-example [Group G] (a b : G) : a⁻¹ * (a * b) = b := by
+example (a b : G) : a⁻¹ * (a * b) = b := by
   sorry
 
-example [Group G] (a b c d : G) : (a * b) * (c * d) = a * (b * (c * d)) := by
+example (a b c d : G) : (a * b) * (c * d) = a * (b * (c * d)) := by
   sorry
 
 
@@ -294,7 +297,7 @@ example [Group G] (a b c d : G) : (a * b) * (c * d) = a * (b * (c * d)) := by
 /-
   Let's do a longer proof. This is the "socks and shoes" law.
 -/
-example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
+example (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
   -- this will reduce the proof to showing that (b⁻¹ * a⁻¹) * (a * b) = 1
   apply inv_eq_of_mul_eq_one_left
   -- now finish the proof yourself
@@ -304,9 +307,10 @@ example [Group G] (a b : G) : (a * b)⁻¹ = b⁻¹ * a⁻¹ := by
 /-
   If you need a bigger challenge, try the following exercise. Use the lemma
     `sq a : a ^ 2 = a * a`
+  Try to do this as efficiently as possible!
 -/
 
-example [Group G] (a b : G) : a * b ^ 2 * a⁻¹ = (a * b * a⁻¹) ^ 2 := by
+example (a b : G) : a * b ^ 2 * a⁻¹ = (a * b * a⁻¹) ^ 2 := by
   sorry
 
 

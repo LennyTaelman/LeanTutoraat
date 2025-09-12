@@ -134,7 +134,6 @@ example (x : ℝ) (h : x = 1) : 2 * x = 2 := by
 example (n : ℕ) (h : n = 2) : n ^ 4 = 16 := by
   sorry
 
--- Let `a` and `b` be real numbers and assume `a = b`. Then `(a + b) ^ 2 = 4 * a ^ 2`.
 example (a b : ℝ) (h : a = 5 * b) : (a + b) ^ 2 = 36 * b ^ 2 := by
   sorry
 

@@ -223,8 +223,9 @@ lemma cos_two_mul (x : ℝ) : cos (2 * x) = 2 * (cos x) ^ 2 - 1 := by
   One can leave the arguments in lemma implicit, and for example write
     `rewrite [sin_sq_add_cos_sq]`
   Lean will then search for the pattern `(sin x) ^ 2 + (cos x) ^ 2`, guessing the argument `x`.
-
-  Tr to do the following examples as efficiently as possible
+  You can also combine several rewrites as follows:
+    `rewrite [h1, h2, h3]`
+  Try to do the following examples as efficiently as possible
 -/
 
 example (x : ℝ) : sin (x + 2 * π) = sin x := by

@@ -5,78 +5,49 @@ tutoraat_init
 
 /- # Exercise sheet 1: Proving equalities and inequalities -/
 
-/- ## Recap: numerical identities with `numbers`  -/
+/- ## Recap: using `rfl`,`numbers` and `algebra`  -/
 
 /-
+  Last week we've seen three basic tactics to prove `trivial' equalities:
+    `rfl` proves identities of the form `a = a`
+    `numbers` proves identities between numerical expressions without variables
+    `algebra` proves algebraic identities
+   In fact, `rfl` and `numbers` can also prove inequalities, see
+   the examples below.
 
-  The tactic `numbers` proves equalities and inequalities
-  between "numerical" expressions  without variables. We've
-  already seen the "equalities" part in the introductory sheet.
+   Use `\ge` and `\le` to type `≥` and `≤`. (Read: "greater/less than or equal to")
 -/
 
-example : 1 + 1 = 2 := by
-  numbers
+example : 2 ≥ 2 := by
+  rfl
 
-example : 2 > 1 := by
+example : 5 ^ 2 < 2 ^ 7 := by
   numbers
 
 /-
-  The tactic `sorry` is used to skip a proof. ("Sorry, I'll do this later!").
-  In the four examples below, replace `sorry` with `numbers`, and see what happens.
+  Let's practice a bit before moving on with new material. Replace `sorry` with
+  a correct proof in the following examples. Try to use the lightest tactic that
+  does the job (`rfl` being the lightest, and `algebra` the heaviest). hat happens.
 -/
 
-example : 2 ^ 7 ≥ 5 ^ 3 := by
+
+example : 7 * 11 * 13 > 1000 := by
+  sorry
+
+example : 0 ≤ 0 := by
+  sorry
+
+example (a b : ℤ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
   sorry
 
 example : (1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9) ^ 2 = 2025 := by
   sorry
 
-example : 1 + 1 = 3 := by
-  sorry
-
-example (a : ℝ) : a + 1 > a := by
-  sorry
-
-
-/- ## Recap: algebraic identities using `algebra` -/
-
-/-
-  In the following example, the expression `(a : ℝ)` before the `:` means that
-  `a` denotes an (arbitrary) real number. So the example states that for all real
-  numbers `a` the identity `(a + 1) * (a - 1) = a ^ 2 - 1` holds.
--/
-example (a : ℝ) : (a + 1) * (a - 1) = a ^ 2 - 1 := by
-  algebra
-
-example (a b : ℤ) : (a + b) * (a - b) = a ^ 2 - b ^ 2 := by
-  algebra
-
-/-
-  In the four examples below, replace `sorry` with `algebra`, and see what happens.
--/
-
 example (a b c : ℕ) : (a + b) * c = a * c + b * c := by
   sorry
 
-example (a b : ℚ) : (a + b) ^ 2 = a ^ 2 + 2 * a * b + b ^ 2 := by
+example (x y : ℝ) : x + y ≥ x + y := by
   sorry
-
-example (a b : ℤ) : (a + b) ^ 2 = a ^ 2 + b ^ 2 := by
-  sorry
-
-example (a : ℝ) : a ^ 2 ≥ 0 := by
-  sorry
-
-
-/-
-  Now state and prove the theorem that for all real numbers `a`, `b`, `c`
-  the identity `a ^ 2 + b ^ 2 + c ^ 2 = (a + b + c) ^ 2 - 2 * (a * b + b * c + c * a)`
-  holds.
-
-  To type the symbol `ℝ`, use `\R` or `\real`.
--/
-
-
 
 
 
@@ -353,9 +324,9 @@ example (a b : ℝ) (h1 : a * b = c) (h2 : b > 0) (h3 : c > 0) : a > 0 := by
 
 example (a : ℝ) (h : a > 1) : 1 / a < 1 := by
   calc
-    1 / a = 1 * (1 / a) := by ring
+    1 / a = 1 * (1 / a) := by algebra
     _ < a * (1 / a) := by rel [h]
-    _ = 1 := by field_simp
+    _ = 1 := by algebra
 
 example (a b : ℝ) (h1 : a * b = 1) (h2 : a ≥ 1) : b ≤ 1 := by
   -- tricky: we don't have b>0 yet, so cannot say b ≤ a * b

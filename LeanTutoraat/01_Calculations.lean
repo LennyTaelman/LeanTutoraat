@@ -108,7 +108,7 @@ example (a b c d : ℤ) (h1 : a + b = c) (h2 : b - a = d) : c * d = b ^ 2 - a ^ 
 example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
   calc
     (a + b) ^ 2 = (a - b) ^ 2 + 4 * (a * b) := by algebra
-              _ = 4 ^ 2 + 4 * 1             := by rewrite [h1, h2]; numbers
+              _ = 4 ^ 2 + 4 * 1             := by rewrite [h1, h2]; rfl
               _ = 20                        := by numbers
 
 
@@ -121,8 +121,7 @@ example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
     _ = -7                  := by sorry
 
 -- Replace each `sorry` with a valid justification.
-example (x y : ℤ) (h1 : x + y = 2) (h2 : x * y = 1) :
-  x ^ 3 + y ^ 3 = 2 := by
+example (x y : ℤ) (h1 : x + y = 2) (h2 : x * y = 1) : x ^ 3 + y ^ 3 = 2 := by
   calc
     x ^ 3 + y ^ 3 = (x + y) ^ 3 - 3 * (x * y) * (x + y) := by sorry
                 _ = 2 ^ 3 - 3 * 1 * 2                   := by sorry
@@ -135,7 +134,7 @@ example (x y : ℤ) (h1 : x + y = 2) (h2 : x * y = 1) :
   block where each step is justified by a `sorry`. Then fill in the justifications.
 -/
 
--- Replace `sorry` with a correct `calc` proof. Hint:
+-- Replace `sorry` with a correct `calc` proof.
 example (a b : ℝ) (h1 : a + b = s) (h2 : a * b = t) : (b - a) ^ 2 = s ^ 2 - 4 * t := by
   sorry
 

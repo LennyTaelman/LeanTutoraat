@@ -161,8 +161,6 @@ example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
   The tactic `extra` proves inequalities of the form `a + e > a`
   or `a + e ≥ a`. It detects the "extra" term `e` that is added
   and tries to automatically prove that `e > 0` or `e ≥ 0`.
-
-  TODO: consider eliminating `positivity`, as it is subsumed by `extra`.
 -/
 
 example (a : ℝ) (h : a > 1) : a > 0 := by
@@ -177,17 +175,11 @@ example (a : ℝ) : a + 2 > a := by
 example (a b : ℤ) (h : a ≥ 0) : a + b ≥ b := by
   extra
 
--- check that `extra` cannot prove the following (why?)
-example (a b : ℝ) : a + b ≥ b := by
-  sorry
-
--- check that `extra` *can* prove the following (why?)
-example (a b : ℕ) : a + b ≥ b := by
-  sorry
-
 
 /-
   In the following examples, replace `sorry` by either `positivity` or `extra`.
+  Try to use the lighter tactic (being `positivity`) when possible.
+  Exactly one of the statements is *false*. Can you tell which one before trying?
 -/
 
 
@@ -195,6 +187,12 @@ example (a : ℝ) (b : ℝ) : a + b ^ 2 ≥ a := by
   sorry
 
 example (a : ℝ) : a - 1 < a := by
+  sorry
+
+example (a b : ℕ) : a + b ≥ b := by
+  sorry
+
+example (a b : ℝ) : a + b ≥ a := by
   sorry
 
 example (a : ℝ) : a ^ 2 ≥ 0 := by

@@ -169,6 +169,8 @@ example (a : ℝ) (h : a > 1) : a > 0 := by
 example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a * b > 0 := by
   positivity
 
+
+
 example (a : ℝ) : a + 2 > a := by
   extra
 
@@ -179,7 +181,7 @@ example (a b : ℤ) (h : a ≥ 0) : a + b ≥ b := by
 /-
   In the following examples, replace `sorry` by either `positivity` or `extra`.
   Try to use the lighter tactic (being `positivity`) when possible.
-  Exactly one of the statements is *false*. Can you tell which one before trying?
+  Exactly one of these statements is *false*. Can you tell which one before trying?
 -/
 
 
@@ -193,6 +195,9 @@ example (a b : ℕ) : a + b ≥ b := by
   sorry
 
 example (a b : ℝ) : a + b ≥ a := by
+  sorry
+
+example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a / b > 0 := by
   sorry
 
 example (a : ℝ) : a ^ 2 ≥ 0 := by
@@ -288,7 +293,17 @@ example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
 example (n : ℤ) (h : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
   sorry
 
+-- Replace `sorry` with a correct `calc` proof.
+example (a b : ℝ) (h : a ≤ b) : 0 ≤ b - a := by
+  sorry
 
+-- Replace `sorry` with a correct `calc` proof. This one is tricky...
+example (a : ℝ) (h : a > 1) : 1 / a < 1 := by
+  sorry
+
+-- Replace `sorry` with a correct `calc` proof.
+example (a b c : ℝ) (h1 : a * b = c) (h2 : b > 0) (h3 : c > 0) : a > 0 := by
+  sorry
 
 
 /-
@@ -301,79 +316,3 @@ example (n : ℤ) (h : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
   - `extra` and `positivity` for automatically proving simple inequalities
   - `rel` for substituting inequalities
 -/
-
-
-
-/- ## THINGS TO INTEGRATE SOMEWHERE -/
-
-
-
--- various things related to division/multiplication and inequalities
-
-example (a b : ℝ) (h1 : a > 0) (h2 : b > 0) : a / b > 0 := by positivity
-
--- hint: use that a = c / b
-example (a b : ℝ) (h1 : a * b = c) (h2 : b > 0) (h3 : c > 0) : a > 0 := by
-  calc
-    a = (a * b) / b := by algebra
-    _ = c / b := by rw [h1]
-    _ > 0 := by positivity
-
-example (a : ℝ) (h : a > 1) : 1 / a < 1 := by
-  calc
-    1 / a = 1 * (1 / a) := by algebra
-    _ < a * (1 / a) := by rel [h]
-    _ = 1 := by algebra
-
-example (a b : ℝ) (h1 : a * b = 1) (h2 : a ≥ 1) : b ≤ 1 := by
-  -- tricky: we don't have b>0 yet, so cannot say b ≤ a * b
-  have h : a * b ≤ a * 1 := by
-    calc
-      a * b = 1  := by rw [h1]
-      _ ≤ a := by rel [h2]
-      _ = a * 1 := by ring
-  cancel a at h
-
-
--- things with division
-
--- this is horrible now; what is the proper idomatic way to do this?
-example (a b : ℝ) (h1 : a > 0) (h2 : b > 1) : a / b < a := by
-  have h : a / b > 0 := by positivity
-  calc
-    a / b = (a / b) * 1 := by ring
-    _ < (a / b) * b := by rel [h2]
-    _ = a := by field_simp
-
-example (a b : ℝ) (h2 : b ≠ 0) : b * a / b = a := by field_simp; ring
-
-
--- first attempts at  using simp/field_simp
-
-example (a : ℝ) (b : ℝ) (h : a = 1) : a - 1 = 0  * b := by
-  -- simp
-  rw [h]
-  simp
-
-example (a b c : ℝ) (h : c ≠ 0) : a / (1 / c) + b = a * c + b := by
-  field_simp
-
-
--- more division "identities"
-
--- note that field_simp does not work if you comment out the h1 or h2
--- since cannot cancel a or b unless we know they are nonzero
-lemma test (a b : ℝ) (h : a * b = 1) : 1 / a + 1 / b = a + b := by
-  have h1 : a ≠ 0 := by exact left_ne_zero_of_mul_eq_one h
-  have h2 : b ≠ 0 := by exact right_ne_zero_of_mul_eq_one h
-  calc
-    1 / a + 1 / b = (a * b) / a + (a * b) / b := by rw [h]
-    _ = a + b := by field_simp; ring
-
-
--- a simple but surprisingly tricky inequality
-
-example (a b : ℝ) (h : a ≤ b) : 0 ≤ b - a := by
-  calc
-    0 ≤ a - a := by algebra
-    _ ≤ b - a := by rel [h]

@@ -214,19 +214,19 @@ example (a b : ℝ) (h1 : a > 0) (h2 : b ≥ 0) : a * b ≥ 0 := by
 /-
   Inequalities and equalities can be chained together using `calc` again. Fill
   in the justifications for both steps in the proof below.
+
+  Note: we prove `≥` by chaining a `=` and a `≥` in this proof.
 -/
 
 
 example (a b : ℝ) : a ^ 2 + b ^ 2 - 2 * a * b ≥ 0 := by
   calc
     a ^ 2 + b ^ 2 - 2 * a * b = (a - b) ^ 2 := by sorry
-    _ ≥ 0 := by sorry
+                            _ ≥ 0           := by sorry
 
--- Note: in the above proof, the result of chaining a `=` and a `≥` is a `≥`
 
 /-
   Now write your own `calc` proof for the following inequality.
-  Hint: type `≤` using `\le` (less than or equal) and `≥` using `\ge` (greater than or equal).
 -/
 example (a : ℝ) : a + 2 ≥ a + 1 := by
   sorry
@@ -241,7 +241,7 @@ example (a b c : ℝ) : (c + a ^ 2) + 1 > c := by
 /- ## Substituting inequalities with `rel` -/
 
 /-
-  The tactic `rel` is somewhat similar to `rw`, but is used to prove
+  The tactic `rel` is somewhat similar to `rewrite`, but is used to prove
   inequalities.
 -/
 
@@ -275,9 +275,9 @@ example (a b c : ℝ) (h1 : a > b) :  a * c > b * c := by
 example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
   calc
     (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by sorry
-    _ = 2 * (x ^ 2 + y ^ 2) := by sorry
-    _ ≤ 2 * 1 := by sorry
-    _ = 2 := by sorry
+              _ = 2 * (x ^ 2 + y ^ 2)       := by sorry
+              _ ≤ 2 * 1                     := by sorry
+              _ = 2                         := by sorry
 
 
 /-
@@ -295,8 +295,8 @@ example (n : ℤ) (h : n ≥ 5) : n ^ 2 > 2 * n + 11 := by
   Congratulations! You have completeed the first worksheet. You
   have learned to write proofs using the following tactics:
 
-  - `numbers` and `algebra` for automatically proving simple identities
-  - `rw` for substituting equalities
+  - `rfl`, `numbers` and `algebra` for automatically proving simple identities
+  - `rewrite` for substituting equalities
   - `calc` for chaining together equalities and/or inequalities
   - `extra` and `positivity` for automatically proving simple inequalities
   - `rel` for substituting inequalities

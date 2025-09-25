@@ -264,8 +264,8 @@ example (a b : ℝ) (h : a ≥ b) : 3 * a ≥ 3 * b := by
   rel [h]
 
 /-
-  Warning: in the example below, the tactic `rel [h1]` *sees* the hypothesis h : a > 0, which is
-  *needed* to deduce that a * b > a * c.
+  Warning: in the example below, the tactic `rel [h1]` *sees* the hypothesis `h2 : c > 0`, which
+  is *needed* to deduce that a * b > a * c.
 -/
 example (a b c : ℝ) (h1 : a > b) (h2 : c > 0) : a * c > b * c := by
   rel [h1]

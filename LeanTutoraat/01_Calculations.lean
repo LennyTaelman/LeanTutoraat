@@ -27,7 +27,7 @@ example : 5 ^ 2 < 2 ^ 7 := by
 /-
   Let's practice a bit before moving on with new material. Replace `sorry` with
   a correct proof in the following examples. Try to use the lightest tactic that
-  does the job (`rfl` being the lightest, and `algebra` the heaviest). hat happens.
+  does the job (`rfl` being the lightest, and `algebra` the heaviest).
 -/
 
 

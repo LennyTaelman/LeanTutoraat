@@ -79,7 +79,7 @@ example (x : ℚ) (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
 -/
 
 
-
+/-! ## Invoking lemmas with `apply` -/
 
 /-! ## Outsourcing intermediate results to lemmas -/
 
@@ -154,15 +154,16 @@ example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
         _ = b ^ 2                        := by sorry
 
 
--- hint: "complete the square"
-example (a b : ℝ) : a ^ 2 + a * b + b ^ 2 ≥ 0 := by
-  sorry
 
 /-
-  Now turn the example above into a lemma, and use it to prove the statement
-  below. (A more natural proof would be to distinguish cases depending on the
-  sign of `a` and `b`. We will see how to do that later.)
+  Now let's do a more involved example.
+  1) first prove the first inequality (hint: "complete the square")
+  2) then turn it into a lemma (and in particular give it a name)
+  3) finally use the lemma to prove the second inequality
 -/
+
+example (a b : ℝ) : a ^ 2 + a * b + b ^ 2 ≥ 0 := by
+  sorry
 
 example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
   sorry
@@ -170,11 +171,50 @@ example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
 
 
 
-/-! ## Proving ∀-statements with `intro` -/
+/-! ## Proving ∀-statements with `intro` and ∃-statements with `use` -/
+
+/-
+  To prove a statement of the form "∀ `x` in `ℝ`, it holds that....", one typicall starts with
+  "Let `x` be a real number" and then reasons that the things holds for this
+  (arbitrarily chosen) `x`.
+
+  In Lean, this is achieved with the `intro` tactic. Examine the proof below by
+  moving the cursor around.
+-/
+
+example : ∀ x : ℝ, x ^ 2 ≥ 0 := by
+  intro x
+  positivity
 
 
-/-! ## Proving ∃-statements with `use` -/
+/-
+  To prove a statement of the form "∃ `n` in `ℝ` such that ...", one typically
+  starts with "Take `n` to be such and such. We now show that it satisfies the
+  desired property."
+
+  In Lean, this is achieved with the `use` tactic. Examine the proof below by
+  moving the cursor around.
+-/
+
+example : ∃ n : ℤ, 81 * n = 2025 := by
+  use 25
+  numbers
 
 
+/-
+  Now do the following exercises.
+-/
+
+example : ∀ x : ℕ, ∃ y : ℕ, x < y := by
+  sorry
+
+example : ∃ n : ℕ, ∀ m : ℕ, n ≤ m := by
+  sorry
+
+example (a : ℤ) : ∃ m n : ℤ, m ^ 2 - n ^ 2 = 2 * a + 1 := by
+  sorry
+
+example (x : ℝ) : ∃ y : ℝ, x ≤ y ^ 2 := by
+  sorry
 
 /-! # Extra challenges -/

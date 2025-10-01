@@ -118,7 +118,7 @@ example (x y a b : ℝ) (h1 : x ≤ y) (h2 : a ≤ b) : a * y + b * x ≤ a * x 
   repeated part into a lemma. Replace the `sorry` below with a correct proof.
 -/
 
-lemma sub_nonneg_of_ge (x y : ℝ) (h : y ≥ x) : 0 ≤ y - x := by
+lemma sub_nonneg_of_ge (x y : ℝ) (h : x ≤ y) : 0 ≤ y - x := by
   sorry
 
 example (x y a b : ℝ) (h1 : x ≤ y) (h2 : a ≤ b) : a * y + b * x ≤ a * x + b * y := by

@@ -48,7 +48,8 @@ example (r s : ℚ) (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 := by
   in the proof of `h3`.
 -/
 example (a b : ℝ) (h1 : a * b = 0) (h2 : a - 1 > 0) : b = 0 := by
-  have h3 : a > 0 := by sorry
+  have h3 : a > 0 := by
+    sorry
   calc
     b = a * b / a := by algebra
     _ = 0 / a := by rewrite [h1]; rfl

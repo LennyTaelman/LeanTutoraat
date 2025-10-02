@@ -289,18 +289,22 @@ example (a b : ℝ) (h : a ≥ b) : 3 * a ≥ 3 * b := by
 
 
 /-
-  Even in things that are not entirely linear, there are often many linear
-  intermediate steps that can be discharged using `linarith`.
+  Even in things that are not entirely linear, `linarith` can be very useful.
+  Here is an example:
 -/
 
 example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
-  calc
-    (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by extra
-              _ = 2 * (x ^ 2 + y ^ 2)       := by algebra
-              _ ≤ 2                         := by linarith
+  have h1 : (x - y) ^ 2 ≥ 0 := by positivity
+  have h2 : (x + y) ^ 2 + (x - y) ^ 2 = 2 * (x ^ 2 + y ^ 2) := by algebra
+  -- now our goal is a linear combination of `h`, `h1` and `h2` so `linarith` can handle it.
+  linarith
+
+
+
 
 /-
-  Finally, a more challenging example combining what we have seen so far.
-
-  Try to do this on paper first!
+  Finally, a more challenging example! Hint: work out the argument on paper first!
 -/
+
+example (x y z c : ℝ) (h : x + y + z = c) : ∃ d : ℝ, x * y + y * z + z * x ≤ d := by
+  sorry

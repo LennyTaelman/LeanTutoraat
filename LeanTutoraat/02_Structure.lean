@@ -299,8 +299,16 @@ example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
   -- now our goal is a linear combination of `h`, `h1` and `h2` so `linarith` can handle it.
   linarith
 
+/-
+  This one we did above before knowing `linarith`. Now do it again, using
+  `linarith` generously!
+-/
 
-
+example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
+  have h1' : 0 ≤ b + a := by sorry
+  have h2' : 0 ≤ b - a := by sorry
+  have h3 : b ^ 2 - a ^ 2 ≥ 0 := by sorry
+  sorry
 
 /-
   Finally, a more challenging example! Hint: work out the argument on paper first!

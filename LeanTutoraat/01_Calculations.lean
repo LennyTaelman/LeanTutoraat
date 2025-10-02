@@ -113,7 +113,7 @@ example (a b : ℚ) (h1 : a - b = 4) (h2 : a * b = 1) : (a + b) ^ 2 = 20 :=
 
 
 -- Replace each `sorry` with a valid justification.
-example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 :=
+example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s = -1) : r = -7 := by
   calc
     r = (r + 2 * s) - 2 * s := by sorry
     _ = -1 - 2 * s          := by sorry

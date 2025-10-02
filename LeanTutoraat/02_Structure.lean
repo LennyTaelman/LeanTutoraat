@@ -1,6 +1,5 @@
 /- Copyright (c) Lenny Taelman, 2025.  All rights reserved. -/
 import Library.Basic
-tutoraat_init
 
 
 /-! # Proofs with structure -/
@@ -217,4 +216,91 @@ example (a : ℤ) : ∃ m n : ℤ, m ^ 2 - n ^ 2 = 2 * a + 1 := by
 example (x : ℝ) : ∃ y : ℝ, x ≤ y ^ 2 := by
   sorry
 
-/-! # Extra challenges -/
+example : ∃ b : ℝ, ∀ x : ℝ, b ≤ x ^ 2 - 2 * x := by
+  sorry
+
+
+
+/-! # `linarith` to automate systems of linear equalities and inequalities -/
+
+/-
+  Many of the proofs we have seen so far can be automated. The tactic
+  `linarith` automatically proves linear inequalities of equalities
+  from hypotheses which are linear equalities or inequalities.
+-/
+
+example (x y : ℝ) (h1 : x + 1 = 0) (h2 : x + y = 1): y = 2 := by
+  linarith
+
+example (a b : ℝ) (h1 : a > 2) (h2 : a + b < 3) : b < 1 := by
+  linarith
+
+example (n : ℕ) : n + 1 ≥ 1 := by
+  linarith
+
+/-
+  Below are many examples that we have seen earlier, and can now be
+  solved much more easily. Some of these involved rather long `calc` proofs.
+
+  This is a general principle in Lean: tasks for which there is an obvious
+  procedure (e.g. Gauss elimination for solving linear systems) should be
+  automated.
+
+  Prove the following 10 examples. Try to do them in *one attempt*: Convince
+  yourself of the correct Lean proof before trying...
+
+  Hint: all of them can be proven using just one line. For most of them
+  `linarith` will work, but not for all...
+-/
+
+example (x y : ℝ) (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 := by
+  sorry
+
+example (r s : ℝ) (h1 : s = 3) (h2 : r + 2 * s > -1) : r > -7 := by
+  sorry
+
+example (a b : ℤ) (h : a - b = 0) : a = b := by
+  sorry
+
+example (n m : ℕ) : n + m ≥ m := by
+  sorry
+
+example (p q : ℚ) (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 := by
+  sorry
+
+example (a b c : ℝ) (h1 : a > b) (h2 : c > 0) : a * c > b * c := by
+  sorry
+
+example (a b : ℤ) (h : a ≥ 0) : a + b ≥ b := by
+  sorry
+
+example (a b c : ℝ) : a - c ^ 2 ≤ a := by
+  sorry
+
+example (a b c : ℝ) (h : a > b) : c - a < c - b := by
+  sorry
+
+example (a b : ℝ) (h : a ≥ b) : 3 * a ≥ 3 * b := by
+  sorry
+
+/-
+  How many did you manage to do at the first attempt?
+-/
+
+
+/-
+  Even in things that are not entirely linear, there are often many linear
+  intermediate steps that can be discharged using `linarith`.
+-/
+
+example (x y : ℝ) (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 ≤ 2 := by
+  calc
+    (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by extra
+              _ = 2 * (x ^ 2 + y ^ 2)       := by algebra
+              _ ≤ 2                         := by linarith
+
+/-
+  Finally, a more challenging example combining what we have seen so far.
+
+  Try to do this on paper first!
+-/

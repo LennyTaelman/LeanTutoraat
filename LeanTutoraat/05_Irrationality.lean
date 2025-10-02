@@ -160,7 +160,7 @@ lemma nat_inv_le_one (n : ℕ) (hn : n > 0) : nat_inv n ≤ 1 := by
 
 
 /-
-  Now define `b n := nat_inf fac n`, so `b n = 1 / n !`
+  Now define `b n := nat_inf fac n`, so `b n = 1 / n!`
 -/
 
 def b (n : ℕ) : ℝ := nat_inv (fac n)

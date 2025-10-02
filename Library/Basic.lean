@@ -20,7 +20,7 @@ import Library.Tactic.TruthTable
 
 notation3 (prettyPrint := false) "forall_sufficiently_large "(...)", "r:(scoped P => ∃ C, ∀ x ≥ C, P x) => r
 
-macro "linarith" linarithArgsRest : tactic => `(tactic | fail "linarith tactic disabled")
+
 macro "nlinarith" linarithArgsRest : tactic => `(tactic | fail "nlinarith tactic disabled")
 macro "linarith!" linarithArgsRest : tactic => `(tactic | fail "linarith! tactic disabled")
 macro "nlinarith!" linarithArgsRest : tactic => `(tactic | fail "nlinarith! tactic disabled")
@@ -62,7 +62,7 @@ elab "tutoraat_init" : command => do
     ⟨`instance, #[`Int.instDivInt_1,`Int.instDivInt, `Nat.instDivNat]⟩,
     ⟨`norm_num, #[`Mathlib.Meta.NormNum.evalNatDvd, `Mathlib.Meta.NormNum.evalIntDvd]⟩
   ]
-
+  -- macro "linarith" linarithArgsRest : tactic => `(tactic | fail "linarith tactic disabled")
 
 /-
   Trigonometry

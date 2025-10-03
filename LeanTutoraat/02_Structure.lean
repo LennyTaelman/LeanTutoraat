@@ -74,8 +74,15 @@ example (x : ℚ) (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
   sorry
 
 /-
-  TODO: example where student needs to formulate the `have` statement.
+  A more challenging example, where you need to write your own `have` statements.
+
+  Hint: first establish that `y > 0` and `x > 0` so you can more easily reason about
+  inequalities involving multiplication and division.
 -/
+
+example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
+  sorry
+
 
 
 /-! ## Invoking lemmas with `apply` -/

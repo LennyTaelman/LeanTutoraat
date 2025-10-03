@@ -37,6 +37,11 @@ macro "simp" : tactic => `(tactic|
       sub_lt_self_iff])
 
 
+-- macro "linarith" : tactic => `(tactic|
+--     linarith (config := { splitHypotheses := true, discharger :=  simp }))
+
+
+
 /--
 This if from *The Mechanics of Proof*. Might not need this...
 

@@ -156,11 +156,12 @@ example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
 
 /-
   Now let's do a more involved example.
-  1) first prove the first inequality (hint: "complete the square")
+  1) first prove the first inequality
   2) then turn it into a lemma (and in particular give it a name)
   3) finally use the lemma to prove the second inequality
 -/
 
+-- hint: `(a + b / 2) ^ 2 = a ^ 2 + a * b + b ^ 2 / 4`
 example (a b : ℝ) : a ^ 2 + a * b + b ^ 2 ≥ 0 := by
   sorry
 

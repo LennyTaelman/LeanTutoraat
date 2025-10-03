@@ -85,8 +85,6 @@ example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
 
 
 
-/-! ## Invoking lemmas with `apply` -/
-
 /-! ## Outsourcing intermediate results to lemmas -/
 
 /-

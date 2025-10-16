@@ -1,4 +1,3 @@
-/- Copyright (c) Lenny Taelman, 2025.  All rights reserved. -/
 import Library.Basic
 
 

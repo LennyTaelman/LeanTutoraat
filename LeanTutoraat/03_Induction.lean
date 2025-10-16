@@ -1,4 +1,3 @@
-/- Copyright (c) Heather Macbeth, 2023.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
 import Library.Basic
 
@@ -23,29 +22,28 @@ namespace Nat
 
 example (n : ℕ) : 2 ^ n ≥ n + 1 := by
   simple_induction n with k IH
-  · -- base case: ⊢ 2 ^ 0 ≥ 0 + 1
+  · -- base case: goal is 2 ^ 0 ≥ 0 + 1
     sorry
-  · -- inductive step: ⊢ 2 ^ (k + 1) ≥ (k + 1) + 1
-    -- note the new hypothesis `IH`
+  · -- inductive step: goal is 2 ^ (k + 1) ≥ (k + 1) + 1
+    -- note the new hypothesis `IH`!
     calc
-      2 ^ (k + 1) = 2 * 2 ^ k := by sorry
-      _ ≥ 2 * (k + 1) := by sorry
-      _ = (k + 1 + 1) + k := by sorry
-      _ ≥ k + 1 + 1 := by sorry
+      2 ^ (k + 1) = 2 * 2 ^ k           := by sorry
+                _ ≥ 2 * (k + 1)         := by sorry
+                _ = ((k + 1) + 1) + k   := by sorry
+                _ ≥ (k + 1) + 1         := by sorry
 
 
 -- Now prove Bernoulli's inequality:
 
 example (x : ℝ) (n : ℕ) (h : x ≥ 0) : (1 + x) ^ n ≥ 1 + n * x := by
   simple_induction n with k IH
-  · -- base case: ⊢ (1 + x) ^ 0 ≥ 1 + 0 * x
-    -- hint: use the tactic `simp` to do some trivial simplifications first
+  · -- base case: goal is `(1 + x) ^ 0 ≥ 1 + 0 * x`
     sorry
-  · -- inductive step: ⊢ (1 + x) ^ (k + 1) ≥ 1 + (k + 1) * x
+  · -- inductive step: goal is `(1 + x) ^ (k + 1) ≥ 1 + (k + 1) * x`
     calc (1 + x) ^ (k + 1) = (1 + x) * (1 + x) ^ k := by algebra
       _ ≥ (1 + x) * (1 + k * x) := by rel [IH]
       _ = 1 + (k + 1) * x +  k * x ^ 2 := by algebra
-      _ ≥ 1 + (k + 1)  * x := by extra
+      _ ≥ 1 + (k + 1) * x := by extra
 
 
 -- Note: in the right window pane you may have seen expressions like `↑k`. These
@@ -92,16 +90,14 @@ example (n : ℕ) (hn : n ≥ 2) : 2 ^ n ≥ n ^ 2 := by
     sorry
 
 
-
--- TODO: add examples with ∑ over {0..n}
-
 /- # Exercises -/
 
 
 example (n : ℕ) : 3 ^ n ≥ n ^ 2 + n + 1 := by
   sorry
 
-example {a : ℝ} (ha : -1 ≤ a) (n : ℕ) : (1 + a) ^ n ≥ 1 + n * a := by
+-- this is a stronger form of the Bernoulli inequality from above.
+example (x : ℝ) (h : -1 ≤ x) (n : ℕ) : (1 + x) ^ n ≥ 1 + n * x := by
   sorry
 
 example : ∃ C : ℕ, ∀ n : ℕ, n ≥ C → 3 ^ n ≥ 2 ^ n + 100 := by
@@ -124,8 +120,10 @@ def c (n : ℕ) : ℝ :=
   | n + 1 => c n + 2 ^ n
 
 /-
-  You can ignore the precise form of the definition. All you need to know is
-  that `c n` is a real number, and that it satisfies the following two lemmas:
+  You can ignore the precise form of the definition. All you need to know is that `c n` is a real
+  number, and that it satisfies the lemmas `c_zero` and `c_succ` below.
+
+  The only thing you should every use about `c` in your proofs are those two lemmas.
 -/
 
 lemma c_zero : c 0 = 0 := by rfl
@@ -161,7 +159,8 @@ def s1 (n : ℕ) : ℕ :=
 
 
 /-
-  Again you can ignore the definition above, you'll only use the following lemmas:
+  Again you can ignore the definition above, you'll only use the following lemmas, which
+  completely determine `s1 n` for all `n : ℕ`.
 -/
 
 lemma s1_zero : s1 0 = 0 := by rfl

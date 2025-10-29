@@ -230,6 +230,10 @@ example (n : ℕ) : 3 * s2 n ≥ n ^ 3 := by
   sorry
 
 
+-- EVERYTHING ABOVE THIS LINE HAS BEEN VERIFIED
+-- TODO: add some challenges, and maybe some casting?
+
+
 /-
   Challenge: prove the beautiful formula s3 n  = (s1 n) ^ 2.
   E.g. 2025 = 1^3 + 2^3 + ... + 9^3 = (1 + 2 + ... + 9)^2
@@ -255,6 +259,44 @@ example (x : ℝ) (n : ℕ) (h : x ≥ 0) : (1 + x) ^ n ≥ 1 + n * x := by
 
 -- Note: in the right window pane you may have seen expressions like `↑k`. These
 -- indicate that the natural number `k` is being considered as a real number.
+
+
+
+
+/-
+  ## Why did we avoid subtraction and division in the proofs above?
+-/
+
+-- Verify that `algebra` cannot prove the statement below. Why would that be?
+example (n : ℕ) : (n - 1) + 1 = n := by
+  sorry
+
+/-
+  In fact, in Lean the subtraction of two natural numbers is again a natural
+  number. If the result would be negative, it is defined to be `0`.
+
+  So the above statement is *false* for `n = 0`, since the left hand side is `1`.
+
+  However, for integers (or rationals, or reals, ...) subtraction is defined as
+  usual. Indeed, verify that `algebra` *can* prove the statement below.
+-/
+
+example (n : ℤ) : (n - 1) + 1 = n := by
+  sorry
+
+
+/-
+  Exercise:
+-/
+
+
+example (n : ℕ) (h : n ≥ 1) : (n - 1) + 1 = n := by
+  induction_from_starting_point n, h with k hk IH
+  · rfl
+  · algebra
+
+
+
 
 
 /- # For later use! -/

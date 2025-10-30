@@ -31,6 +31,7 @@ example (n : ℕ) : 2 ^ n ≥ n + 1 := by
   · sorry
   · calc
       2 ^ (k + 1) = 2 * 2 ^ k           := by sorry
+                _ ≥ 2 * (k + 1)         := by sorry -- use the induction hypothesis `IH`
                 _ ≥ (k + 1) + 1         := by sorry
 
 
@@ -48,10 +49,13 @@ example (n : ℕ) : n ^ 2 ≥ n := by
 
   To typeset the dots for base and inductive case, use `\.` Note that the proofs
   for base and inductive step are indented.
+
+  Tip: first write a skeleton induction proof, with `sorry` for the base and inductive steps.
 -/
 
 example (n : ℕ) : 3 ^ n ≥ n ^ 2 + n + 1 := by
   sorry
+
 
 
 /- ## Prove something holds for all `n ≥ C` with `induction_from_starting_point` -/

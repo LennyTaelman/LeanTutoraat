@@ -1,10 +1,9 @@
 import Library.Basic
 
-/-! # Induction -/
 
+/- # Induction -/
 
-/-! ## Proving something holds for all natural numbres with `simple_induction` -/
-
+/- ## Proving something holds for all natural numbres with `simple_induction` -/
 
 /-
   Say we want to prove something for all `n : ℕ` by induction.
@@ -15,7 +14,6 @@ import Library.Basic
     where the induction hypothesis `IH` is that the statement holds for `n = k`
   We then need to provide proofs for the base case and the inductive step.
 -/
-
 
 /-
   Below is a simple example. Note the two dots `·` after `simple_induction`.
@@ -56,8 +54,7 @@ example (n : ℕ) : 3 ^ n ≥ n ^ 2 + n + 1 := by
   sorry
 
 
-/-! ## Prove something holds for all `n ≥ C` with `induction_from_starting_point` -/
-
+/- ## Prove something holds for all `n ≥ C` with `induction_from_starting_point` -/
 
 /-
   Sometimes we want to prove something for all n ≥ C,
@@ -113,7 +110,6 @@ example (n : ℕ) : ∃ C : ℕ, n ≥ C → n ^ 2 ≥ n + 100 := by
 
 
 /- # Finite sums -/
-
 
 /-
   Induction is a powerful tool for proving statements about finite sums of the

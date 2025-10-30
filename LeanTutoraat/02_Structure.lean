@@ -1,11 +1,9 @@
 import Library.Basic
 
 
-/-! # Proofs with structure -/
+/- # Proofs with structure -/
 
-
-/-! ## Establishing intermediate results with `have` -/
-
+/- ## Establishing intermediate results with `have` -/
 
 /-
   If `b ≥ a` and `c ≥ 0`, then `(b - a) * c ≥ 0`. This looks like something that
@@ -84,7 +82,7 @@ example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
 
 
 
-/-! ## Outsourcing intermediate results to lemmas -/
+/- ## Outsourcing intermediate results to lemmas -/
 
 /-
   The inequality below is called the "rearrangement inequality". It abstracts
@@ -145,8 +143,6 @@ example (x y a b : ℝ) (h1 : x ≤ y) (h2 : a ≤ b) : a * y + b * x ≤ a * x 
   We can now re-use the lemma in other proofs:
 -/
 
-
-
 example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
   have h1' : 0 ≤ a - (-b) := by
     sorry
@@ -175,9 +171,7 @@ example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
   sorry
 
 
-
-
-/-! ## Proving ∀-statements with `intro` and ∃-statements with `use` -/
+/- ## Proving ∀-statements with `intro` and ∃-statements with `use` -/
 
 /-
   To prove a statement of the form "∀ `x` in `ℝ`, it holds that....", one typicall starts with
@@ -228,7 +222,7 @@ example : ∃ b : ℝ, ∀ x : ℝ, b ≤ x ^ 2 - 2 * x := by
 
 
 
-/-! # `linarith` to automate systems of linear equalities and inequalities -/
+/- # `linarith` to automate systems of linear equalities and inequalities -/
 
 /-
   Many of the proofs we have seen so far can be automated. The tactic

@@ -64,8 +64,8 @@ example (n : ℕ) : 3 ^ n ≥ n ^ 2 + n + 1 := by
   Sometimes we want to prove something for all n ≥ C,
   and hence want to start induction at n = C.
 
-  If `n` is a natural number and `h` the hypothesis that `C ≤ n`,
-  then the tactic `induction_from_starting_point n, h with k hk IH`
+  If `n` is a natural number and `hn` the hypothesis that `C ≤ n`,
+  then the tactic `induction_from_starting_point n, hn with k hk IH`
   creates two goals:
   - a base case: prove the statement for `n = C`
   - an inductive step: prove the statement for `n = k + 1`, where
@@ -80,8 +80,9 @@ example (n : ℕ) (hn : n ≥ 2) : n ^ 2 ≥ n + 2 := by
   induction_from_starting_point n, hn with k hk IH
   · sorry
   · calc
-      (k + 1) ^ 2  = k ^ 2 + 2 * k + 1 := by sorry
-                 _ ≥ (k + 1) + 2       := by sorry
+      (k + 1) ^ 2  = k ^ 2 + 2 * k + 1   := by sorry
+                 _ ≥ (k + 2) + 2 * k + 1 := by sorry
+                 _ ≥ (k + 1) + 2         := by sorry
 
 /-
   Now do the following one yourself
@@ -90,9 +91,7 @@ example (n : ℕ) (hn : n ≥ 2) : n ^ 2 ≥ n + 2 := by
 example (n : ℕ) (hn : n ≥ 3) : n ^ 2 ≥ 3 * n := by
   induction_from_starting_point n, hn with k hk IH
   · sorry
-  · calc
-      (k + 1) ^ 2 = k ^ 2 + 2 * k + 1 := by algebra
-                 _ ≥  3 * (k + 1) := by linarith
+  · sorry
 
 
 /-
@@ -101,9 +100,11 @@ example (n : ℕ) (hn : n ≥ 3) : n ^ 2 ≥ 3 * n := by
   where the arrow `→` should be read as an implication.
 
   Prove this in lean, by following these steps:
-  1. Figure out what value of `C` you will use. (Say `C = 5` -- which won't work!)
+  1. Figure out what value of `C` you will use. (For the sake of argument, let's
+     say you want to use `C = 5`)
   2. Start the proof with `use 5`. The goal is now `n ≥ 5 → n ^ 2 ≥ n + 100`
-  3. Use the tactic `intro h` to introduce the hypothesis `n ≥ 5`.
+  3. Use the tactic `intro h` to introduce the hypothesis `n ≥ 5`. The goal will
+     now be `n ^ 2 ≥ n + 100`.
   4. Finish the proof using induction.
 -/
 
@@ -132,40 +133,48 @@ def s (n : ℕ) : ℕ :=
   | n + 1 => s n + 2 ^ n
 
 /-
-  The above defines `s 0` to be `0` (the empty sum) and `s (n + 1)` to be `s n +
-  2 ^ n`. Verify for yourself (on paper if necessary) that this indeed forces
-    `s n = 1 + 2 + 4 + ... + 2 ^ (n - 1)`.
+  The above defines `s 0` to be `0` (the empty sum) and `s (n + 1)` to be
+  `s n + 2 ^ n`. So for small values of `n` we find:
+  - `s 0 = 0`
+  - `s 1 = s 0 + 2 ^ 0 = 0 + 1`
+  - `s 2 = s 1 + 2 ^ 1 = 0 + 1 + 2`
+  - `s 3 = s 2 + 2 ^ 2 = 0 + 1 + 2 + 4`
+  as expected.
 
-  You can ignore the precise form of the definition. All you need to know about
-  `s` is
-  1. `s n` is a natural number
-  2. `s 0 = 0`, which is proven in the lemma `s_zero` below.
-  3. `s (n + 1) = s n + 2 ^ n`, which is proven in the lemma `s_succ` below.
-
-  In your proofs, you can *use*`rewrite [s_zero]` or `rewrite [s_succ]` to
-  transform `s 0` into `0` or `s (n + 1)` into `s n + 2 ^ n`.
+  In proving things about `s` you will need to *use* the lemmas `s_zero` and
+  `s_succ` below. For example, you can use `rewrite [s_zero]` to transform `s 0` into `0`.
 -/
 
 lemma s_zero : s 0 = 0 := by rfl
 
 lemma s_succ (n : ℕ) : s (n + 1) = s n + 2 ^ n := by rfl
 
-
 /-
-  We can now prove that `s n = 2 ^ n - 1` for all `n : ℕ`. We state it slightly
-  differently, as `1 + s n = 2 ^ n`, to avoid having to deal with subtraction in `ℕ`.
+  As a warming-up, and sanity check, let's verify that `s 1 = 1` and `s 2 = 3`.
 -/
 
+example : s 1 = 1 := by
+  rewrite [s_succ]
+  rewrite [s_zero]
+  numbers
+
+-- do this one yourself
+example : s 2 = 3 := by
+  sorry
+
+
+/-
+  You can now prove that `s n = 2 ^ n - 1` for all `n : ℕ`. We state it slightly
+  differently, as `1 + s n = 2 ^ n`, to avoid having to deal with subtraction in
+  `ℕ`.
+
+  Replace both `sorry`s with proofs.
+-/
 
 example (n : ℕ) : 1 + s n = 2 ^ n := by
   simple_induction n with k IH
   · sorry
-  · calc
-      1 + s (k + 1) = 1 + (s k + 2 ^ k)  := by sorry
-                  _ = (1 + s k) + 2 ^ k  := by sorry
-                  _ = 2 ^ k + 2 ^ k      := by sorry
-                  _ = 2 ^ (k + 1)        := by sorry
-
+  · sorry
 
 
 /-
@@ -178,7 +187,6 @@ def s1 (n : ℕ) : ℕ :=
   | 0 => 0
   | n + 1 => (s1 n) + (n + 1)
 
-
 /-
   Again you can ignore the definition above, you'll only use the following lemmas, which
   completely determine `s1 n` for all `n : ℕ`.
@@ -189,8 +197,18 @@ lemma s1_zero : s1 0 = 0 := by rfl
 lemma s1_succ (n : ℕ) : s1 (n + 1) = s1 n + (n + 1) := by rfl
 
 /-
+  Sanity check: should have s1 3 = 0 + 1 + 2 + 3 = 6. Prove this.
+-/
+
+example : s1 3 = 6 := by
+  sorry
+
+
+/-
   We now prove that `s1 n = n * (n + 1) / 2`. We state it as
-  `2 * s1 n = n * (n + 1)` to avoid having to deal with division in `ℕ`.
+  `2 * s1 n = n * (n + 1)` to avoid having to deal with division in `ℕ`
+  (in particular, it is not a priori clear that the right hand side is a natural
+  number!).
 -/
 
 
@@ -212,53 +230,51 @@ lemma s2_zero : s2 0 = 0 := by rfl
 
 lemma s2_succ (n : ℕ) : s2 (n + 1) = s2 n + (n + 1) ^ 2 := by rfl
 
+/-
+  Sanity checks are good!
+-/
+
+example : s2 2 = 5 := by
+  sorry
+
 
 /-
   Write a proof that `6 * s2 n = n * (n + 1) * (2 * n + 1)`.
 -/
+
 example (n : ℕ) : 6 * s2 n = n * (n + 1) * (2 * n + 1) := by
   sorry
-
 
 
 /-
   Variation: prove that `3 * s2 n ≥ n ^ 3`.
 -/
 
-
 example (n : ℕ) : 3 * s2 n ≥ n ^ 3 := by
   sorry
 
 
--- EVERYTHING ABOVE THIS LINE HAS BEEN VERIFIED
--- TODO: add some challenges, and maybe some casting?
-
-
 /-
-  Challenge: prove the beautiful formula s3 n  = (s1 n) ^ 2.
-  E.g. 2025 = 1^3 + 2^3 + ... + 9^3 = (1 + 2 + ... + 9)^2
+  Congratulations! You now know how to write induction proofs in Lean. If you
+  want one more challenge, try to prove Bernoulli's inequality:
+    `(1 + x) ^ n ≥ 1 + n * x` for all `x ≥ 0` and `n ≥ 0`
+  by induction on `n`.
+
+  At some point, you may see expressions like `↑k * x` in the right window pane.
+  This up-arrow indicates that the natural number `k` is being considered as a
+  real number before being multiplied with `x`. Lean is terribly careful and
+  pedantic about such things (and must be). Next week we'll learn some
+  techniques to deal with such things. For the proof below, you should not
+  worry, since `algebra` will automatically take care of this where needed.
+
+  Final hint: the tactic `simp` will automaticall simplify expressions like `0 *
+  x` or `x ^ 0` or `x + 0`. You may find this useful in the base case of the induction.
 -/
 
--- TODO: bah, no good way of doing this without first establihsing formula for s1
-
-
-
-
--- Now prove Bernoulli's inequality:
 
 example (x : ℝ) (n : ℕ) (h : x ≥ 0) : (1 + x) ^ n ≥ 1 + n * x := by
-  simple_induction n with k IH
-  · -- base case: goal is `(1 + x) ^ 0 ≥ 1 + 0 * x`
-    sorry
-  · -- inductive step: goal is `(1 + x) ^ (k + 1) ≥ 1 + (k + 1) * x`
-    calc (1 + x) ^ (k + 1) = (1 + x) * (1 + x) ^ k := by algebra
-      _ ≥ (1 + x) * (1 + k * x) := by rel [IH]
-      _ = 1 + (k + 1) * x +  k * x ^ 2 := by algebra
-      _ ≥ 1 + (k + 1) * x := by extra
+  sorry
 
-
--- Note: in the right window pane you may have seen expressions like `↑k`. These
--- indicate that the natural number `k` is being considered as a real number.
 
 
 

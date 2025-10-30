@@ -5,6 +5,7 @@
 \usepackage{booktabs}
 \usepackage{fancyvrb}
 \usepackage{amsfonts}
+\usepackage{multicol}
 
 \DefineVerbatimEnvironment{code}{Verbatim}{fontsize=\small}
 
@@ -16,6 +17,8 @@
 
 \maketitle
 
+\section*{Tactics}
+
 \begin{table}[h!]
 \centering
 \begin{tabularx}{\textwidth}{l p{10cm} X}
@@ -25,7 +28,7 @@
 
 \texttt{rfl} & 
 Prove equalities that hold \emph{by definition}. &
-\parbox{8cm}{\ttfamily\small
+\parbox[t]{8cm}{\ttfamily\small
 example :\ 1 + 2 = 3 := by rfl
 } \\
 
@@ -33,7 +36,7 @@ example :\ 1 + 2 = 3 := by rfl
 
 \texttt{numbers} & 
 Prove (in)equalities between purely numerical expressions. &
-\parbox{12cm}{\ttfamily\small
+\parbox[t]{12cm}{\ttfamily\small
 example :\ 5 \^{} 3 < 2 \^{} 7 := by numbers
 } \\
 
@@ -41,7 +44,7 @@ example :\ 5 \^{} 3 < 2 \^{} 7 := by numbers
 
 \texttt{algebra} & 
 Prove algebraic identities. &
-\parbox{12cm}{\ttfamily\small
+\parbox[t]{12cm}{\ttfamily\small
 example (x y :\ $\mathbb{R}$) :\ (x + y) * (x - y) = x \^{} 2 - y \^{} 2 := by algebra
 } \\ 
 
@@ -49,7 +52,7 @@ example (x y :\ $\mathbb{R}$) :\ (x + y) * (x - y) = x \^{} 2 - y \^{} 2 := by a
 
 \texttt{rewrite [h]} & 
 If hypothesis \texttt{h} is of the form \texttt{a = b}, replace \texttt{a} with \texttt{b} in the goal. &
-\parbox{12cm}{\ttfamily\small
+\parbox[t]{12cm}{\ttfamily\small
 example (x :\ $\mathbb{Q}$) (h :\ x = 2) :\ x \^{} 2 = 4 := by\\
 \hspace*{1em}rewrite [h];\ numbers
 } \\ 
@@ -58,7 +61,7 @@ example (x :\ $\mathbb{Q}$) (h :\ x = 2) :\ x \^{} 2 = 4 := by\\
 
 \texttt{rewrite [$\leftarrow$h]} & 
 If hypothesis \texttt{h} is of the form \texttt{a = b}, replace \texttt{b} with \texttt{a} in the goal. &
-\parbox{12cm}{\ttfamily\small
+\parbox[t]{12cm}{\ttfamily\small
 example (x y :\ $\mathbb{Q}$) (h :\ x + 1 = y) :\ x = y - 1 := by\\
 \hspace*{1em}rewrite [$\leftarrow$h];\ algebra
 } \\ 
@@ -67,23 +70,96 @@ example (x y :\ $\mathbb{Q}$) (h :\ x + 1 = y) :\ x = y - 1 := by\\
 
 \texttt{positivity} & 
 Prove goals of the form \texttt{a > 0} or \texttt{a $\geq$ 0}. &
-\parbox{12cm}{\ttfamily\small
+\parbox[t]{12cm}{\ttfamily\small
 example (x :\ $\mathbb{R}$) :\ x \^{} 2 $\geq$ 0 := by positivity
 } \\ 
 
 \midrule
 
+\texttt{extra} & 
+Prove inequalities of the form \texttt{a + e > a} or \texttt{a + e $\geq$ a}. &
+\parbox[t]{12cm}{\ttfamily\small
+example (a b :\ $\mathbb{Z}$) (h :\ a $\geq$ 0) :\ a + b $\geq$ b := by extra
+} \\ 
+
+\midrule
+
+\texttt{rel [h]} & 
+Use inequality \texttt{h} to prove a directly related inequality. &
+\parbox[t]{12cm}{\ttfamily\small
+example (a b :\ $\mathbb{R}$) (h :\ a $\geq$ b) :\ a + 1 $\geq$ b + 1 := by\\
+\hspace*{1em}rel [h]
+} \\ 
+
+\midrule
+
+\texttt{linarith} & 
+A powerful tactic to automatically prove linear inequalities from linear (in)equalities 
+in the hypotheses. &
+\parbox[t]{12cm}{\ttfamily\small
+example (a b :\ $\mathbb{R}$) (h1 :\ a > 2) (h2 :\ a + b < 3) :\ b < 1 := by\\
+\hspace*{1em}linarith
+} \\ 
+
+
+\midrule
+
 \texttt{calc} & 
-Chain (in)equalities together to prove a goal. &
-\parbox{12cm}{\ttfamily\small
+Chain (in)equalities together to prove an (in)equality. &
+\parbox[t]{12cm}{\ttfamily\small
 example (x y :\ $\mathbb{R}$) :\ x \^{} 2 + y \^{} 2 - 2 * x * y $\geq$ 0 := by\\
 \hspace*{1em}calc\\
 \hspace*{2em}x \^{} 2 + y \^{} 2 - 2 * x * y = (x - y) \^{} 2 := by algebra\\
 \hspace*{15em}\_ $\geq$ 0\hspace*{4.4em}:= by positivity
 } \\ 
 
+\midrule
+
+\texttt{use} & 
+Start proving an existential statement ($\exists$) by providing the value that
+you will use. &
+\parbox[t]{12cm}{\ttfamily\small
+example :\ $\exists$ n :\ $\mathbb{N}$, 81 * n = 2025 := by\\
+\hspace*{1em}use 25\\
+\hspace*{1em}numbers
+} \\ 
+
+\midrule
+
+\texttt{intro} & 
+Start proving a universal statement ($\forall$) by introducing an arbitrary
+variable. &
+\parbox[t]{12cm}{\ttfamily\small
+example :\ $\forall$ x :\ $\mathbb{R}$, x \^{} 2 $\geq$ 0 := by\\
+\hspace*{1em}intro x\\
+\hspace*{1em}positivity
+} \\ 
+
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\newpage
+
+\section*{Typing mathematical symbols}
+
+\begin{tabular}{cll}
+\toprule
+\textbf{Symbol} & \textbf{Type} & \textbf{Description} \\
+\midrule
+$\mathbb{N}$ & \texttt{\textbackslash N} & natural numbers \\
+$\mathbb{Z}$ & \texttt{\textbackslash Z} & integers \\
+$\mathbb{Q}$ & \texttt{\textbackslash Q} & rational numbers \\
+$\mathbb{R}$ & \texttt{\textbackslash R} & real numbers \\
+$\leq$ & \texttt{\textbackslash le} & less than or equal to \\
+$\geq$ & \texttt{\textbackslash ge} & greater than or equal to \\
+$\pi$ & \texttt{\textbackslash pi} & pi \\
+$\leftarrow$ & \texttt{\textbackslash l} & used in \texttt{rewrite [$\leftarrow$h]} \\
+$a^{-1}$ & \texttt{\textbackslash inv} & inverse \\
+$\forall$ & \texttt{\textbackslash forall} & for all \\
+$\exists$ & \texttt{\textbackslash exists} & exists \\
+$\cdot$ & \texttt{\textbackslash .} & bullet (used for induction cases) \\
+\bottomrule
+\end{tabular}
 
 \end{document}

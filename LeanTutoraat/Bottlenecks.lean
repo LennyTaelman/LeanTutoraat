@@ -2,11 +2,61 @@
 import Mathlib
 import Library.Basic
 
--- NOTE: this also establishes a basic simp tactic
-math2001_init
 
 open Real
 noncomputable section
+
+/-
+  Things to be considered in lecture 4
+-/
+
+
+
+/-
+  ## Why did we avoid subtraction and division in the proofs above?
+-/
+
+-- Verify that `algebra` cannot prove the statement below. Why would that be?
+example (n : ℕ) : (n - 1) + 1 = n := by
+  sorry
+
+/-
+  In fact, in Lean the subtraction of two natural numbers is again a natural
+  number. If the result would be negative, it is defined to be `0`.
+
+  So the above statement is *false* for `n = 0`, since the left hand side is `1`.
+
+  However, for integers (or rationals, or reals, ...) subtraction is defined as
+  usual. Indeed, verify that `algebra` *can* prove the statement below.
+-/
+
+example (n : ℤ) : (n - 1) + 1 = n := by
+  sorry
+
+
+/-
+  Exercise:
+-/
+
+
+example (n : ℕ) (h : n ≥ 1) : (n - 1) + 1 = n := by
+  induction_from_starting_point n, h with k hk IH
+  · rfl
+  · algebra
+
+
+
+
+
+/- # For later use! -/
+
+example (N : ℕ) (h : N ≥ 1) : ∃ n : ℕ, N = n + 1 := by
+  induction_from_starting_point N, h with k hk IH
+  · use 0; numbers
+  · obtain ⟨n, hn⟩ := IH
+    use n + 1
+    rewrite [hn]
+    algebra
 
 
 /-

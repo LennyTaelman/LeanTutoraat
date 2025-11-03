@@ -456,8 +456,8 @@ lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
       _ = s (n + k + 1) := by ring
       _ = s (n + k) + a (n + k) := by rw [s_succ]
       _ ≤ s n + (a n) * (g k) + a (n + k) := by rel [IH]
-      _ ≤ s n + (a n) * (g k) + (c k) * a n := by rel [a_bound n k hn]
-      _ = s n + (a n) * ((g k) + (c k)) := by ring
+      _ ≤ s n + (a n) * (g k) + (1/2) ^ k * a n := by rel [a_bound n k hn]
+      _ = s n + (a n) * ((g k) + (1/2) ^ k) := by algebra
       _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
 
 
@@ -466,7 +466,7 @@ theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
   have h : a n > 0 := a_pos n
   calc
     _ ≤ s n + (a n) * (g k) := by apply s_under_geometric n k hn
-    _ < s n + (a n) * 2 := by rel [geometric_sum_lt_2 k]
+    _ < s n + (a n) * 2 := by rel [g_lt_2 k]
     _ = s n + 2 * (a n) := by ring
 
 lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :

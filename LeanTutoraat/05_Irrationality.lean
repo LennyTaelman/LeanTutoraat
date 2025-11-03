@@ -514,50 +514,6 @@ lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
   Key inequality for s n
 -/
 
-
-
-
-
-
-
-
-
-
-
-lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) ≤ s n + (a n) * (g k) := by
-  simple_induction k with k IH
-  · -- base case
-    rw [g_zero]
-    simp
-    extra
-  · -- inductive step
-    calc
-      _ = s (n + k + 1) := by ring
-      _ = s (n + k) + a (n + k) := by rw [s_succ]
-      _ ≤ s n + (a n) * (g k) + a (n + k) := by rel [IH]
-      _ ≤ s n + (a n) * (g k) + (1/2) ^ k * a n := by rel [a_bound n k hn]
-      _ = s n + (a n) * ((g k) + (1/2) ^ k) := by algebra
-      _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
-
-
-theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    s (n + k) < s n + 2 * (a n)  := by
-  have h : a n > 0 := a_pos n
-  calc
-    _ ≤ s n + (a n) * (g k) := by apply s_under_geometric n k hn
-    _ < s n + (a n) * 2 := by rel [g_lt_2 k]
-    _ = s n + 2 * (a n) := by ring
-
-lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
-    s m ≤ s n + 2 * (a n)  := by
-  let k := m - n
-  have hk : m = n + k := by exact (Nat.sub_eq_iff_eq_add' hm).mp rfl
-  calc
-    _ = s (n + k)  := by rw [hk]
-    _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
-    _ = s n + 2 * (a n) := by ring
-
 lemma s_bounded' (n : ℕ) : s (n + 1) < 3 := by
   have h : 1 ≥ 1 := by numbers
   calc
@@ -643,28 +599,26 @@ lemma s_lt_e (n : ℕ) : s n < e := by
   The following lemma states that if `s n ≤ c` for all sufficiently large `n`, then
   `e ≤ c`.
 -/
-lemma e_le_of_s_le (c : ℝ) (N : ℕ) (h : ∀ n ≥ N, s n ≤ c) : e ≤ c := by
+lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
   by_contra h2
   push_neg at h2
   let ε := e - c
   have hε : ε > 0 := by dsimp; addarith [h2]
-  obtain ⟨m, hm⟩ := s_tends_to_e ε hε
-  let n := max N m
-  have hn : n ≥ N := by exact Nat.le_max_left N m
-  have hn2 : n ≥ m := by exact Nat.le_max_right N m
-  specialize h n hn
-  specialize hm n hn2
-  contrapose hm
+  obtain ⟨N, hN⟩ := s_tends_to_e ε hε
+  let n := N
+  specialize h N
+  specialize hN N
+  contrapose hN
   push_neg
   calc
     _ = e - c := by rfl
-    _ ≤ e - s n := by addarith [h]
-    _ ≤ |e - s n| := by exact le_abs_self (e - s n)
-    _ = |- (e - s n )| := by rw [abs_neg]
-    _ = |s n - e| := by ring
+    _ ≤ e - s N := by addarith [h]
+    _ ≤ |e - s N| := by exact le_abs_self (e - s n)
+    _ = |- (e - s N )| := by rw [abs_neg]
+    _ = |s N - e| := by ring
 
 theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
-  apply e_le_of_s_le _ 1
+  apply e_le_of_s_le _ 0
   intro m hm
   by_cases h : m ≥ n
   · exact key_bound_s' n m h hn
@@ -734,7 +688,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
     · field_simp; norm_cast; addarith [hn]
   calc
   _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
-  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rw [a_succ]; ring
+  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by sorry
   _ = ((fac n) * a n) * (2 * ((n : ℝ) + 1)⁻¹) := by ring
   _ = 1 * (2 * ((n : ℝ) + 1)⁻¹) := by rw [fac_mul_a_eq_one n]
   _ = 2 * ((n : ℝ) + 1)⁻¹ := by ring

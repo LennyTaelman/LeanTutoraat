@@ -1,17 +1,9 @@
-/- Copyright (c) Lenny Taelman, 2025.  All rights reserved. -/
-import Mathlib
 import Library.Basic
-
--- NOTE: this now also establishes a basic simp tactic
-math2001_init
-
-open Nat Finset Real BigOperators
 noncomputable section
 
 
-
 /-
-  In this worksheet, we will prove that e is irrational. This is intended as a
+  In this worksheet, we will prove that `e` is irrational. This is intended as a
   larger group project, where participants can work on different parts of the proof
   in parallel.
 
@@ -22,11 +14,16 @@ noncomputable section
 -/
 
 
+
 /-
-  The factorial function. Rather than using its definition, you should
-  use the two defining lemmas :
-  - fac_zero : fac 0 = 1
-  - fac_succ : fac (n + 1) = (n + 1) * fac n
+  # Part I: some inequalities satisfied by the factorial function
+-/
+
+/-
+  The factorial function `fac`, with values in `ℕ`. As before, you should manipulate
+  this function by using the following two lemmas:
+  - `fac_zero : fac 0 = 1`
+  - `fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n`
 -/
 
 def fac (n : ℕ) : ℕ :=
@@ -40,7 +37,7 @@ lemma fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by rfl
 
 
 /-
-  Prove some basic facts about the factorial function.
+  Now let's prove some basic facts about the factorial function.
 -/
 
 lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]
@@ -49,17 +46,43 @@ lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]
 
 lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]
 
-lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
-  simple_induction n with n IH
-  · rw [fac_zero]
-  · have h : n + 1 ≥ 1 := by extra
-    calc
-      fac (n + 1) = (n + 1) * fac n := by rw [fac_succ]
-      _ ≥ 1 * fac n := by rel [h]
-      _ = fac n := by algebra
-      _ ≥ 1 := by apply IH
 
-lemma fac_monotone (n m : ℕ) (h : m ≥ n) : fac m ≥ fac n := by
+lemma fac_pos (n : ℕ) : fac n > 0 := by
+  simple_induction n with n IH
+  · rewrite [fac_zero]; positivity
+  · rewrite [fac_succ]; positivity
+
+lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
+  linarith [fac_pos n]
+
+lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
+  linarith [fac_pos n]
+
+lemma fac_strictly_monotone (n : ℕ) (h : n ≥ 1) : fac (n + 1) > fac n := by
+  rewrite [fac_succ]
+  have h1 : n + 1 > 1 := by extra
+  have h2 : fac n > 0 := by apply fac_pos n
+  calc
+    (n + 1) * fac n > 1 * fac n := by rel [h1]
+    _ = fac n := by algebra
+
+lemma fac_gt_one (n : ℕ) (h : n ≥ 2) : fac n > 1 := by
+  induction_from_starting_point n, h with k hk IH
+  · rewrite [fac_two]; numbers
+  · have hk' : k ≥ 1 := by linarith
+    linarith [fac_strictly_monotone k hk']
+
+
+lemma fac_gt_of_gt (n m : ℕ) (h1 : n ≥ m + 1) (h2 : m ≥ 1): fac n > fac m := by
+  induction_from_starting_point n, h1 with k hk IH
+  · apply fac_strictly_monotone m h2
+  · rewrite [fac_succ]
+    calc
+      (k + 1) * fac k = k * fac k + fac k := by algebra
+                    _ ≥ fac k := by extra
+                    _ > fac m := by linarith
+
+lemma fac_ge_of_ge (n m : ℕ) (h : m ≥ n) : fac m ≥ fac n := by
   induction_from_starting_point m, h with k hk IH
   · extra
   · have h : k + 1 ≥ 1 := by extra
@@ -69,20 +92,9 @@ lemma fac_monotone (n m : ℕ) (h : m ≥ n) : fac m ≥ fac n := by
       _ = fac k := by algebra
       _ ≥ fac n := by rel [IH]
 
-lemma fac_gt (n m : ℕ) (h : m > n) : fac m > fac n := by
-  sorry
-
-lemma fac_pos (n : ℕ) : fac n > 0 := by
-  calc fac n ≥ 1 := by apply fac_ge_one
-    _ > 0 := by numbers
-
-lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
-  have h : fac n > 0 := by apply fac_pos
-  positivity
-
 lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
-  calc fac n ≥ fac 2 := fac_monotone 2 n hn
-    _ = 2 := by rw [fac_two]
+  calc fac n ≥ fac 2 := fac_ge_of_ge 2 n hn
+    _ = 2 := by rewrite [fac_two]; rfl
 
 
 /-
@@ -94,7 +106,7 @@ lemma aux (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
   positivity
 
 /-
-  The following is the key inequality in the proof of irrationality of e.
+  The following is the key inequality in the proof of irrationality of `e`.
   I recommend you write out the proof in detail on paper first.
 -/
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
@@ -114,15 +126,20 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
 
 
 /-
-  We will define `e` as `∑ 1 / fac n`. There is a subtlety here:
-  we have defined `fac n` as a natural number, and we want to consider
-  its inverse as a real number. We'll do some trick to avoid complications
-  later on.
+  # Part II: the real inverse of a natural number
 -/
 
-def nat_inv (n : ℕ) : ℝ := 1 / (n : ℝ)
+/-
+  We will define `e` as `∑ 1 / fac n`. There is a subtlety here:
+  we have defined `fac n` as a natural number, and we want to consider
+  its inverse as a real number. To avoid lots of technicalities later on,
+  we separate out the transition from "natural number `n`" to "real number `1 / n`",
+  and prove the elementary properties of this function.
+-/
 
-lemma nat_inv_def (n : ℕ) : nat_inv n = 1 / (n : ℝ) := by rfl
+def nat_inv (n : ℕ) : ℝ := (n : ℝ)⁻¹
+
+lemma nat_inv_def (n : ℕ) : nat_inv n = (n : ℝ)⁻¹ := by rfl
 
 lemma nat_inv_one : nat_inv 1 = 1 := by
   rw [nat_inv_def]
@@ -132,182 +149,133 @@ lemma nat_inv_pos (n : ℕ) (hn : n > 0) : nat_inv n > 0 := by
   rw [nat_inv_def n]
   positivity
 
+lemma nat_inv_ne_zero (n : ℕ) (hn : n > 0) : nat_inv n ≠ 0 := by
+  linarith [nat_inv_pos n hn]
+
 lemma nat_inv_mul (n m : ℕ) : nat_inv (n * m) = nat_inv n * nat_inv m := by
-  rw [nat_inv_def, nat_inv_def, nat_inv_def]
+  rewrite [nat_inv_def, nat_inv_def, nat_inv_def]
   algebra
 
 lemma nat_inv_le (n m : ℕ) (h : n ≥ m) (hm : m > 0) : nat_inv n ≤ nat_inv m := by
-  rw [nat_inv_def n, nat_inv_def m]
-  have hn : n > 0 := by
-    calc
-      n ≥ m := by exact h
-      _ > 0 := by exact hm
-  sorry
+  rewrite [nat_inv_def n, nat_inv_def m]
+  have hn : n > 0 := by linarith
+  apply inv_le_inv_of_le
+  positivity
+  norm_cast
 
 lemma nat_inv_lt (n m : ℕ) (h : n > m) (hm : m > 0) : nat_inv n < nat_inv m := by
   rw [nat_inv_def n, nat_inv_def m]
-  have hn : n > 0 := by
-    calc
-      n > m := by exact h
-      _ > 0 := by exact hm
-  sorry
+  have hn : n > 0 := by linarith
+  apply inv_lt_inv_of_lt
+  positivity
+  norm_cast
 
 lemma nat_inv_le_one (n : ℕ) (hn : n > 0) : nat_inv n ≤ 1 := by
-  rw [← nat_inv_one]
+  rewrite [← nat_inv_one]
   apply nat_inv_le
   exact hn
   numbers
 
+lemma nat_inv_lt_one (n : ℕ) (hn : n > 1) : nat_inv n < 1 := by
+  rewrite [← nat_inv_one]
+  apply nat_inv_lt
+  exact hn
+  numbers
+
+
 
 /-
-  Now define `b n := nat_inf fac n`, so `b n = 1 / n!`
+  Now define `a n := nat_inf fac n`, so `a n = 1 / n!`
 -/
 
-def b (n : ℕ) : ℝ := nat_inv (fac n)
+def a (n : ℕ) : ℝ := nat_inv (fac n)
 
-lemma b_def (n : ℕ) : b n = nat_inv (fac n) := by rfl
+lemma a_def (n : ℕ) : a n = nat_inv (fac n) := by rfl
 
-lemma b_zero : b 0 = 1 := by
-  rw [b_def, fac_zero, nat_inv_one]
+lemma a_zero : a 0 = 1 := by
+  rewrite [a_def, fac_zero, nat_inv_one]
+  rfl
 
-lemma b_one : b 1 = 1 := by
-  rw [b_def, fac_one, nat_inv_one]
+lemma a_one : a 1 = 1 := by
+  rewrite [a_def, fac_one, nat_inv_one]
+  rfl
 
-lemma b_two : b 2 = 1 / 2 := by
-  rw [b_def, fac_two, nat_inv_def]
+lemma a_two : a 2 = 1 / 2 := by
+  rewrite [a_def, fac_two, nat_inv_def]
   numbers
 
-lemma b_three : b 3 = 1 / 6 := by
-  rw [b_def, fac_three, nat_inv_def]
+lemma a_three : a 3 = 1 / 6 := by
+  rewrite [a_def, fac_three, nat_inv_def]
   numbers
 
-lemma b_pos (n : ℕ) : b n > 0 := by
-  rw [b_def]
+lemma a_pos (n : ℕ) : a n > 0 := by
+  rewrite [a_def]
   apply nat_inv_pos
   apply fac_pos
 
-lemma b_le_one (n : ℕ) : b n ≤ 1 := by
-  rw [b_def]
+lemma a_le_one (n : ℕ) : a n ≤ 1 := by
+  rewrite [a_def]
   apply nat_inv_le_one
   apply fac_pos
 
-lemma b_le (n m : ℕ) (h : n ≥ m) : b n ≤ b m := by
-  rw [b_def]
+lemma a_le (n m : ℕ) (h : n ≥ m) : a n ≤ a m := by
+  rw [a_def]
   apply nat_inv_le
-  apply fac_monotone
+  apply fac_ge_of_ge
   apply h
   apply fac_pos
 
-lemma b_lt (n m : ℕ) (h : n > m) (hn : n > 0) : b n < b m := by
-  rw [b_def]
+lemma a_lt (n m : ℕ) (h : n > m) (hn : m > 0) : a n < a m := by
+  rw [a_def]
   apply nat_inv_lt
-  apply fac_gt
+  apply fac_gt_of_gt
   exact h
+  linarith
   apply fac_pos
+
+lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
+  rewrite [a_def, nat_inv_def]
+  have h : fac n ≠ 0 := by apply fac_ne_zero
+  algebra
+
 
 
 /-
-  Propositie: ∑_{i=0}^{k-1} 1 / (2 ^ i : ℝ) ≤ 2
+  # Bounding the geometric series Σ_{i=0}^{k-1} 2^{-i}
 -/
 
-
-def c (k : ℕ) : ℝ :=
-  match k with
-  | 0 => 1
-  | k + 1 => c k / 2
-
-lemma c_zero : c 0 = 1 := by rfl
-
-lemma c_succ (k : ℕ) : c (k + 1) = c k / 2 := by rfl
-
-lemma c_pos (k : ℕ) : c k > 0 := by
-  simple_induction k with k IH
-  · rw [c_zero]
-    positivity
-  · rw [c_succ]
-    positivity
-
-
-def g (k : ℕ) : ℝ :=
-  match k with
+def g (n : ℕ) : ℝ := match n with
   | 0 => 0
-  | k + 1 => g k + c k
+  | n + 1 => g n + (1/2) ^ n
 
 lemma g_zero : g 0 = 0 := by rfl
 
-lemma g_succ (k : ℕ) : g (k + 1) = g k + c k := by rfl
+lemma g_succ (n : ℕ) : g (n + 1) = g n + (1/2) ^ n := by rfl
 
+lemma g_one : g 1 = 1 := by rw [g_succ, g_zero]; numbers
 
-lemma geometric_sum (k : ℕ) : g k = 2 - 2 * c k := by
-  simple_induction k with k IH
-  · rw [g_zero, c_zero]
-    numbers
-  · -- inductive step
-    rw [g_succ, c_succ]
-    rw [IH]
+lemma g_two : g 2 = 3 / 2 := by rw [g_succ, g_one]; numbers
+
+lemma g_three : g 3 = 7 / 4 := by rw [g_succ, g_two]; numbers
+
+lemma g_eq (n : ℕ) : g n = 2 - 2 * (1/2) ^ n := by
+  simple_induction n with n IH
+  · simp; rfl
+  · rewrite [g_succ]
+    rewrite [IH]
     algebra
 
-lemma geometric_sum_lt_2 (k : ℕ) : g k < 2 := by
-  rw [geometric_sum]
-  have h : c k > 0 := by apply c_pos
-  extra
+lemma g_lt_2 (n : ℕ) : g n < 2 := by
+  calc
+    g n = 2 - 2 * (1/2) ^ n := by rewrite [g_eq]; rfl
+    _ < 2 := by extra
 
 
 
-/-
-  The sequence a_n = 1 / fac n
--/
-
--- def a (n : ℕ) : ℝ := (fac n : ℝ)⁻¹
-
-def a (n : ℕ) : ℝ :=
-  match n with
-  | 0 => 1
-  | n + 1 => a n / (n + 1)
-
-lemma a_zero : a 0 = 1 := by rfl
-
-lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by rfl
-
-lemma a_one : a 1 = 1 := by rw [a_succ, a_zero]; numbers
-
-lemma a_two : a 2 = 1 / 2 := by rw [a_succ, a_one]; numbers
-
-lemma a_three : a 3 = 1 / 6 := by rw [a_succ, a_two]; numbers
-
-lemma a_pos (n : ℕ) : 0 < a n  := by
-  simple_induction n with n IH
-  · rw [a_zero]
-    positivity
-  · rw [a_succ]
-    positivity
-
-lemma a_succ' (n : ℕ) : (n + 1) * a (n + 1) = a n := by
-  rw [a_succ]
-  algebra
-
-lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
-  simple_induction n with n IH
-  · rw [a_zero, fac_zero]
-    numbers
-  · calc
-      fac (n + 1) * a (n + 1) = (n + 1) * fac n * a (n + 1) := by rw [fac_succ]; algebra
-      _ = fac n * ((n + 1) * (a (n + 1))) := by algebra
-      _ = fac n * a n := by rw [a_succ']
-      _ = 1 := by rw [IH]
-
-lemma a_le_1 (n : ℕ) : a n ≤ 1 := by
-  simple_induction n with n IH
-  · rw [a_zero]
-  · rw [a_succ]
-    have h : ↑n + 1 ≥ 1 := by extra
-    calc
-      a n / (n + 1) ≤ a n := by sorry
-      _ ≤ 1 := by apply IH
 
 
 /-
-  Integrality
+  # Integrality
 -/
 
 def isInt (a : ℝ) : Prop := ∃ N : ℤ, a = N
@@ -454,31 +422,20 @@ lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
   Key inequality for s n
 -/
 
--- alternative: use fac_bound
 
 
--- TODO: really need to practice a bit with inverses and inequalities
--- this is a MESS now
-
-
-
-
-
+lemma a_bound_aux (n : ℕ) (k : ℕ) : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
+  rewrite [a_def, nat_inv_def, nat_inv_def]
+  algebra
 
 lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    a (n + k) ≤  (c k) * (a n) := by
-  simple_induction k with k IH
-  · -- base case
-    rw [c_zero]
-    simp; rfl
-  · -- inductive step
-    have h : a (n + (k + 1)) = a (n + k + 1) := by ring
-    have h2 : (n + k) + 1 ≥ (2 : ℝ) := by sorry
-    rw [h]
-    rw [a_succ]
-    rw [c_succ]
-    field_simp
-    sorry
+    a (n + k) ≤  (1/2) ^ k * (a n) := by
+  rewrite [a_bound_aux, a_def]
+  apply nat_inv_le
+  apply fac_bound
+  positivity
+  apply aux n k
+
 
 
 

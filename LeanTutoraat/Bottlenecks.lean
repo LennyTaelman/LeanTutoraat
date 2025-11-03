@@ -13,6 +13,29 @@ noncomputable section
 
 
 /-
+  ## Inverses and inequalities
+-/
+
+
+example (x y : ℝ) (h : x > y) (h2 : y > 0) : x⁻¹ < y⁻¹ := by
+  apply inv_lt_inv_of_lt
+  positivity
+  apply h
+
+
+
+/-
+  ## Casts and inequalities
+-/
+
+
+
+/-
+  ## Natural numbers and inequalities
+-/
+
+
+/-
   ## Why did we avoid subtraction and division in the proofs above?
 -/
 

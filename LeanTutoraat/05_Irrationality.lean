@@ -523,20 +523,25 @@ lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
 
 
 /-
-  The next part shows that the sequence s n is Cauchy, defines e : ℝ to be its
-  limit, and establishes a lemma stating that s n converges to e.
+  # The number `e` as limit of the sequence `s n`
 
-  The proofs have been pre-filled, since they require working closely with the
-  definitions of ℝ, "Cauchy" and "limit" as implemented in Mathlib. However,
-  we only need to use the lemma `s_tends_to_e`, which guarantees that no matter
-  how `e : ℝ` was defined, it agrees with the real number e as you know it.
+  The next part defines the number `e` as follows:
+  - we show that the sequence `s n` is Cauchy, and hence has a limit
+  - we define `e` to be this limit.
+  The details are a bit technical, since they require working closely with the
+  how `ℝ`, "Cauchy" and "limit" have been implemented in Lean.
 
-  In partiacul, in the remainder of the worksheet you can ignore the definition
-  and only need to use the lemma `s_tends_to_e`.
+  To be able to *use* the number `e`, we also prove two lemmas:
+  - `s_lt_e`, which states that `s n < e` for all `n`
+  - `e_le_of_s_le`, which states that if `s n ≤ c` for all `n`, then `e ≤ c`.
+
+  In the remainder of the worksheet, you will only need to know these two facts about `e`.
+  Convice yourself that these  completely determine the number `e`! In particular,
+  you can trust that the number `e` defined below agrees with the real number `e` as you know it.
 -/
 
 
-theorem s_cauchy : IsCauSeq abs s := by
+lemma s_cauchy : IsCauSeq abs s := by
   apply isCauSeq_of_mono_bounded
   · intro n hn
     apply s_abs_bounded n
@@ -544,11 +549,9 @@ theorem s_cauchy : IsCauSeq abs s := by
     rel [s_lt_next n]
   · use 0
 
-
 def e_seq : CauSeq ℝ abs := ⟨fun n ↦ s n, s_cauchy⟩
 
 def e : ℝ := CauSeq.lim e_seq
-
 
 lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro ε hε
@@ -558,19 +561,12 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro n hn
   exact hN n hn n (by rfl)
 
-
-
-/-
-  Deduce some bounds on e
--/
-
-
 lemma s_lt_e (n : ℕ) : s n < e := by
   by_contra h
   rw [not_lt] at h
   have h2 : e < s (n+1) := by addarith [h, s_lt_next n]
   let ε := s (n+1) - e
-  have hε : ε > 0 := by dsimp; addarith [h2]
+  have hε : ε > 0 := by dsimp; linarith [h2]
   obtain ⟨N, hN⟩ := s_tends_to_e ε hε
   let m := max N (n+1)
   have hm : m ≥ N := by exact Nat.le_max_left N (n+1)
@@ -580,10 +576,14 @@ lemma s_lt_e (n : ℕ) : s n < e := by
   push_neg
   calc
     _ = s (n + 1) - e := by rfl
-    _ ≤ s m - e := by addarith [s_monotone' (n + 1) m hm2]
+    _ ≤ s m - e := by linarith [s_monotone' (n + 1) m hm2]
     _ ≤ |s m - e| := by exact le_abs_self (s m - e)
 
--- if s n ≤ c for all n, then e ≤ c
+
+/-
+  The following lemma states that if `s n ≤ c` for all sufficiently large `n`, then
+  `e ≤ c`.
+-/
 lemma e_le_of_s_le (c : ℝ) (N : ℕ) (h : ∀ n ≥ N, s n ≤ c) : e ≤ c := by
   by_contra h2
   push_neg at h2
@@ -620,8 +620,7 @@ theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
 theorem e_lt_3 : e < 3 := by
    calc
     e ≤ s 3 + 2 * (a 3) := by exact key_bound_e 3 (by numbers)
-    _ = 5 / 2 + 2 * (1 / 6) := by rw [s_three, a_three]
-    _ < 3 := by numbers
+    _ < 3 := by rewrite [s_three, a_three]; numbers
 
 
 /-

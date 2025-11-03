@@ -242,6 +242,14 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
 
 /-
   # Bounding the geometric series Σ_{i=0}^{k-1} 2^{-i}
+
+  Let `g n := 1 + 1/2 + 1/4 + ... + 1/2^(n-1)`, so there are `n` terms in the sum.
+  The first few values are:
+  - `g 0 = 0` (empty sum)
+  - `g 1 = 1`
+  - `g 2 = 1 + 1/2 = 3/2`
+  - `g 3 = 1 + 1/2 + 1/4 = 7/4`
+  In this section, we prove that `g n < 2` for all `n`.
 -/
 
 def g (n : ℕ) : ℝ := match n with
@@ -265,7 +273,10 @@ lemma g_eq (n : ℕ) : g n = 2 - 2 * (1/2) ^ n := by
     rewrite [IH]
     algebra
 
-lemma g_lt_2 (n : ℕ) : g n < 2 := by
+
+-- we can now prove the main result of this section:
+
+theorem g_lt_2 (n : ℕ) : g n < 2 := by
   calc
     g n = 2 - 2 * (1/2) ^ n := by rewrite [g_eq]; rfl
     _ < 2 := by extra
@@ -276,6 +287,10 @@ lemma g_lt_2 (n : ℕ) : g n < 2 := by
 
 /-
   # Integrality
+
+  We will prove that `e` is irrational by proving that `M * e` is not an integer for any
+  positive natural number `M`. In this section, we define what it means for a real number
+  to be an integer, and prove some basic properties of this notion.
 -/
 
 def isInt (a : ℝ) : Prop := ∃ N : ℤ, a = N
@@ -327,11 +342,17 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
 /-
   The partial sums s n, convering to e:
 
-  s n = a 0 + a 1 + ... + a (n-1)   (n terms)
+  `s n = a 0 + a 1 + ... + a (n-1)`   (n terms)
 
   Defined recursively:
-    s 0 = 0
-    s (n + 1) = s n + a n
+    `s 0 = 0`
+    `s (n + 1) = s n + a n`
+
+  Recall that `a n = 1 / n!`, so the first few values of `s n` are:
+  - `s 0 = 0` (empty sum)
+  - `s 1 = a 0 = 1`
+  - `s 2 = a 0 + a 1 = 1 + 1 = 2`
+  - `s 3 = a 0 + a 1 + a 2 = 1 + 1 + 1/2 = 5/2`
 -/
 
 def s (n : ℕ) :=

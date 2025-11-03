@@ -3,12 +3,14 @@ noncomputable section
 
 
 /-
+  # Final group project: proving that `e` is irrational
+
   In this worksheet, we will prove that `e` is irrational. This is intended as a
   larger group project, where participants can work on different parts of the proof
   in parallel.
 
   Below is a detailed skeleton proof, with the argument already split into many
-  smaller lemmas. The class will work on those in parallel, replacing all the
+  smaller lemmas. You will work on those in parallel, replacing all the
   `sorry`s with actual proofs, until the proof of the main theorem
   no longer uses any `sorry`.
 -/
@@ -16,11 +18,9 @@ noncomputable section
 
 
 /-
-  # Part I: some inequalities satisfied by the factorial function
--/
+  ## Part I: Bounds on the factorial function
 
-/-
-  The factorial function `fac`, with values in `ℕ`. As before, you should manipulate
+  The factorial function `fac`, with values in `ℕ`. You should manipulate
   this function by using the following two lemmas:
   - `fac_zero : fac 0 = 1`
   - `fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n`
@@ -126,14 +126,14 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
 
 
 /-
-  # Part II: the real inverse of a natural number
+  ## Part II: the term `a n := 1 / n!`
 -/
 
 /-
-  We will define `e` as `∑ 1 / fac n`. There is a subtlety here:
+  We will define `e` as `∑_n 1 / n!`. There is a subtlety here:
   we have defined `fac n` as a natural number, and we want to consider
   its inverse as a real number. To avoid lots of technicalities later on,
-  we separate out the transition from "natural number `n`" to "real number `1 / n`",
+  we separate out the transition from "natural number `n!`" to "real number `1 / n!`",
   and prove the elementary properties of this function.
 -/
 
@@ -238,10 +238,29 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   have h : fac n ≠ 0 := by apply fac_ne_zero
   algebra
 
+lemma a_bound_aux (n : ℕ) (k : ℕ) : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
+  rewrite [a_def, nat_inv_def, nat_inv_def]
+  algebra
 
 
 /-
-  # Bounding the geometric series Σ_{i=0}^{k-1} 2^{-i}
+  We can now use `fac_bound` from above to prove the following key inequality
+  for `a n`. Hint: use `a_bound_aux` to rewrite this into an inequality between
+  `nat_inv`'s.
+-/
+theorem a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    a (n + k) ≤  (1/2) ^ k * (a n) := by
+  rewrite [a_bound_aux, a_def]
+  apply nat_inv_le
+  apply fac_bound
+  positivity
+  apply aux n k
+
+
+
+
+/-
+  # Part III: bounding the geometric series Σ_{i=0}^{k-1} 2^{-i}
 
   Let `g n := 1 + 1/2 + 1/4 + ... + 1/2^(n-1)`, so there are `n` terms in the sum.
   The first few values are:
@@ -249,7 +268,7 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   - `g 1 = 1`
   - `g 2 = 1 + 1/2 = 3/2`
   - `g 3 = 1 + 1/2 + 1/4 = 7/4`
-  In this section, we prove that `g n < 2` for all `n`.
+  In this part, we prove that `g n < 2` for all `n`.
 -/
 
 def g (n : ℕ) : ℝ := match n with
@@ -283,10 +302,115 @@ theorem g_lt_2 (n : ℕ) : g n < 2 := by
 
 
 
+/-
+  ## Part IV: the partial sums `s n`
+
+  Recall that `a n = 1 / n!`. We will define the number `e` through the series `e = ∑_n a n`.
+  Consider the partial sums:
+    `s n = a 0 + a 1 + ... + a (n-1)`   (n terms)
+  They are defined recursively by:
+    `s 0 = 0`
+    `s (n + 1) = s n + a n`
+  The first few values of `s n` are:
+  - `s 0 = 0` (empty sum)
+  - `s 1 = a 0 = 1`
+  - `s 2 = a 0 + a 1 = 1 + 1 = 2`
+  - `s 3 = a 0 + a 1 + a 2 = 1 + 1 + 1/2 = 5/2`
+-/
+
+def s (n : ℕ) :=
+  match n with
+  | 0 => 0
+  | n + 1 => s n + a n
+
+lemma s_zero : s 0 = 0 := by rfl
+
+lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by rfl
+
+lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
+
+lemma s_two : s 2 = 2 := by rw [s_succ, s_one, a_one]; numbers
+
+lemma s_three : s 3 = 5 / 2 := by rw [s_succ, s_two, a_two]; numbers
+
+
+lemma s_lt_next (n : ℕ) : s n < s (n + 1) := by
+  rw [s_succ]
+  addarith [a_pos n]
+
+lemma s_monotone (n : ℕ) (m : ℕ) (hm : m > n) : s n < s m := by
+  induction_from_starting_point m, hm with k hk IH
+  · exact s_lt_next n
+  · calc
+    _ < s k := by rel [IH]
+    _ < s (k + 1) := by rel [s_lt_next k]
+
+lemma s_monotone' (n : ℕ) (m : ℕ) (hm : m ≥ n) : s n ≤ s m := by
+  induction_from_starting_point m, hm with k hk IH
+  · rfl
+  · calc
+    _ ≤ s k := by rel [IH]
+    _ ≤ s (k + 1) := by rel [s_lt_next k]
+
+lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
+  simple_induction n with n IH
+  · rw [s_zero]
+  · rw [s_succ]
+    addarith [IH, a_pos n]
+
 
 
 /-
-  # Integrality
+  Key inequality for s n
+-/
+
+
+
+
+
+
+
+
+
+
+
+lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    s (n + k) ≤ s n + (a n) * (g k) := by
+  simple_induction k with k IH
+  · -- base case
+    rw [g_zero]
+    simp
+    extra
+  · -- inductive step
+    calc
+      _ = s (n + k + 1) := by ring
+      _ = s (n + k) + a (n + k) := by rw [s_succ]
+      _ ≤ s n + (a n) * (g k) + a (n + k) := by rel [IH]
+      _ ≤ s n + (a n) * (g k) + (1/2) ^ k * a n := by rel [a_bound n k hn]
+      _ = s n + (a n) * ((g k) + (1/2) ^ k) := by algebra
+      _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
+
+
+theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+    s (n + k) < s n + 2 * (a n)  := by
+  have h : a n > 0 := a_pos n
+  calc
+    _ ≤ s n + (a n) * (g k) := by apply s_under_geometric n k hn
+    _ < s n + (a n) * 2 := by rel [g_lt_2 k]
+    _ = s n + 2 * (a n) := by ring
+
+lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
+    s m ≤ s n + 2 * (a n)  := by
+  let k := m - n
+  have hk : m = n + k := by exact (Nat.sub_eq_iff_eq_add' hm).mp rfl
+  calc
+    _ = s (n + k)  := by rw [hk]
+    _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
+    _ = s n + 2 * (a n) := by ring
+
+
+/-
+  ## Part IV: Integrality
 
   We will prove that `e` is irrational by proving that `M * e` is not an integer for any
   positive natural number `M`. In this section, we define what it means for a real number
@@ -339,61 +463,8 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
 
 
 
-/-
-  The partial sums s n, convering to e:
-
-  `s n = a 0 + a 1 + ... + a (n-1)`   (n terms)
-
-  Defined recursively:
-    `s 0 = 0`
-    `s (n + 1) = s n + a n`
-
-  Recall that `a n = 1 / n!`, so the first few values of `s n` are:
-  - `s 0 = 0` (empty sum)
-  - `s 1 = a 0 = 1`
-  - `s 2 = a 0 + a 1 = 1 + 1 = 2`
-  - `s 3 = a 0 + a 1 + a 2 = 1 + 1 + 1/2 = 5/2`
--/
-
-def s (n : ℕ) :=
-  match n with
-  | 0 => 0
-  | n + 1 => s n + a n
-
-lemma s_zero : s 0 = 0 := by rfl
-
-lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by rfl
-
-lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
-
-lemma s_two : s 2 = 2 := by rw [s_succ, s_one, a_one]; numbers
-
-lemma s_three : s 3 = 5 / 2 := by rw [s_succ, s_two, a_two]; numbers
 
 
-lemma s_lt_next (n : ℕ) : s n < s (n + 1) := by
-  rw [s_succ]
-  addarith [a_pos n]
-
-lemma s_monotone (n : ℕ) (m : ℕ) (hm : m > n) : s n < s m := by
-  induction_from_starting_point m, hm with k hk IH
-  · exact s_lt_next n
-  · calc
-    _ < s k := by rel [IH]
-    _ < s (k + 1) := by rel [s_lt_next k]
-
-lemma s_monotone' (n : ℕ) (m : ℕ) (hm : m ≥ n) : s n ≤ s m := by
-  induction_from_starting_point m, hm with k hk IH
-  · rfl
-  · calc
-    _ ≤ s k := by rel [IH]
-    _ ≤ s (k + 1) := by rel [s_lt_next k]
-
-lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
-  simple_induction n with n IH
-  · rw [s_zero]
-  · rw [s_succ]
-    addarith [IH, a_pos n]
 
 /-
   Establish that n ! * s (n + 1) is an integer.
@@ -444,18 +515,6 @@ lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
 -/
 
 
-
-lemma a_bound_aux (n : ℕ) (k : ℕ) : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
-  rewrite [a_def, nat_inv_def, nat_inv_def]
-  algebra
-
-lemma a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
-    a (n + k) ≤  (1/2) ^ k * (a n) := by
-  rewrite [a_bound_aux, a_def]
-  apply nat_inv_le
-  apply fac_bound
-  positivity
-  apply aux n k
 
 
 
@@ -523,7 +582,7 @@ lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
 
 
 /-
-  # The number `e` as limit of the sequence `s n`
+  ## The number `e` as limit of the sequence `s n`
 
   The next part defines the number `e` as follows:
   - we show that the sequence `s n` is Cauchy, and hence has a limit

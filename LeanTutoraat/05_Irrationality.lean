@@ -544,9 +544,10 @@ lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
   - we show that the sequence `s n` is Cauchy, and hence has a limit
   - we define `e` to be this limit.
   The details are a bit technical, since they require working closely with the
-  how `ℝ`, "Cauchy" and "limit" have been implemented in Lean.
+  how `ℝ`, "Cauchy" and "limit" have been implemented in Lean. For this reason,
+  this section is already pre-filled with proofs.
 
-  To be able to *use* the number `e`, we also prove two lemmas:
+  To be able to *use* the number `e`, we include proofs of two lemmas:
   - `s_lt_e`, which states that `s n < e` for all `n`
   - `e_le_of_s_le`, which states that if `s n ≤ c` for all `n`, then `e ≤ c`.
 
@@ -576,6 +577,10 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro n hn
   exact hN n hn n (by rfl)
 
+/-
+  The following lemma states that `s n < e` for all `n`. Together with
+  `e_le_of_s_le` below, this completely determines the number `e`.
+-/
 lemma s_lt_e (n : ℕ) : s n < e := by
   by_contra h
   rw [not_lt] at h
@@ -597,7 +602,7 @@ lemma s_lt_e (n : ℕ) : s n < e := by
 
 /-
   The following lemma states that if `s n ≤ c` for all sufficiently large `n`, then
-  `e ≤ c`.
+  `e ≤ c`. Together with `s_lt_e` above, this completely determines the number `e`.
 -/
 lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
   by_contra h2
@@ -610,29 +615,44 @@ lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
   specialize hN N
   contrapose hN
   push_neg
-  calc
+  constructor
+  · rfl
+  · calc
     _ = e - c := by rfl
     _ ≤ e - s N := by addarith [h]
     _ ≤ |e - s N| := by exact le_abs_self (e - s n)
     _ = |- (e - s N )| := by rw [abs_neg]
     _ = |s N - e| := by ring
 
+/-
+  # Key bounds on the number`e`
+
+  We now use `s_lt_e` and `e_le_of_s_le` to prove some inequalities satisfied by `e`.
+-/
+
+theorem e_gt_2 : e > 2 := by
+  calc
+    e > s 2 := by apply s_lt_e
+    _ = 2 := by apply s_two
+
+
 theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
-  apply e_le_of_s_le _ 0
-  intro m hm
+  apply e_le_of_s_le _
+  intro m
   by_cases h : m ≥ n
   · exact key_bound_s' n m h hn
   · push_neg at h
     have h3 : a n ≥ 0 := by addarith [a_pos n]
-    have h2 : 2 * (a n) ≥ 0 := by positivity
+    have h2 : 2 * (a n) > 0 := by linarith [a_pos n]
     calc
       _ ≤ s n := by rel [s_monotone m n h]
       _ ≤ s n + 2 * (a n) := by extra
 
 
+
 theorem e_lt_3 : e < 3 := by
    calc
-    e ≤ s 3 + 2 * (a 3) := by exact key_bound_e 3 (by numbers)
+    e ≤ s 3 + 2 * (a 3) := by apply key_bound_e; numbers
     _ < 3 := by rewrite [s_three, a_three]; numbers
 
 
@@ -663,7 +683,7 @@ lemma t_def (n : ℕ) : t n = e - s n := by rfl
 
 lemma t_pos (n : ℕ) : 0 < t n := by
   rw [t_def]
-  addarith [s_lt_e n]
+  linarith [s_lt_e n]
 
 lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   rw [t_def]
@@ -688,7 +708,7 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
     · field_simp; norm_cast; addarith [hn]
   calc
   _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
-  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by sorry
+  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rewrite [a_def, a_def, fac_succ, nat_inv_mul, nat_inv_def]; algebra
   _ = ((fac n) * a n) * (2 * ((n : ℝ) + 1)⁻¹) := by ring
   _ = 1 * (2 * ((n : ℝ) + 1)⁻¹) := by rw [fac_mul_a_eq_one n]
   _ = 2 * ((n : ℝ) + 1)⁻¹ := by ring
@@ -696,25 +716,18 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   _ < 1 := by numbers
 
 -- KEY INGREDIENT 3:
--- major bottleneck, make this idiomatic!
 lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
-  apply mul_pos
-  · norm_cast; exact fac_pos n
-  · exact t_pos (n + 1)
+  have h1 : (fac n) > 0 := by apply fac_pos n
+  have h2 : t (n + 1) > 0 := by apply t_pos (n + 1)
+  positivity
 
 
--- source of contradiction
+-- KEY INGREDIENT 4: the source of contradiction (pre-filled)
 lemma no_int_between_0_and_1 (N : ℤ) (hN : N > 0) (hN2 : N < 1) : False := by
   have h : N ≥ 1 := by exact hN
   have h2 : ¬ N < 1 := by exact Int.not_lt.mpr hN
   contradiction
 
-
-example (N : ℤ) (h : 0 < (N : ℝ)) : 0 < N := by
-  simp_all only [Int.cast_pos]
-
-example (N : ℤ) (h : (N : ℝ) < 1) : N < 1 := by
-  norm_cast at *
 
 
 -- KEY STEP: show that n! * e cannot be an integer!

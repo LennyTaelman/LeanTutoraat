@@ -13,3 +13,6 @@ Doc/cheatsheet.fdb_latexmk
 Doc/cheatsheet.fls
 Doc/cheatsheet.log
 Doc/cheatsheet.synctex.gz
+Doc/Irrationality/proof.fdb_latexmk
+Doc/Irrationality/proof.log
+Doc/Irrationality/proof.synctex.gz

@@ -143,17 +143,17 @@ e = \lim_{n \to \infty} s_n = \sum_{n=0}^{\infty} \frac{1}{n!}.
 \]
 
 Since $(s_n)$ is a strictly increasing sequence (as $a_n > 0$ for all $n$) and bounded
-above (e.g., $s_n < 3$ for all $n$), the limit exists, and it satisfies the following two properties:
+above (by Lemma~\ref{lemma:s-bound-total}), the limit exists. 
 
 \begin{lemma}[Characterisation of $e$] The number $e$ satisfies:
     \begin{enumerate}
-       \item for all $n$, we have $s_n < e$
-       \item if $c\in \R$ and $s_n \leq c$ for all $n$, then $e \leq c$.
+       \item For all $n$, we have $s_n < e$;
+       \item If $c\in \R$ and $s_n \leq c$ for all $n$, then $e \leq c$.
     \end{enumerate}
-Moreover, $e$ is the \emph{only}  real number that satisfies these properties. \qed
+Moreover, $e$ is the \emph{only}  real number that satisfies these two properties. \qed
 \end{lemma}
 
-Combining with Lemma~\ref{lemma:s-bound-total} we obtain:
+Combining the second point with Lemma~\ref{lemma:s-bound-total} we obtain:
 
 \begin{theorem}[Key bound on $e$] For all $n>0$ we have $e \leq s_n + 2 \cdot a_n$
 \end{theorem}

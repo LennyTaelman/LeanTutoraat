@@ -16,6 +16,7 @@
 \newtheorem{definition}{Definition}
 
 \def\N{\mathbb{N}}
+\def\Z{\mathbb{Z}}
 \def\R{\mathbb{R}}
 
 \begin{document}
@@ -135,7 +136,7 @@ then this follows from $s_m \leq s_n$ and $a_n > 0$.
 \end{proof}
 
 
-\section{$e$ as limit of $s_n$}
+\section{The number $e = \lim_{n \to \infty} s_n$}
 
 The number $e$ is defined as the limit of the sequence $(s_n)$:
 \[
@@ -145,7 +146,7 @@ e = \lim_{n \to \infty} s_n = \sum_{n=0}^{\infty} \frac{1}{n!}.
 Since $(s_n)$ is a strictly increasing sequence (as $a_n > 0$ for all $n$) and bounded
 above (by Lemma~\ref{lemma:s-bound-total}), the limit exists. 
 
-\begin{lemma}[Characterisation of $e$] The number $e$ satisfies:
+\begin{lemma}[Characterisation of $e$]\label{lemma:e-characterisation} The number $e$ satisfies:
     \begin{enumerate}
        \item For all $n$, we have $s_n < e$;
        \item If $c\in \R$ and $s_n \leq c$ for all $n$, then $e \leq c$.
@@ -155,41 +156,71 @@ Moreover, $e$ is the \emph{only}  real number that satisfies these two propertie
 
 Combining the second point with Lemma~\ref{lemma:s-bound-total} we obtain:
 
-\begin{theorem}[Key bound on $e$] For all $n>0$ we have $e \leq s_n + 2 \cdot a_n$
-\end{theorem}
-
-
-\section{Proof that $n! \cdot s_{n+1}$ is an integer, but $n! \cdot e$ cannot be}
-
-Define the tail of the series:
-\[
-t_n = e - s_n = \sum_{i=n}^{\infty} \frac{1}{i!}.
-\]
-
-Note that $t_n > 0$ for all $n$ (since $s_n < e$), and from the bound above, we have $t_n \leq 2 \cdot a_n$ for $n \geq 1$.
-
-The key ingredients are:
-
-\begin{lemma}[Integrality of $n! \cdot s_{n+1}$]
-For all $n \in \mathbb{N}$, the number $n! \cdot s_{n+1}$ is an integer.
+\begin{lemma}[Key bound on $e$]\label{lemma:e-bound}
+  For all $n>0$ we have $e \leq s_n + 2 \cdot a_n$
 \end{lemma}
 
-\begin{proof}[Proof sketch]
-We have
+
+\section{Integrality of $n! \cdot s_{n+1}$}
+
+\begin{definition}We say that a real number $x$ is \emph{integral} if $x
+\in \Z$. (In Lean: if there exists an integer $N$ such that $x = \uparrow N$.)
+\end{definition}
+
+\begin{lemma}\label{lemma:fac-mul-a-integral}
+  For all $m \leq n$ we have $n! \cdot a_m$ is an integer.
+\end{lemma}
+
+\begin{proof}By induction on $n$ starting at $n=m$. The base step is the
+statement that $n! \cdot a_n = 1$ is an integer. For the inductive step, assume
+that $n! \cdot a_m$ is an integer. Then
 \[
-n! \cdot s_{n+1} = n! \cdot \sum_{i=0}^{n} \frac{1}{i!} = \sum_{i=0}^{n} \frac{n!}{i!}.
+   (n+1)! \cdot a_m = (n+1) \cdot n! \cdot a_m = (n+1) \cdot (\text{some integer}),
 \]
-For $i \leq n$, we have $n!/i! = n \cdot (n-1) \cdots (i+1) \in \mathbb{N}$, so the sum is an integer.
+hence $(n+1)! \cdot a_m$ is an integer.
 \end{proof}
 
-\begin{lemma}[Bound on $n! \cdot t_{n+1}$]
+\begin{lemma}For all $n$ we have that $n! \cdot s_{n+1}$ is an integer.
+\end{lemma}
+
+\begin{proof}
+Induction on $n$. For $n=0$ we have $0! \cdot s_1 = 1$, which is an integer. For
+the inductive step, assume that $n! \cdot s_{n+1}$ is an integer. Then we have
+\[
+  (n+1)! \cdot s_{n+2} = (n+1)! \cdot (s_{n+1} + a_{n+1}) = (n+1) \cdot (n! \cdot s_{n+1}) + (n+1)! \cdot a_{n+1}.
+\]
+The first term is an integer by the induction hypothesis, and the second term is an integer by Lemma~\ref{lemma:fac-mul-a-integral}.
+\end{proof}
+
+\section{The tail $t_n = e - s_n$}
+
+Consider the `tail' of the series:
+\[
+t_n := e - s_n = \frac{1}{n!} + \frac{1}{(n+1)!} + \cdots.
+\]
+
+\begin{lemma}\label{lemma:t-positive}$t_n > 0$ for all $n$.
+\end{lemma}
+
+\begin{proof} Follows from the inequality $s_n < e$ of Lemma~\ref{lemma:e-characterisation}.
+\end{proof}
+
+\begin{lemma}\label{lemma:t-bound}
+If $n > TODO$ then $t_n \leq 2 \cdot a_n$
+\end{lemma}
+
+\begin{proof}
+Follows from Lemma~\ref{lemma:t-bound} and Lemma~\ref{lemma:a-bound}.
+\end{proof}
+
+\begin{lemma}\label{lemma:fac-mul-t-bound}
 For all $n \geq 2$,
 \[
 0 < n! \cdot t_{n+1} < 1.
 \]
 \end{lemma}
 
-\begin{proof}[Proof sketch]
+\begin{proof}
 The positivity follows from $t_{n+1} > 0$. For the upper bound, we use:
 \begin{align*}
 n! \cdot t_{n+1} &\leq n! \cdot 2 \cdot a_{n+1} \\
@@ -200,9 +231,18 @@ n! \cdot t_{n+1} &\leq n! \cdot 2 \cdot a_{n+1} \\
 where the last inequality uses $n \geq 2$.
 \end{proof}
 
-\begin{theorem}[Non-integrality of $n! \cdot e$]
-For all $n \geq 2$ and any integer $N$, we have $n! \cdot e \neq N$.
-\end{theorem}
+
+\begin{lemma}
+If $n\geq 2$, then $n! \cdot t_{n+1}$ is not integral.
+\end{lemma}
+
+\begin{proof}
+Direct consequence of Lemma~\ref{lemma:fac-mul-t-bound}: there is no integer strictly
+between $0$ and $1$.
+\end{proof}
+
+\section{Irrationality of $e$}
+
 
 \begin{proof}[Proof sketch]
 Suppose for contradiction that $n! \cdot e = N$ for some integer $N$. Since $n! \cdot s_{n+1}$ is an integer (say $M$), we have

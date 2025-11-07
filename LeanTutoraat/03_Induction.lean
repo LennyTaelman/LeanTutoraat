@@ -100,8 +100,8 @@ example (n : ℕ) (hn : n ≥ 3) : n ^ 2 ≥ 3 * n := by
   where the arrow `→` should be read as an implication.
 
   Prove this in lean, by following these steps:
-  1. Figure out what value of `C` you will use. (For the sake of argument, let's
-     say you want to use `C = 5`)
+  1. Figure out what value of `C` you will use. For the sake of argument, let's
+     say you want to use `C = 5` (which won't work!)
   2. Start the proof with `use 5`. The goal is now `n ≥ 5 → n ^ 2 ≥ n + 100`
   3. Use the tactic `intro h` to introduce the hypothesis `n ≥ 5`. The goal will
      now be `n ^ 2 ≥ n + 100`.
@@ -257,7 +257,7 @@ example (n : ℕ) : 3 * s2 n ≥ n ^ 3 := by
 /-
   Congratulations! You now know how to write induction proofs in Lean. If you
   want one more challenge, try to prove Bernoulli's inequality:
-    `(1 + x) ^ n ≥ 1 + n * x` for all `x ≥ 0` and `n ≥ 0`
+    `(1 + x) ^ n ≥ 1 + n * x` for all `x ≥ -1` and `n ≥ 0`
   by induction on `n`.
 
   At some point, you may see expressions like `↑k * x` in the right window pane.
@@ -267,10 +267,10 @@ example (n : ℕ) : 3 * s2 n ≥ n ^ 3 := by
   techniques to deal with such things. For the proof below, you should not
   worry, since `algebra` will automatically take care of this where needed.
 
-  Final hint: the tactic `simp` will automaticall simplify expressions like `0 *
+  Final hint: the tactic `simp` will automatically simplify expressions like `0 *
   x` or `x ^ 0` or `x + 0`. You may find this useful in the base case of the induction.
 -/
 
 
-example (x : ℝ) (n : ℕ) (h : x ≥ 0) : (1 + x) ^ n ≥ 1 + n * x := by
+example (x : ℝ) (n : ℕ) (h : x ≥ -1) : (1 + x) ^ n ≥ 1 + n * x := by
   sorry

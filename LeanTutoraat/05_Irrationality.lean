@@ -425,10 +425,19 @@ lemma isInt_one : isInt 1 := by use 1; numbers
 
 lemma isInt_nat (n : ℕ) : isInt (n : ℝ) := by use n; rfl
 
+lemma isInt_int (n : ℤ) : isInt (n : ℝ) := by use n; rfl
+
 lemma isInt_add (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a + b) := by
   obtain ⟨N, hN⟩ := ha
   obtain ⟨M, hM⟩ := hb
   use N + M
+  rw [hN, hM]
+  algebra
+
+lemma isInt_sub (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a - b) := by
+  obtain ⟨N, hN⟩ := ha
+  obtain ⟨M, hM⟩ := hb
+  use N - M
   rw [hN, hM]
   algebra
 
@@ -722,17 +731,25 @@ lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
   positivity
 
 
--- KEY INGREDIENT 4: the source of contradiction (pre-filled)
-lemma no_int_between_0_and_1 (N : ℤ) (hN : N > 0) (hN2 : N < 1) : False := by
-  have h : N ≥ 1 := by exact hN
-  have h2 : ¬ N < 1 := by exact Int.not_lt.mpr hN
-  contradiction
-
+-- KEY INGREDIENT 4: no real number between n and n+1 is an integer!
+lemma no_int_between_n_and_succ_n (n : ℤ) (x : ℝ) (h1 : n < x) (h2 : x < n + 1) : ¬ isInt x := by
+  intro h
+  obtain ⟨N, hN⟩ := h
+  rw [hN] at h1 h2
+  norm_cast at h1 h2
+  linarith
 
 
 -- KEY STEP: show that n! * e cannot be an integer!
+
+lemma e_not_integral : ¬ isInt e := by
+  intro h
+  have h2 : e > 2 := by apply e_gt_2
+  have h3 : e < 2 + 1 := by linarith[e_lt_3]
+  apply no_int_between_n_and_succ_n 2 e h2 h3 h
+
 lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
-    (fac n) * e ≠ N := by
+    ¬ isInt ((fac n) * e) := by
   intro hN
   obtain ⟨N2, hN2⟩ := fac_mul_s_succ_integral n
   let N3 := N - N2
@@ -753,6 +770,19 @@ lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
   exact no_int_between_0_and_1 N3 h2 h3
 
 #print axioms fac_mul_e_not_integral
+
+
+def isRat (x : ℝ) : Prop := ∃ p q : ℕ, q > 0 ∧ x = p / q
+
+lemma fac_mul_integral_of_rational (x : ℝ) (h : isRat x) :
+    ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by
+  obtain ⟨p, q, hq, hx⟩ := h
+
+  use q
+  rw [hx]
+  rw [fac_div_integral q hq]
+  algebra
+  sorry
 
 
 -- TODO: make this idiomatic!

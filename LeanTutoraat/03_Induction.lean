@@ -103,9 +103,9 @@ example (n : ℕ) (hn : n ≥ 3) : n ^ 2 ≥ 3 * n := by
   1. Figure out what value of `C` you will use. For the sake of argument, let's
      say you want to use `C = 5` (which won't work!)
   2. Start the proof with `use 5`. The goal is now `n ≥ 5 → n ^ 2 ≥ n + 100`
-  3. Use the tactic `intro h` to introduce the hypothesis `n ≥ 5`. The goal will
+  3. Use the tactic `intro hn` to introduce the hypothesis `n ≥ 5`. The goal will
      now be `n ^ 2 ≥ n + 100`.
-  4. Finish the proof using induction.
+  4. Finish the proof using induction, starting at `n = 5`.
 -/
 
 example (n : ℕ) : ∃ C : ℕ, n ≥ C → n ^ 2 ≥ n + 100 := by

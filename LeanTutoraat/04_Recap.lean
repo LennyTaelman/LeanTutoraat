@@ -98,19 +98,79 @@ example (n : ℕ) (h : n ≥ 4): fac n ≥ 2 ^ n := by
 
 
 /-
-  ## Mixed identities and inequalities
+  ## Mixing naturals and reals
 
   So far, we have mostly proven equalities and inequalities where all variables
   where either natural numbers, integers, or real numbers. Sometimes we need to
   mix them and interpret for example a natural number `n` as a *real* number.
   This requires some care!
+
+  Lean does a lot of this handling automatically, which makes things more confusing.
+  (It is not clear what goes wrong when thigns go wrong...)
+
+  Let's make things more explicit.
 -/
 
+def nat_to_real (n : ℕ) : ℝ := n
 
-example (n : ℕ) (m : ℕ) : (n + m : ℝ) = (n : ℝ) + (m : ℝ) := by
+lemma nat_to_real_def (n : ℕ) : nat_to_real n = ↑n := by rfl
+
+/-
+  We can now be very careful, and write `nat_to_real n` when we want to consider the natural
+  number `n` as a real number.
+
+  Let's prove some basic properties. General strategy:
+  1) use `rewrite [nat_to_real_def]` to unfold the definition of `nat_to_real`.
+  2) inspect the goal. It will contain things such as `↑n`, which means "the number `n`
+       considered as a real number".
+  3) the tactics `numbers`, `algebra`, and `linarith` can usually deal with these automatically.
+-/
+
+-- the image of the natural number 0 is the real number 0
+lemma nat_to_real_zero : nat_to_real 0 = 0 := by rewrite [nat_to_real_def]; numbers
+
+-- addition of naturals is compatible with addition of reals
+lemma nat_to_real_add (n m : ℕ) : nat_to_real (n + m) = nat_to_real n + nat_to_real m := by
+  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
   algebra
 
-example (n : ℕ) (m : ℕ) (h : n ≥ m) : (n : ℝ) ≥ (m : ℝ) := by
+-- multiplication of naturals is compatible with multiplication of reals
+lemma nat_to_real_mul (n m : ℕ) : nat_to_real (n * m) = nat_to_real n * nat_to_real m := by
+  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
+  algebra
+
+/-
+  The following is *false*! Check that you cannot prove it in the same way as the previous lemmas.
+  Why is that? Because `n - m` denotes the natural number `n - m`, which is defined to be `0` if `n < m`.
+-/
+lemma nat_to_real_sub (n m : ℕ) : nat_to_real (n - m) = nat_to_real n - nat_to_real m := by
+  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
+  sorry -- inspect the goal before this `sorry`. Verify that `algebra` cannot prove this.
+
+
+-- inequalities of naturals are compatible with inequalities of reals
+lemma nat_to_real_of_le (n m : ℕ) (h : nat_to_real n ≥ nat_to_real m) : n ≥ m := by
+  rewrite [nat_to_real_def, nat_to_real_def] at h
+  linarith
+
+
+
+
+
+
+/-
+  For example, the following example shows that the inequality of natural numbers
+  is compatible with inequality of real numbers. Put your cursor before `sorry` and
+  you will see that
+  - you have a hypothesis `h : n ≥ m`
+  - you have a goal `↑n ≥ ↑m`
+  Here the uparrow in `↑n` indicates that `n` is being considered as a real number.
+
+  Note that this is *not* an empty statement! Fortunately, `linarith` can do this
+  automatically.
+-/
+
+example (n m : ℕ) (h : n ≥ m) : (n : ℝ) ≥ (m : ℝ) := by
   linarith
 
 /-
@@ -122,5 +182,34 @@ example (n : ℕ) (m : ℕ) (h : n > m) (x : ℝ) : n + x > m + x := by
   have h2 : (n : ℝ) > (m : ℝ) := by linarith
   linarith
 
-example (n m : ℕ) (x : ℝ) : (n + m) * x = n * x + m * x := by
+
+/-
+  Here is another example. Let's define `nat_mul n x` inductively as:
+  - `nat_mul 0 x = 0`
+  - `nat_mul (n + 1) x = nat_mul n x + x`
+  We have `nat_mul n x = x + x + ... + x` (with `n` terms)
+-/
+
+def nat_mul (n : ℕ) (x : ℝ) : ℝ := n * x
+
+lemma nat_mul_def (n : ℕ) (x : ℝ) : nat_mul n x = n * x := by rfl
+
+/-
+  Let's do some basic checks
+-/
+
+lemma nat_mul_one (x : ℝ) : nat_mul 1 x = x := by rewrite [nat_mul_def]; algebra
+
+lemma nat_mul_two (x : ℝ) : nat_mul 2 x = 2 * x := by rewrite [nat_mul_def]; algebra
+
+
+
+
+/-
+  We can now prove that `nat_mul n x = n * x` for all `n : ℕ` and `x : ℝ`.
+-/
+
+
+example (n m : ℕ) (x : ℝ) : nat_mul (n + m) x = nat_mul n x + nat_mul m x := by
+  rewrite [nat_mul_def, nat_mul_def, nat_mul_def]
   algebra

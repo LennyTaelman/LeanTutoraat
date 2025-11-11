@@ -158,7 +158,10 @@ macro "sorry" : tactic => `(tactic| sorry)
   `a = b` which follows from a linear manipulation of the available hypotheses.
   It may be helpful to add hypotheses using the `have` tactic.
 -/
-macro "linarith" : tactic => `(tactic | first | linarith | norm_cast <;> done | (norm_cast; linarith) )
+macro "linarith" : tactic => `(tactic | first
+  | linarith
+  | norm_cast at * <;> done
+  | (norm_cast at *; linarith) )
 
 /--
 The `apply` tactic applies a lemma to the current goal, generating new subgoals

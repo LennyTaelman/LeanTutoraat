@@ -161,14 +161,14 @@ lemma nat_inv_le (n m : ℕ) (h : n ≥ m) (hm : m > 0) : nat_inv n ≤ nat_inv 
   have hn : n > 0 := by linarith
   apply inv_le_inv_of_le
   positivity
-  norm_cast
+  linarith
 
 lemma nat_inv_lt (n m : ℕ) (h : n > m) (hm : m > 0) : nat_inv n < nat_inv m := by
   rw [nat_inv_def n, nat_inv_def m]
   have hn : n > 0 := by linarith
   apply inv_lt_inv_of_lt
   positivity
-  norm_cast
+  linarith
 
 lemma nat_inv_le_one (n : ℕ) (hn : n > 0) : nat_inv n ≤ 1 := by
   rewrite [← nat_inv_one]
@@ -738,7 +738,6 @@ lemma no_int_between_n_and_succ_n (n : ℤ) (x : ℝ) (h1 : n < x) (h2 : x < n +
   intro h
   obtain ⟨N, hN⟩ := h
   rw [hN] at h1 h2
-  norm_cast at h1 h2
   linarith
 
 

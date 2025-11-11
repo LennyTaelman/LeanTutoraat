@@ -98,7 +98,7 @@ lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
 
 
 /-
-  The key lower bound on the factorial function
+  In the proof of `fac_bound` below, it will be useful to know that `2 ^ k * fac n` is positive.
 -/
 
 lemma aux (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by

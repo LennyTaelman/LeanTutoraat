@@ -96,6 +96,53 @@ example (n : ℕ) (h : n ≥ 4): fac n ≥ 2 ^ n := by
       _ ≥  2 * 2 ^ k := by rel [h2]
       _ = 2 ^ (k + 1) := by algebra
 
+/-
+  Geometric series
+-/
+
+def geom (c : ℝ) (n : ℕ) : ℝ :=
+  match n with
+  | 0 => 0
+  | n + 1 => c ^ n + geom c n
+
+lemma geom_zero (c : ℝ) : geom c 0 = 0 := by rfl
+
+lemma geom_succ (c : ℝ) (n : ℕ) :
+    geom c (n + 1) = c ^ n + geom c n := by rfl
+
+/-
+  Sanity checks
+-/
+
+lemma geom_one (c : ℝ) : geom c 1 = 1 := by
+  rewrite [geom_succ, geom_zero]; algebra
+
+lemma geom_two (c : ℝ) : geom c 2 = 1 + c := by
+  rewrite [geom_succ, geom_one]; algebra
+
+lemma geom_three (c : ℝ) : geom c 3 = 1 + c + c ^ 2 := by
+  rewrite [geom_succ, geom_two]; algebra
+
+/-
+  The main result, version 1:
+-/
+
+lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1  - c ^ n := by
+  simple_induction n with k IH
+  · rewrite [geom_zero]; algebra
+  · rewrite [geom_succ]
+    calc
+      (1 - c) * (c ^ k + geom c k) = (1 - c) * c ^ k + (1 - c) * geom c k := by algebra
+      _ = 1 - c ^ (k + 1) := by rewrite [IH]; algebra
+
+/-
+  Version 2, probably more familiar:
+-/
+
+lemma geom_series' (c : ℝ) (n : ℕ) (h : 1 - c ≠ 0) : geom c n = (1 - c ^ n) / (1 - c) := by
+  simple_induction n with k IH
+  · rewrite [geom_zero]; algebra
+  · rewrite [geom_succ, IH]; algebra
 
 /-
   ## Mixing naturals and reals
@@ -105,60 +152,7 @@ example (n : ℕ) (h : n ≥ 4): fac n ≥ 2 ^ n := by
   mix them and interpret for example a natural number `n` as a *real* number.
   This requires some care!
 
-  Lean does a lot of this handling automatically, which makes things more confusing.
-  (It is not clear what goes wrong when thigns go wrong...)
 
-  Let's make things more explicit.
--/
-
-def nat_to_real (n : ℕ) : ℝ := n
-
-lemma nat_to_real_def (n : ℕ) : nat_to_real n = ↑n := by rfl
-
-/-
-  We can now be very careful, and write `nat_to_real n` when we want to consider the natural
-  number `n` as a real number.
-
-  Let's prove some basic properties. General strategy:
-  1) use `rewrite [nat_to_real_def]` to unfold the definition of `nat_to_real`.
-  2) inspect the goal. It will contain things such as `↑n`, which means "the number `n`
-       considered as a real number".
-  3) the tactics `numbers`, `algebra`, and `linarith` can usually deal with these automatically.
--/
-
--- the image of the natural number 0 is the real number 0
-lemma nat_to_real_zero : nat_to_real 0 = 0 := by rewrite [nat_to_real_def]; numbers
-
--- addition of naturals is compatible with addition of reals
-lemma nat_to_real_add (n m : ℕ) : nat_to_real (n + m) = nat_to_real n + nat_to_real m := by
-  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
-  algebra
-
--- multiplication of naturals is compatible with multiplication of reals
-lemma nat_to_real_mul (n m : ℕ) : nat_to_real (n * m) = nat_to_real n * nat_to_real m := by
-  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
-  algebra
-
-/-
-  The following is *false*! Check that you cannot prove it in the same way as the previous lemmas.
-  Why is that? Because `n - m` denotes the natural number `n - m`, which is defined to be `0` if `n < m`.
--/
-lemma nat_to_real_sub (n m : ℕ) : nat_to_real (n - m) = nat_to_real n - nat_to_real m := by
-  rewrite [nat_to_real_def, nat_to_real_def, nat_to_real_def]
-  sorry -- inspect the goal before this `sorry`. Verify that `algebra` cannot prove this.
-
-
--- inequalities of naturals are compatible with inequalities of reals
-lemma nat_to_real_of_le (n m : ℕ) (h : nat_to_real n ≥ nat_to_real m) : n ≥ m := by
-  rewrite [nat_to_real_def, nat_to_real_def] at h
-  linarith
-
-
-
-
-
-
-/-
   For example, the following example shows that the inequality of natural numbers
   is compatible with inequality of real numbers. Put your cursor before `sorry` and
   you will see that

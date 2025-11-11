@@ -714,7 +714,9 @@ lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
   have h4 : ((n : ℝ) + 1)⁻¹ ≤ 3⁻¹ := by
     apply inv_le_of_inv_le
     · numbers
-    · field_simp; norm_cast; addarith [hn]
+    · calc
+        (3: ℝ)⁻¹⁻¹ = 3 := by numbers
+        _ ≤ n + 1 := by linarith
   calc
   _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
   _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rewrite [a_def, a_def, fac_succ, nat_inv_mul, nat_inv_def]; algebra

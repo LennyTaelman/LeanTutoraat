@@ -152,6 +152,14 @@ The `sorry` tactic admits the current goal without proof. It is used as a placeh
 macro "sorry" : tactic => `(tactic| sorry)
 
 
+
+/--
+  The `linarith` tactic tries to prove a goal of the form `a ≤ b` or `a < b` or
+  `a = b` which follows from a linear manipulation of the available hypotheses.
+  It may be helpful to add hypotheses using the `have` tactic.
+-/
+macro "linarith" : tactic => `(tactic | first | linarith | norm_cast <;> done | (norm_cast; linarith) )
+
 /--
 The `apply` tactic applies a lemma to the current goal, generating new subgoals
 for each of its hypotheses.

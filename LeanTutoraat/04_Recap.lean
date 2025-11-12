@@ -206,7 +206,9 @@ lemma halve_zero : halve 0 = 0 := by
   numbers
 
 
--- TODO: make sure we practice using `apply` with these lemmas!!
+
+
+
 
 /-
   Sometimes `linarith` needs a hint. In the example below, first use `linarith`
@@ -226,9 +228,40 @@ lemma halve_le (n m : ℕ) (h : n ≤ m) : halve n ≤ halve m := by
   have h2 : (n : ℝ) ≤ (m : ℝ) := by linarith
   linarith
 
-
 /-
   Optional challenge!
 -/
 lemma halve_to_inf (x : ℝ) : ∃ n : ℕ, x ≤ halve n := by
   sorry
+
+
+
+/-
+  Let's try something more subtle:
+-/
+
+def harmonic (n : ℕ) : ℝ :=
+  match n with
+  | 0 => 0
+  | n + 1 => harmonic n + 1 / (n + 1)
+
+lemma harmonic_zero : harmonic 0 = 0 := by rfl
+
+lemma harmonic_succ (n : ℕ) : harmonic (n + 1) = harmonic n + 1 / (n + 1) := by rfl
+
+lemma harmonic_one : harmonic 1 = 1 := by rewrite [harmonic_succ, harmonic_zero]; numbers
+
+lemma harmonic_two : harmonic 2 = 3 / 2 := by rewrite [harmonic_succ, harmonic_one]; numbers
+
+lemma harmonic_three : harmonic 3 = 11 / 6 := by rewrite [harmonic_succ, harmonic_two]; numbers
+
+
+lemma harmonic_pos (n : ℕ) : harmonic n ≥ 0 := by
+  simple_induction n with k IH
+  · rewrite [harmonic_zero]; numbers
+  · rewrite [harmonic_succ]
+    calc
+      harmonic (k + 1) = harmonic k + 1 / (k + 1) := by rewrite [harmonic_succ]; rfl
+      _ ≥ 0 + 1 / (k + 1) := by rel [IH]
+      _ = 1 / (k + 1) := by algebra
+      _ ≥ 0 := by positivity

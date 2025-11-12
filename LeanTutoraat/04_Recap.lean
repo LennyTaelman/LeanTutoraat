@@ -1,9 +1,9 @@
 import Library.Basic
-
+noncomputable section
 
 /- # Recap and consolidation -/
 
-/- ## Induction with `simple_induction` and `induction_from_starting_point` -/
+/- ## Induction proofs and the factorial function -/
 
 /-
   Recall: `simple_induction n with k IH` creates two goals:
@@ -97,21 +97,27 @@ example (n : ℕ) (h : n ≥ 4): fac n ≥ 2 ^ n := by
       _ = 2 ^ (k + 1) := by algebra
 
 /-
-  Geometric series
+  ## Geometric series
+
+  The function below defines for all `c : ℝ` and `n : ℕ` the sum
+    `geom c n = 1 + c + c ^ 2 + ... + c ^ (n-1)` (so there are `n` terms)
+  It can be manipulated using the two defining lemmas:
+    - `geom_zero c : geom c 0 = 0` (empty sum)
+    - `geom_succ c n : geom c (n + 1) = (geom c n) + c ^ n`
 -/
 
 def geom (c : ℝ) (n : ℕ) : ℝ :=
   match n with
   | 0 => 0
-  | n + 1 => c ^ n + geom c n
+  | n + 1 => (geom c n) + c ^ n
 
 lemma geom_zero (c : ℝ) : geom c 0 = 0 := by rfl
 
 lemma geom_succ (c : ℝ) (n : ℕ) :
-    geom c (n + 1) = c ^ n + geom c n := by rfl
+    geom c (n + 1) = (geom c n) + c ^ n := by rfl
 
 /-
-  Sanity checks
+  Sanity checks: let's make sure this matches our expectations!
 -/
 
 lemma geom_one (c : ℝ) : geom c 1 = 1 := by
@@ -124,7 +130,7 @@ lemma geom_three (c : ℝ) : geom c 3 = 1 + c + c ^ 2 := by
   rewrite [geom_succ, geom_two]; algebra
 
 /-
-  The main result, version 1:
+  The main result, version 1, which holds for all `c : ℝ`:
 -/
 
 lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1  - c ^ n := by
@@ -132,11 +138,11 @@ lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1  - c ^ n := by
   · rewrite [geom_zero]; algebra
   · rewrite [geom_succ]
     calc
-      (1 - c) * (c ^ k + geom c k) = (1 - c) * c ^ k + (1 - c) * geom c k := by algebra
+      (1 - c) * ((geom c k) + c ^ k) = (1 - c) * c ^ k + (1 - c) * geom c k := by algebra
       _ = 1 - c ^ (k + 1) := by rewrite [IH]; algebra
 
 /-
-  Version 2, probably more familiar:
+  Version 2, probably more familiar, but requires the assumption that `1 - c ≠ 0`:
 -/
 
 lemma geom_series' (c : ℝ) (n : ℕ) (h : 1 - c ≠ 0) : geom c n = (1 - c ^ n) / (1 - c) := by
@@ -144,66 +150,85 @@ lemma geom_series' (c : ℝ) (n : ℕ) (h : 1 - c ≠ 0) : geom c n = (1 - c ^ n
   · rewrite [geom_zero]; algebra
   · rewrite [geom_succ, IH]; algebra
 
+
 /-
-  ## Mixing naturals and reals
+  ## Halving natural numbers
 
-  So far, we have mostly proven equalities and inequalities where all variables
-  where either natural numbers, integers, or real numbers. Sometimes we need to
-  mix them and interpret for example a natural number `n` as a *real* number.
-  This requires some care!
-
-
-  For example, the following example shows that the inequality of natural numbers
-  is compatible with inequality of real numbers. Put your cursor before `sorry` and
-  you will see that
-  - you have a hypothesis `h : n ≥ m`
-  - you have a goal `↑n ≥ ↑m`
-  Here the uparrow in `↑n` indicates that `n` is being considered as a real number.
-
-  Note that this is *not* an empty statement! Fortunately, `linarith` can do this
-  automatically.
+  Let's start mixing natural and real numbers a bit. We introduce the function
+  `halve` which sends a natural number `n` to the real number `n / 2`.
 -/
 
-example (n m : ℕ) (h : n ≥ m) : (n : ℝ) ≥ (m : ℝ) := by
+def halve (n : ℕ) : ℝ := n / 2
+
+/-
+  The following lemma just spells out the definition. It allows you to use
+    `rewrite [halve_def]` to replace `halve n` with its definition.
+-/
+
+lemma halve_def (n : ℕ) : halve n = n / 2 := by rfl
+
+/-
+  Now let's do some basic checks:
+-/
+
+example : halve 0 = 0 := by rewrite [halve_def]; numbers
+
+example : halve 1 = 1 / 2 := by rewrite [halve_def]; numbers
+
+example : halve 2 = 1 := by rewrite [halve_def]; numbers
+
+/-
+  And let's prove some simple lemma's.
+-/
+
+lemma twice_halve (n : ℕ) : 2 * (halve n) = n := by
+  rewrite [halve_def]
+  algebra
+
+lemma halve_add (n m : ℕ) : halve (n + m) = halve n + halve m := by
+  rewrite [halve_def, halve_def, halve_def]
+  algebra
+
+lemma halve_non_neg (n : ℕ) : halve n ≥ 0 := by
+  rewrite [halve_def]
+  positivity
+
+lemma halve_le_self (n : ℕ) : halve n ≤ n := by
+  rewrite [halve_def]
   linarith
+
+lemma halve_succ (n : ℕ) : halve (n + 1) = halve n + 1 / 2 := by
+  rewrite [halve_def, halve_def]
+  algebra
+
+lemma halve_zero : halve 0 = 0 := by
+  rewrite [halve_def]
+  numbers
+
+
+-- TODO: make sure we practice using `apply` with these lemmas!!
 
 /-
   Sometimes `linarith` needs a hint. In the example below, first use `linarith`
-  to prove that the *real* number `n` is greater than the *real* number `m`, and then let
-  `linarith` do the rest
+  to prove that the *real* number `n` is greater than the *real* number `m`,
+  using
+    `have h2 : (n : ℝ) < (m : ℝ) := by linarith`
+  and then use `linarith` to finish the proof.
 -/
-example (n : ℕ) (m : ℕ) (h : n > m) (x : ℝ) : n + x > m + x := by
-  have h2 : (n : ℝ) > (m : ℝ) := by linarith
+lemma halve_lt (n m : ℕ) (h : n < m) : halve n < halve m := by
+  rewrite [halve_def, halve_def]
+  -- `linarith` cannot finish this without a hint. We first establish that `(n : ℝ) < (m : ℝ)`
+  have h2 : (n : ℝ) < (m : ℝ) := by linarith
+  linarith
+
+lemma halve_le (n m : ℕ) (h : n ≤ m) : halve n ≤ halve m := by
+  rewrite [halve_def, halve_def]
+  have h2 : (n : ℝ) ≤ (m : ℝ) := by linarith
   linarith
 
 
 /-
-  Here is another example. Let's define `nat_mul n x` inductively as:
-  - `nat_mul 0 x = 0`
-  - `nat_mul (n + 1) x = nat_mul n x + x`
-  We have `nat_mul n x = x + x + ... + x` (with `n` terms)
+  Optional challenge!
 -/
-
-def nat_mul (n : ℕ) (x : ℝ) : ℝ := n * x
-
-lemma nat_mul_def (n : ℕ) (x : ℝ) : nat_mul n x = n * x := by rfl
-
-/-
-  Let's do some basic checks
--/
-
-lemma nat_mul_one (x : ℝ) : nat_mul 1 x = x := by rewrite [nat_mul_def]; algebra
-
-lemma nat_mul_two (x : ℝ) : nat_mul 2 x = 2 * x := by rewrite [nat_mul_def]; algebra
-
-
-
-
-/-
-  We can now prove that `nat_mul n x = n * x` for all `n : ℕ` and `x : ℝ`.
--/
-
-
-example (n m : ℕ) (x : ℝ) : nat_mul (n + m) x = nat_mul n x + nat_mul m x := by
-  rewrite [nat_mul_def, nat_mul_def, nat_mul_def]
-  algebra
+lemma halve_to_inf (x : ℝ) : ∃ n : ℕ, x ≤ halve n := by
+  sorry

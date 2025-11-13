@@ -203,12 +203,12 @@ example (m : ℕ) (h : m ≥ 4) : s m ≥ 2 := by
     `s_double_bound n h : s (2 * n) ≥ s n + 1/2`
   for `n : ℕ` and `h : n > 0`.
 
-  To prove this, we will need some lemmas first.
+  To prove this, we will use the lemma `inverse_le` below.
 -/
 
 
-lemma inverse_le (a b : ℝ) (h : a ≤ b) (ha : a > 0) : 1 / a ≥ 1 / b := by
-  exact one_div_le_one_div_of_le ha h
+lemma inverse_le (a b : ℝ) (h1 : a ≤ b) (h2 : a > 0) : 1 / a ≥ 1 / b := by
+  apply one_div_le_one_div_of_le h2 h1
 
 /-
   There is a subtlety in the next lemma: `n` is a natural number, but we need to
@@ -216,15 +216,29 @@ lemma inverse_le (a b : ℝ) (h : a ≤ b) (ha : a > 0) : 1 / a ≥ 1 / b := by
   funny-looking `(1 : ℝ)` in the statement is to tell Lean to consider `1` as a
   real number. Lean then automatically converts the other players in the
   inequality to real numbers.
+
+  To prove the lemma below, first esstablish the hypotheses `h2` and `h3` (each
+  can be done using a single tactic). Then apply `inverse_le` with the correct
+  arguments to finish the proof.
 -/
 lemma fractions_estimate (n : ℕ) (h : n > 0) : (1 : ℝ) / (2 * n + 2) ≤ 1 / (2 * n + 1) := by
-  -- let's first establish that `2 * n + 1 ≤ 2 * n + 2` in the real numbers
+  -- First establish that `2 * n + 1 ≤ 2 * n + 2` in the real numbers using `linarith`
   have h2 : (2 * n + 1 : ℝ) ≤ (2 * n + 2 : ℝ) := by linarith
-  -- Finish the proof. It may be useful to establish that `2 * n + 1 > 0` in the real numbers first.
+  -- Now establish that `2 * n + 1 > 0` in the real numbers using `positivity`,
+  -- and finish the proof using `inverse_le`.
   have h3 : (2 * n + 1 : ℝ) > 0 := by positivity
   apply inverse_le (2 * n + 1) (2 * n + 2) h2 h3
 
+/-
+  Examine your proof above, moving the cursor around and inspecting the right
+  hand window. Pay close attention to the difference between the natural number `n`,
+  and the associated real number `↑n`.
+-/
 
+
+/-
+  Now prove the lemma `s_twice_succ` below. The proof uses `fractions_estimate`.
+-/
 lemma s_twice_succ (n : ℕ) (h : n > 0) : s (2 * (n + 1)) ≥ s (2 * n) + 1 / (n + 1) := by
   calc
     s (2 * (n + 1)) = s ((2 * n + 1) + 1) := by algebra
@@ -233,6 +247,9 @@ lemma s_twice_succ (n : ℕ) (h : n > 0) : s (2 * (n + 1)) ≥ s (2 * n) + 1 / (
     _ ≥ s (2 * n) + 1 / (2 * n + 2) + 1 / (2 * n + 2) := by rel [fractions_estimate n h]
     _ = s (2 * n) + 1 / (n + 1)  := by algebra
 
+/-
+  Prove the following using `induction_from_starting_point` and the lemma `s_twice_succ`.
+-/
 lemma s_double_bound (n : ℕ) (h : n > 0) : s (2 * n) ≥ s n + 1/2 := by
   induction_from_starting_point n, h with k hk IH
   · rewrite [s_two, s_one]; numbers
@@ -242,6 +259,10 @@ lemma s_double_bound (n : ℕ) (h : n > 0) : s (2 * n) ≥ s n + 1/2 := by
       _ ≥  (s k + 1 / 2) + 1 / (k + 1) := by rel [IH]
       _ = (s k + 1 / (k + 1)) + 1 / 2 := by algebra
 
+
+/-
+  Finally, we establish the key lower bound!
+-/
 lemma harmonic_pow_two (n : ℕ) : s (2 ^ n) ≥ n / 2 := by
   simple_induction n with k IH
   · simp;
@@ -255,19 +276,19 @@ lemma harmonic_pow_two (n : ℕ) : s (2 ^ n) ≥ n / 2 := by
 
 
 /-
-   Now let's prove divergence: for every `n : ℕ` there is an `N` such that `s m ≥ n` for all
-   `m ≥ N`. Use the lemma `harmonic_pow_two` to prove this.
+   Now we can wrap up and prove divergence: for every `N : ℕ` there is an `n`
+   such that `s m ≥ N` for all `m ≥ N`.
 
    Follow the following steps:
 
    1) figure out which value `N = C` to use (as a function of `n`) and start with `use C`
    2) use `intro h` to introduce the hypothesis `m ≥ C`
    3) now use `induction_from_starting_point` to prove that the ineqality holds
-      for all `m ≥ C`
+      for all `m ≥ C`.
 -/
 
 
-theorem harmonic_diverges (N n : ℕ) : ∃ n : ℕ, m ≥ n → s m ≥ N := by
+theorem harmonic_diverges (N : ℕ) : ∃ n : ℕ, m ≥ n → s m ≥ N := by
   use 2 ^ (2 * N)
   intro h
   induction_from_starting_point m, h with k hk IH

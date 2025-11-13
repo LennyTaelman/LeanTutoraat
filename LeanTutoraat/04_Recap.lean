@@ -6,71 +6,72 @@ noncomputable section
 /-
   ## Geometric series
 
-  The function below defines for all `c : ℝ` and `n : ℕ` the sum
-    `geom c n = 1 + c + c ^ 2 + ... + c ^ (n-1)` (so there are `n` terms)
+  The function `g` below defines for all `c : ℝ` and `n : ℕ` the sum
+    `g c n = 1 + c + c ^ 2 + ... + c ^ (n-1)` (so there are `n` terms)
   The first few values are:
-    - `geom c 0 = 0` (empty sum)
-    - `geom c 1 = 1`
-    - `geom c 2 = 1 + c`
-    - `geom c 3 = 1 + c + c ^ 2`
-  We will prove the classical formula for such a geometric sum.
+    - `g c 0 = 0` (empty sum)
+    - `g c 1 = 1`
+    - `g c 2 = 1 + c`
+    - `g c 3 = 1 + c + c ^ 2`
+  As before, we don't write parentheses around the arguments of a function, so we write
+  `g c n` instead of `g(c, n)`.
 
-  First the definition, and the two defining lemmas:
+  Let's start with the definition, and the two defining lemmas:
 -/
 
-def geom (c : ℝ) (n : ℕ) : ℝ :=
+def g (c : ℝ) (n : ℕ) : ℝ :=
   match n with
   | 0 => 0
-  | n + 1 => (geom c n) + c ^ n
+  | n + 1 => (g c n) + c ^ n
 
-lemma geom_zero (c : ℝ) : geom c 0 = 0 := by rfl
+lemma g_zero (c : ℝ) : g c 0 = 0 := by rfl
 
-lemma geom_succ (c : ℝ) (n : ℕ) :
-    geom c (n + 1) = (geom c n) + c ^ n := by rfl
+lemma g_succ (c : ℝ) (n : ℕ) :
+    g c (n + 1) = (g c n) + c ^ n := by rfl
 
 /-
-  From now on, you will use `geom_zero` and `geom_succ` to prove things about `geom`.
+  From now on, you will use `g_zero` and `g_succ` to prove things about `g`.
 
   Let's start with some simple sanity checks to make sure this matches our expectations! Prove the following
-  three lemma's using `geom_zero` and `geom_succ`.
+  three lemma's using `g_zero` and `g_succ`.
 -/
 
-lemma geom_one (c : ℝ) : geom c 1 = 1 := by
-  rewrite [geom_succ, geom_zero]; algebra
+lemma g_one (c : ℝ) : g c 1 = 1 := by
+  rewrite [g_succ, g_zero]; algebra
 
-lemma geom_two (c : ℝ) : geom c 2 = 1 + c := by
-  rewrite [geom_succ, geom_one]; algebra
+lemma g_two (c : ℝ) : g c 2 = 1 + c := by
+  rewrite [g_succ, g_one]; algebra
 
-lemma geom_three (c : ℝ) : geom c 3 = 1 + c + c ^ 2 := by
-  rewrite [geom_succ, geom_two]; algebra
+lemma g_three (c : ℝ) : g c 3 = 1 + c + c ^ 2 := by
+  rewrite [g_succ, g_two]; algebra
 
-example : geom 10 4 = 1111 := by
-  rewrite [geom_succ, geom_three]; numbers
+example : g 10 4 = 1111 := by
+  rewrite [g_succ, g_three]; numbers
 
 
 /-
   Now use `simple_induction` to prove that `geom 1 n = n` for all `n : ℕ`.
 -/
-lemma geom_base_one (n : ℕ) : geom 1 n = n := by
+lemma g_base_one (n : ℕ) : g 1 n = n := by
   simple_induction n with k IH
-  · rewrite [geom_zero]; algebra
-  · rewrite [geom_succ]
+  · rewrite [g_zero]; algebra
+  · rewrite [g_succ]
     calc
-      geom 1 (k + 1) = geom 1 k + 1 := by rewrite [geom_succ]; algebra
+      g 1 (k + 1) = g 1 k + 1 := by rewrite [g_succ]; algebra
       _ = k + 1 := by rewrite [IH]; algebra
 
 /-
   We now prove the classical formula for the sum of a geometric series. The first version
   holds for all `c : ℝ`:
-    `(1 - c) * geom c n = 1 - c ^ n`
+    `(1 - c) * g c n = 1 - c ^ n`
   Replace `sorry` below with a proof.
 -/
-lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1 - c ^ n := by
+example (c : ℝ) (n : ℕ) : (1 - c) * g c n = 1 - c ^ n := by
   simple_induction n with k IH
-  · rewrite [geom_zero]; algebra
-  · rewrite [geom_succ]
+  · rewrite [g_zero]; algebra
+  · rewrite [g_succ]
     calc
-      (1 - c) * ((geom c k) + c ^ k) = (1 - c) * c ^ k + (1 - c) * geom c k := by algebra
+      (1 - c) * ((g c k) + c ^ k) = (1 - c) * c ^ k + (1 - c) * g c k := by algebra
       _ = 1 - c ^ (k + 1) := by rewrite [IH]; algebra
 
 /-
@@ -80,20 +81,26 @@ lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1 - c ^ n := by
 lemma one_sub_ne_zero (c : ℝ) (h : c ≠ 1) : 1 - c ≠ 0 := sub_ne_zero.mpr (id (Ne.symm h))
 
 /-
-  Now prove the second version. Hint: first establish `h1 : 1 - c ≠ 0` using the lemma above,
-  so that `algebra` can handle division by `1 - c`.
+  Now prove the second version, which says that
+  ` 1 + c + c ^ 2 + ... + c ^ (n-1) = (1 - c ^ n) / (1 - c)`,
+  assuming that `c ≠ 1`.
+
+  Hint: first establish `h1 : 1 - c ≠ 0` using the lemma above,
+  so that `algebra` knows it can safely handle division by `1 - c`.
 -/
-lemma geom_series' (c : ℝ) (n : ℕ) (h : c ≠ 1) : geom c n = (1 - c ^ n) / (1 - c) := by
+example (c : ℝ) (n : ℕ) (h : c ≠ 1) : g c n = (1 - c ^ n) / (1 - c) := by
   have h1 : 1 - c ≠ 0 := by apply one_sub_ne_zero c h
   simple_induction n with k IH
-  · rewrite [geom_zero]; algebra
-  · rewrite [geom_succ, IH]; algebra
+  · rewrite [g_zero]; algebra
+  · rewrite [g_succ, IH]; algebra
+
+
 
 
 /-
-  ## The harmonic series
+  ## The harmonic sum
 
-  We define the harmonic series
+  We define the harmonic sum
     `s n = 1 + 1/2 + 1/3 + ... + 1/n`
   Note that there are `n` terms in the sum. The first few values are:
     `s 0 = 0` (empty sum)
@@ -101,25 +108,13 @@ lemma geom_series' (c : ℝ) (n : ℕ) (h : c ≠ 1) : geom c n = (1 - c ^ n) / 
     `s 2 = 1 + 1/2 = 3/2`
     `s 3 = 1 + 1/2 + 1/3 = 11/6`
   We will prove that this series diverges, that is that `s n` is unbounded as
-  `n` goes to infinity.
+  `n` goes to infinity. But first: the definition and the two defining lemmas.
 -/
 
-
-/-
-  First the definition!
--/
 def s (n : ℕ) : ℝ :=
   match n with
   | 0 => 0
   | n + 1 => s n + 1 / (n + 1)
-
-/-
-  This defines for every `n : ℕ` a real number `s n : ℝ`. To manipulate it, you
-  use the following two lemmas:
-   - `s_zero : s 0 = 0`
-   - `s_succ n : s (n + 1) = s n + 1 / (n + 1)`
-  Together they completely determine `s n` for all `n : ℕ`.
--/
 
 lemma s_zero : s 0 = 0 := by rfl
 
@@ -145,7 +140,6 @@ lemma s_three : s 3 = 11 / 6 := by rewrite [s_succ, s_two]; numbers
 example (n : ℕ) : s (n + 2) = s n + 1 / (n + 1) + 1 / (n + 2) := by
   rewrite [s_succ, s_succ]
   algebra
-
 
 
 /-
@@ -194,8 +188,7 @@ example (m : ℕ) (h : m ≥ 4) : s m ≥ 2 := by
   I don't recommend you try to prove this now.
 -/
 
-
-
+-- instert your statement and proof here.
 
 /-
   We now move towards proving the divergence of the harmonic series. The key
@@ -203,31 +196,26 @@ example (m : ℕ) (h : m ≥ 4) : s m ≥ 2 := by
     `s_double_bound n h : s (2 * n) ≥ s n + 1/2`
   for `n : ℕ` and `h : n > 0`.
 
-  To prove this, we will use the lemma `inverse_le` below.
+  The following lemma will be useful in the proof.
 -/
-
-
 lemma inverse_le (a b : ℝ) (h1 : a ≤ b) (h2 : a > 0) : 1 / a ≥ 1 / b := by
   apply one_div_le_one_div_of_le h2 h1
 
 /-
-  There is a subtlety in the next lemma: `n` is a natural number, but we need to
-  divide `1` by `2 * n + 2` and `2 * n + 1` as *real numbers*. The
-  funny-looking `(1 : ℝ)` in the statement is to tell Lean to consider `1` as a
-  real number. Lean then automatically converts the other players in the
-  inequality to real numbers.
-
-  To prove the lemma below, first esstablish the hypotheses `h2` and `h3` (each
-  can be done using a single tactic). Then apply `inverse_le` with the correct
-  arguments to finish the proof.
+  Next we use the lemma above to establish the simple inequality
+    `1 / (2 * n + 2) ≤ 1 / (2 * n + 1)`
+  There is however a subtlety in the statement! Whereas `n` is a natural number,
+  the division takes place in the *real numbers*. The expression `(1 : ℝ)` in
+  the statement below tells Lean to consider `1` as a real number. Lean then
+  automatically converts the other players in the inequality to real numbers.
 -/
 lemma fractions_estimate (n : ℕ) (h : n > 0) : (1 : ℝ) / (2 * n + 2) ≤ 1 / (2 * n + 1) := by
   -- First establish that `2 * n + 1 ≤ 2 * n + 2` in the real numbers using `linarith`
   have h2 : (2 * n + 1 : ℝ) ≤ (2 * n + 2 : ℝ) := by linarith
-  -- Now establish that `2 * n + 1 > 0` in the real numbers using `positivity`,
-  -- and finish the proof using `inverse_le`.
+  -- Now introduce and prove a hypoteheis `h3` stating that `2 * n + 1 > 0` in `ℝ`.
   have h3 : (2 * n + 1 : ℝ) > 0 := by positivity
-  apply inverse_le (2 * n + 1) (2 * n + 2) h2 h3
+  -- Finish the proof by applying `inverse_le` with the correct arguments.
+  apply inverse_le (2 * n + 1 : ℝ) (2 * n + 2 : ℝ) h2 h3
 
 /-
   Examine your proof above, moving the cursor around and inspecting the right
@@ -237,7 +225,8 @@ lemma fractions_estimate (n : ℕ) (h : n > 0) : (1 : ℝ) / (2 * n + 2) ≤ 1 /
 
 
 /-
-  Now prove the lemma `s_twice_succ` below. The proof uses `fractions_estimate`.
+  Now use `fractions_estimate` to prove the lemma `s_twice_succ` below. Write
+  out a detailed chain of equalities and inequalities on paper first.
 -/
 lemma s_twice_succ (n : ℕ) (h : n > 0) : s (2 * (n + 1)) ≥ s (2 * n) + 1 / (n + 1) := by
   calc
@@ -299,3 +288,10 @@ theorem harmonic_diverges (N : ℕ) : ∃ n : ℕ, m ≥ n → s m ≥ N := by
     calc
       s (k + 1) ≥ s k := by apply s_monotone k
       _ ≥ N := by apply IH
+
+
+/-
+  Congratulations! You have shown that you can use the tactics learned to prove
+  some non-trivial results! In the final session, we will collaboratively prove
+  a much more involved result: the irrationality of the number `e`.
+-/

@@ -17,11 +17,11 @@
 
 % \maketitle
 
-\section*{Tactics}
+% \section*{Tactics}
 
 \begin{table}[h!]
 \centering
-\begin{tabularx}{\textwidth}{l p{10cm} X}
+\begin{tabularx}{\textwidth}{l p{8.5cm} X}
 \toprule
 \textbf{\!Tactic} & \textbf{\!Description} & \textbf{\!Example} \\
 \midrule
@@ -30,6 +30,14 @@
 Prove equalities that hold \emph{by definition}. &
 \parbox[t]{8cm}{\ttfamily\small
 example :\ 1 = 1 := by\\\hspace*{1em}rfl
+} \\
+
+\midrule
+
+\texttt{simp} &
+Simplifies trivial expressions such as \texttt{a + 0}, \texttt{1 * a} or \texttt{0 * a}. &
+\parbox[t]{12cm}{\ttfamily\small
+example (a : $\mathbb{Z}$) : 1 * a + 0 = a := by\\\hspace*{1em}simp
 } \\
 
 \midrule
@@ -50,20 +58,12 @@ example (x y :\ $\mathbb{R}$) :\ (x + y) * (x - y) = x \^{} 2 - y \^{} 2 := by\\
 
 \midrule
 
-\texttt{rewrite [h]} & 
-If hypothesis \texttt{h} is of the form \texttt{a = b}, replace \texttt{a} with \texttt{b} in the goal. &
+\texttt{rewrite [h]}, \quad \texttt{rewrite [$\leftarrow$h]} & 
+If hypothesis \texttt{h} is of the form \texttt{a = b}, replace \texttt{a} with
+\texttt{b} in the goal. The version with $\leftarrow$h replaces \texttt{b} with \texttt{a}. &
 \parbox[t]{12cm}{\ttfamily\small
 example (x :\ $\mathbb{Q}$) (h :\ x = 2) :\ x \^{} 2 = 4 := by\\
 \hspace*{1em}rewrite [h];\ numbers
-} \\ 
-
-\midrule
-
-\texttt{rewrite [$\leftarrow$h]} & 
-If hypothesis \texttt{h} is of the form \texttt{a = b}, replace \texttt{b} with \texttt{a} in the goal. &
-\parbox[t]{12cm}{\ttfamily\small
-example (x y :\ $\mathbb{Q}$) (h :\ x + 1 = y) :\ x = y - 1 := by\\
-\hspace*{1em}rewrite [$\leftarrow$h];\ algebra
 } \\ 
 
 \midrule
@@ -147,13 +147,35 @@ example (x :\ $\mathbb{R}$) (h :\ x + 1 > 2) :\ x * x$^{-1}$ = 1 := by\\
 \hspace*{1em}algebra
 } \\ 
 
+\midrule
+
+\texttt{simple\_induction n with k IH} & 
+Prove something for all natural numbers \texttt{n} by induction. Creates a base case (\texttt{n=0}) and an inductive step (\texttt{n=k+1} with induction hypothesis \texttt{IH} for \texttt{n=k}). &
+\parbox[t]{12cm}{\ttfamily\small
+example (n :\ $\mathbb{N}$) :\ n $\geq$ 0 := by\\
+\hspace*{1em}simple\_induction n with k IH\\
+\hspace*{1em}· numbers\\
+\hspace*{1em}· positivity
+} \\ 
+
+\midrule
+
+\parbox[t]{6.5cm}{\texttt{induction\_from\_starting\_point n, h with k hk IH}} &
+Prove something for all natural numbers \texttt{n $\geq$ C} by induction, given hypothesis \texttt{h : n $\geq$ C}. Creates a base case for \texttt{n=C} and an inductive step. &
+\parbox[t]{12cm}{\ttfamily\small
+example (n :\ $\mathbb{N}$) (h :\ n $\ge$ 3) :\ n $\ge$ 3 := by\\
+\hspace*{1em}induction\_from\_starting\_point n, h with k hk IH\\
+\hspace*{1em}· numbers\\
+\hspace*{1em}· linarith
+} \\
+
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \newpage
 
-\section*{Special symbols}
+% \section*{Special symbols}
 
 \begin{table}[h!]
 \begin{tabular}{cll}

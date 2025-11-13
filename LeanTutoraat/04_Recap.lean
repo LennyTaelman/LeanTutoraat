@@ -8,9 +8,14 @@ noncomputable section
 
   The function below defines for all `c : ℝ` and `n : ℕ` the sum
     `geom c n = 1 + c + c ^ 2 + ... + c ^ (n-1)` (so there are `n` terms)
-  It can be manipulated using the two defining lemmas:
-    - `geom_zero c : geom c 0 = 0` (empty sum)
-    - `geom_succ c n : geom c (n + 1) = (geom c n) + c ^ n`
+  The first few values are:
+    - `geom c 0 = 0` (empty sum)
+    - `geom c 1 = 1`
+    - `geom c 2 = 1 + c`
+    - `geom c 3 = 1 + c + c ^ 2`
+  We will prove the classical formula for such a geometric sum.
+
+  First the definition, and the two defining lemmas:
 -/
 
 def geom (c : ℝ) (n : ℕ) : ℝ :=
@@ -24,7 +29,10 @@ lemma geom_succ (c : ℝ) (n : ℕ) :
     geom c (n + 1) = (geom c n) + c ^ n := by rfl
 
 /-
-  Sanity checks: let's make sure this matches our expectations!
+  From now on, you will use `geom_zero` and `geom_succ` to prove things about `geom`.
+
+  Let's start with some simple sanity checks to make sure this matches our expectations! Prove the following
+  three lemma's using `geom_zero` and `geom_succ`.
 -/
 
 lemma geom_one (c : ℝ) : geom c 1 = 1 := by
@@ -36,6 +44,13 @@ lemma geom_two (c : ℝ) : geom c 2 = 1 + c := by
 lemma geom_three (c : ℝ) : geom c 3 = 1 + c + c ^ 2 := by
   rewrite [geom_succ, geom_two]; algebra
 
+example : geom 10 4 = 1111 := by
+  rewrite [geom_succ, geom_three]; numbers
+
+
+/-
+  Now use `simple_induction` to prove that `geom 1 n = n` for all `n : ℕ`.
+-/
 lemma geom_base_one (n : ℕ) : geom 1 n = n := by
   simple_induction n with k IH
   · rewrite [geom_zero]; algebra
@@ -45,10 +60,12 @@ lemma geom_base_one (n : ℕ) : geom 1 n = n := by
       _ = k + 1 := by rewrite [IH]; algebra
 
 /-
-  The main result, version 1, which holds for all `c : ℝ`:
+  We now prove the classical formula for the sum of a geometric series. The first version
+  holds for all `c : ℝ`:
+    `(1 - c) * geom c n = 1 - c ^ n`
+  Replace `sorry` below with a proof.
 -/
-
-lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1  - c ^ n := by
+lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1 - c ^ n := by
   simple_induction n with k IH
   · rewrite [geom_zero]; algebra
   · rewrite [geom_succ]
@@ -57,10 +74,17 @@ lemma geom_series (c : ℝ) (n : ℕ) : (1 - c) * geom c n = 1  - c ^ n := by
       _ = 1 - c ^ (k + 1) := by rewrite [IH]; algebra
 
 /-
-  Version 2, probably more familiar, but requires the assumption that `1 - c ≠ 0`:
+  The second version is probably more familiar, but requires the assumption that `c ≠ 1`,
+  so that we can divide by `1 - c`. To prove it, you can freely use the lemma below.
 -/
+lemma one_sub_ne_zero (c : ℝ) (h : c ≠ 1) : 1 - c ≠ 0 := sub_ne_zero.mpr (id (Ne.symm h))
 
-lemma geom_series' (c : ℝ) (n : ℕ) (h : 1 - c ≠ 0) : geom c n = (1 - c ^ n) / (1 - c) := by
+/-
+  Now prove the second version. Hint: first establish `h1 : 1 - c ≠ 0` using the lemma above,
+  so that `algebra` can handle division by `1 - c`.
+-/
+lemma geom_series' (c : ℝ) (n : ℕ) (h : c ≠ 1) : geom c n = (1 - c ^ n) / (1 - c) := by
+  have h1 : 1 - c ≠ 0 := by apply one_sub_ne_zero c h
   simple_induction n with k IH
   · rewrite [geom_zero]; algebra
   · rewrite [geom_succ, IH]; algebra

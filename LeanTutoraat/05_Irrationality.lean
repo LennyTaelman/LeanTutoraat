@@ -366,12 +366,9 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 
 /-
-  Key inequality for s n
+  Key bounds on s n
+  TODO: clean up for generality! Remove extraneous conditions as soon as possible.
 -/
-
-
-
-
 
 
 
@@ -412,6 +409,28 @@ lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
     _ = s (n + k)  := by rw [hk]
     _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
     _ = s n + 2 * (a n) := by ring
+
+
+
+/-
+  `s n` is less than `3` for all `n`.
+-/
+
+
+lemma s_lt_three_zero : s 0 < 3 := by
+  rw [s_zero]; numbers
+
+lemma s_lt_three_succ (n : ℕ) : s (n + 1) < 3 := by
+  have h : 1 ≥ 1 := by numbers
+  calc
+    _ = s (1 + n) := by ring
+    _ < s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
+    _ = 3 := by rw [a_one, s_one]; numbers
+
+lemma s_lt_three (n : ℕ) : s n < 3 :=
+  match n with
+  | 0 => s_lt_three_zero
+  | n + 1 => s_lt_three_succ n
 
 
 /-
@@ -520,74 +539,25 @@ lemma irrationality_criterion {x : ℝ} (h : ∀ N, ¬ isInt ((fac N) * x)) : ¬
 
 
 
-/-
-  Establish that n ! * s (n + 1) is an integer.
-  TODO: clean this up! This is probably the most tricky part of this worksheet;
-  casting and pushing the casts around is a mess;
-  may need specific tooling!
--/
 
 
+-- TODO: decide between (fac m) * s n and (fac m) * s (n + 1) !
 
-lemma fac_mul_a_integral (n : ℕ) (m : ℕ) (h : n ≤ m) :
-    ∃ N : ℤ, (fac m) * (a n)= N := by
-  induction_from_starting_point m, h with k hk IH
-  · use 1
-    rw [fac_mul_a_eq_one]
-    algebra
-  · obtain ⟨N, hN⟩ := IH
-    use (k + 1) * N
-    rw [fac_succ]
-    calc
-    _ = (k + 1) * ((fac k) * (a n)) := by algebra
-    _ = (k + 1) * N := by rw [hN]
-    _ = _ := by algebra
-
-
--- TODO: rewrite using integrality lemmas?
-lemma s_integrality (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
-    ∃ N : ℤ, (fac m) * s n = N := by
-  simple_induction n with n IH
-  · rw [s_zero]
-    use 0
-    ring
-  · have h' : m + 1 ≥ n := by addarith [h]
-    obtain ⟨sN, hsN⟩ := IH h' -- obtain an m from the ∃ in the inductive hypothesis
-    obtain ⟨aN, haN⟩ := fac_mul_a_integral n m (by addarith [h])
-    rw [s_succ]
-    use sN + aN
-    calc
-      (fac m) * (s n + a n) = (fac m) * s n + (fac m) * a n := by algebra
-      _ = (fac m) * s n + aN := by rw [haN]
-      _ = sN + aN := by rw [hsN]
-      _ = (sN + aN : ℤ) := by algebra
-
-
-
-/-
-  Key inequality for s n
--/
-
-lemma s_bounded' (n : ℕ) : s (n + 1) < 3 := by
-  have h : 1 ≥ 1 := by numbers
-  calc
-    _ = s (1 + n) := by ring
-    _ < s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
-    _ = 3 := by rw [a_one, s_one]; numbers
-
--- trick: can use `simple_induction` to distinguish
--- between n = 0 and n = k + 1, while ignoring the induction hypothesis ;-)
--- TODO: don't do this!
-lemma s_bounded (n : ℕ) : s n < 3 := by
+lemma isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
+    isInt ((fac m) * s n) := by
   simple_induction n with k IH
-  · rw [s_zero]
-    numbers
-  · apply s_bounded'
+  · rw [s_zero]; simp; apply isInt_zero
+  · have h2 : (fac m) * s (k + 1) = (fac m) * s k + (fac m) * a k := by
+      rewrite [s_succ]; algebra
+    rewrite [h2]
+    apply isInt_add
+    · have h' : m + 1 ≥ k := by linarith
+      apply IH h'
+    · have h'' : m ≥ k := by linarith
+      apply isInt_fac_mul_a k m h''
 
-lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
-  rw [abs_of_nonneg]
-  · rel [s_bounded n]
-  · apply s_nonneg
+
+
 
 
 
@@ -610,7 +580,17 @@ lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
   you can trust that the number `e` defined below agrees with the real number `e` as you know it.
 -/
 
+/-
+  `|s n| ≤ 3`, so `s n` is a bounded sequence.
+-/
+lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
+  rw [abs_of_nonneg]
+  · rel [s_lt_three n]
+  · apply s_nonneg
 
+/-
+  `s n` is bounded and monotone, so it is a Cauchy sequence.
+-/
 lemma s_cauchy : IsCauSeq abs s := by
   apply isCauSeq_of_mono_bounded
   · intro n hn
@@ -619,10 +599,16 @@ lemma s_cauchy : IsCauSeq abs s := by
     rel [s_lt_next n]
   · use 0
 
+/-
+  Cauchy sequences have a limit, we denote the limit of `s n` by `e`.
+-/
 def e_seq : CauSeq ℝ abs := ⟨fun n ↦ s n, s_cauchy⟩
 
 def e : ℝ := CauSeq.lim e_seq
 
+/-
+  This lemma spells out what it means for `s n` to converge to `e`.
+-/
 lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   intro ε hε
   have h := CauSeq.equiv_def₃ (CauSeq.equiv_lim e_seq) hε
@@ -632,8 +618,8 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
   exact hN n hn n (by rfl)
 
 /-
-  The following lemma states that `s n < e` for all `n`. Together with
-  `e_le_of_s_le` below, this completely determines the number `e`.
+  Since `s n` is increasing and converges to `e`, we have
+  `s n < e` for all `n`.
 -/
 lemma s_lt_e (n : ℕ) : s n < e := by
   by_contra h
@@ -655,8 +641,7 @@ lemma s_lt_e (n : ℕ) : s n < e := by
 
 
 /-
-  The following lemma states that if `s n ≤ c` for all sufficiently large `n`, then
-  `e ≤ c`. Together with `s_lt_e` above, this completely determines the number `e`.
+  If `s n ≤ c` for all `n`, then `e ≤ c`.
 -/
 lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
   by_contra h2

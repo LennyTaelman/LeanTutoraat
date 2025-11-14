@@ -435,16 +435,6 @@ lemma s_lt_three (n : ℕ) : s n < 3 :=
     s n < s 2 + 2 * (a 2) := by exact s_key_bound 2 n h
       _ = 3 := by rw [a_two, s_two]; numbers
 
-/-
-  Taking `m = 3` gives a slightly stronger bound: `s 3 + 2 * (a 3) = 5/2 + 2/6 = 17/6`.
--/
-lemma s_lt_lt_three (n : ℕ) : s n < 17/6 := by
-  have h : 3 ≥ 1 := by numbers
-  calc
-    s n < s 3 + 2 * (a 3) := by exact s_key_bound 3 n h
-      _ = _ := by rw [a_three, s_three]; numbers
-
-
 
 /-
   ## Part IV: Integrality and Rationality
@@ -654,9 +644,9 @@ lemma s_lt_e (n : ℕ) : s n < e := by
 
 
 /-
-  If `s n ≤ c` for all `n`, then `e ≤ c`.
+  If `s n < c` for all `n`, then `e ≤ c`.
 -/
-lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
+lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n < c) : e ≤ c := by
   by_contra h2
   push_neg at h2
   let ε := e - c
@@ -677,7 +667,7 @@ lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n ≤ c) : e ≤ c := by
     _ = |s N - e| := by ring
 
 /-
-  # Key bounds on the number`e`
+  # Key bounds on the number `e`
 
   We now use `s_lt_e` and `e_le_of_s_le` to prove some inequalities satisfied by `e`.
 -/
@@ -691,14 +681,7 @@ theorem e_gt_2 : e > 2 := by
 theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
   apply e_le_of_s_le _
   intro m
-  by_cases h : m ≥ n
-  · exact key_bound_s' n m h hn
-  · push_neg at h
-    have h3 : a n ≥ 0 := by addarith [a_pos n]
-    have h2 : 2 * (a n) > 0 := by linarith [a_pos n]
-    calc
-      _ ≤ s n := by rel [s_monotone m n h]
-      _ ≤ s n + 2 * (a n) := by extra
+  apply s_key_bound n m hn
 
 
 

@@ -721,7 +721,7 @@ theorem e_not_integral : ¬ isInt e := by
 
   We will now prove that e is irrational. Consider the tail
 
-  t n = e - s n = 1 / n! + 1 / (n+1)! + ...
+  `t n = e - s n = 1 / n! + 1 / (n+1)! + ...`
 
   By the key bound, we have t n ≤ 2 * 1 / n!, so
   n! * t (n + 1) < 1 for n > 1
@@ -748,10 +748,26 @@ lemma t_pos (n : ℕ) : 0 < t n := by
   linarith [s_lt_e n]
 
 lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
-  rw [t_def]
-  addarith [key_bound_e n hn]
+  -- let's first spell out the definition of `t n`
+  rewrite [t_def]
+  have h : e ≤ s n + 2 * (a n) := by apply key_bound_e n hn
+  linarith
 
 
+lemma fac_mul_s_succ (n : ℕ) :
+    (fac n) * (a (n + 1)) = 1 / (n + 1) := by
+  rewrite [a_def, nat_inv_def, fac_succ]
+  have h : fac n > 0 := by apply fac_pos n
+  algebra
+
+lemma fac_mul_t_le (n : ℕ) (hn : n ≥ 1) :
+    (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by
+  have h3 : n + 1 ≥ 1 := by linarith
+  calc
+    (fac n) * t (n + 1) ≤ (fac n) * (2 * (a (n + 1))) := by rel [t_le_twice_a (n + 1) h3]
+    _ = _ := by algebra
+
+-- TODO: continue from here, with the above lemmas should be able to conclude quickly
 
 -- KEY INGREDIENT 2:
 lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :

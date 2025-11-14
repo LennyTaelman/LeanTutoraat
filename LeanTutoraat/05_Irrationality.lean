@@ -412,136 +412,9 @@ lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
 /-
   ## Part IV: Integrality and Rationality
 
-  We will prove that `e` is irrational by proving that `M * e` is not an integer for any
-  positive natural number `M`. In this section, we define what it means for a real number
-  to be an integer, and prove some basic properties of this notion.
--/
+  We will prove that `e` is irrational by proving that `(fac N) * e` is not an integer for any
+  positive natural number `N`.
 
-def isInt (x : ℝ) : Prop := ∃ N : ℤ, x = N
-
-lemma isInt_zero : isInt 0 := by use 0; numbers
-
-lemma isInt_one : isInt 1 := by use 1; numbers
-
-lemma isInt_nat (n : ℕ) : isInt (n : ℝ) := by use n; rfl
-
-lemma isInt_int (n : ℤ) : isInt (n : ℝ) := by use n; rfl
-
-lemma isInt_add {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x + y) := by
-  obtain ⟨N, hN⟩ := hx
-  obtain ⟨M, hM⟩ := hy
-  use N + M
-  rw [hN, hM]
-  algebra
-
-lemma isInt_sub {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x - y) := by
-  obtain ⟨N, hN⟩ := hx
-  obtain ⟨M, hM⟩ := hy
-  use N - M
-  rw [hN, hM]
-  algebra
-
-lemma isInt_mul {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x * y) := by
-  obtain ⟨N, hN⟩ := hx
-  obtain ⟨M, hM⟩ := hy
-  use N * M
-  rw [hN, hM]
-  algebra
-
-lemma isInt_nat_mul {x : ℝ} (hx : isInt x) (n : ℕ) : isInt (n * x) := by
-  obtain ⟨N, hN⟩ := hx
-  use n * N
-  rw [hN]
-  algebra
-
-/-
-  Key integrality lemma about `a_n`
--/
-lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
-  induction_from_starting_point m, h with k hk IH
-  · rw [fac_mul_a_eq_one]
-    apply isInt_one
-  · -- bottleneck: make clear that k+1 is a nat!
-    -- bottleneck: instinct should be to do rw [fac_succ] FIRST!
-    have h2 : fac (k + 1) * a n = (k + 1 : ℕ) * (fac k * a n) := by
-      rw [fac_succ]
-      algebra
-    rw [h2]
-    apply isInt_nat_mul
-    exact IH
-
-
-def isRat (x : ℝ) : Prop := ∃ q : ℕ, q > 0 ∧ isInt (q * x)
-
-lemma isRat_zero : isRat 0 := by
-  use 1
-  constructor
-  · numbers
-  · simp; apply isInt_zero
-
-lemma isRat_one : isRat 1 := by
-  use 1
-  constructor
-  · numbers
-  · simp; norm_cast; apply isInt_one
-
-lemma isRat_add {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x + y) := by
-  obtain ⟨q, hq, hx⟩ := hx
-  obtain ⟨r, hr, hy⟩ := hy
-  use q * r
-  constructor
-  · positivity
-  · have h : (q * r : ℕ) * (x + y) = r * (q * x) + q * (r * y) := by algebra
-    rw [h]
-    apply isInt_add (isInt_nat_mul hx r) (isInt_nat_mul hy q)
-
-lemma isRat_mul {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x * y) := by
-  obtain ⟨q, hq, hx⟩ := hx
-  obtain ⟨r, hr, hy⟩ := hy
-  use q * r
-  constructor
-  · positivity
-  · have h : (q * r : ℕ) * (x * y) = (q * x) * (r * y) := by algebra
-    rw [h]
-    apply isInt_mul hx hy
-
-lemma isRat_sub {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x - y) := by
-  obtain ⟨q, hq, hx⟩ := hx
-  obtain ⟨r, hr, hy⟩ := hy
-  use q * r
-  constructor
-  · positivity
-  · have h : (q * r : ℕ) * (x - y) = r * (q * x) - q * (r * y) := by algebra
-    rw [h]
-    apply isInt_sub (isInt_nat_mul hx r) (isInt_nat_mul hy q)
-
-lemma isRat_of_isInt {x : ℝ} (hx : isInt x) : isRat x := by
-  use 1
-  constructor
-  · numbers
-  · norm_cast; simp; exact hx
-
-lemma isRat_nat (n : ℕ) : isRat (n : ℝ) := by
-  use 1
-  constructor
-  · numbers
-  · norm_cast; apply isInt_nat
-
-lemma isRat_int (n : ℤ) : isRat (n : ℝ) := by
-  use 1
-  constructor
-  · numbers
-  · norm_cast; apply isInt_int
-
-lemma isRat_inv_nat (n : ℕ) (h : n > 0) : isRat (n : ℝ)⁻¹ := by
-  use n
-  constructor
-  · exact h
-  · have h : (n : ℝ) * (n : ℝ)⁻¹ = 1 := by algebra
-    rw [h]
-    exact isInt_one
-
-/-
   For `x : ℝ`, we write `isInt x` for the hypothesis that `x` is an integer. You
   can use the following lemmas to reason about integrality:
     - `isInt_zero : isInt 0`
@@ -568,7 +441,7 @@ lemma isRat_inv_nat (n : ℕ) (h : n > 0) : isRat (n : ℝ)⁻¹ := by
 /-
   Let's do a few warming up exercises to get used to these. They won't be
   strictly necessary in the rest of the worksheet, but should help you get
-  familiar with `isInt` and `isRat`.
+  familiar with `isInt` and `isRat` before diving into the important bits.
 -/
 example : isInt 2 := by
   apply isInt_nat 2
@@ -584,6 +457,28 @@ example : isRat (5/8) := by
   have h : (5 : ℝ) / 8  = 5 * (8⁻¹) := by numbers
   rw [h]
   apply isRat_mul h5 h8
+
+
+/-
+  Key integrality lemma about `a_n`
+-/
+lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
+  induction_from_starting_point m, h with k hk IH
+  · rw [fac_mul_a_eq_one]
+    apply isInt_one
+  · -- bottleneck: make clear that k+1 is a nat!
+    -- bottleneck: instinct should be to do rw [fac_succ] FIRST!
+    have h2 : fac (k + 1) * a n = (k + 1 : ℕ) * (fac k * a n) := by
+      rw [fac_succ]
+      algebra
+    rw [h2]
+    apply isInt_nat_mul
+    exact IH
+
+/-
+
+-/
+
 
 
 
@@ -907,8 +802,6 @@ lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
 
 #print axioms fac_mul_e_not_integral
 
-
-def isRat (x : ℝ) : Prop := ∃ p q : ℕ, q > 0 ∧ x = p / q
 
 lemma fac_mul_integral_of_rational (x : ℝ) (h : isRat x) :
     ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by

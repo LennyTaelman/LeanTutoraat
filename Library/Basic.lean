@@ -10,6 +10,7 @@ import Library.Config.Initialize
 import Library.Config.Ring
 import Library.Config.Use
 import Library.Theory.Comparison
+import Library.Theory.Integrality
 import Library.Tactic.Addarith
 import Library.Tactic.Cancel
 import Library.Tactic.Extra.Basic

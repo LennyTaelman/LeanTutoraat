@@ -667,24 +667,28 @@ lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n < c) : e ≤ c := by
     _ = |s N - e| := by ring
 
 /-
-  # Key bounds on the number `e`
+  ## Part V: Key bounds on the number `e`
 
   We now use `s_lt_e` and `e_le_of_s_le` to prove some inequalities satisfied by `e`.
 -/
 
+-- hint: `s 2 = 2`
 theorem e_gt_2 : e > 2 := by
   calc
     e > s 2 := by apply s_lt_e
     _ = 2 := by apply s_two
 
-
 theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
+  -- by `e_le_of_s_le` it suffices to show that `s m < s n + 2 * (a n)` for all `m`.
   apply e_le_of_s_le _
   intro m
+  -- finish the proof by applying `s_key_bound`
   apply s_key_bound n m hn
 
 
-
+/-
+  Application: `e < 3`. Hint: `s 3 + 2 * (a 3) = 17/6 < 3`
+-/
 theorem e_lt_3 : e < 3 := by
    calc
     e ≤ s 3 + 2 * (a 3) := by apply key_bound_e; numbers
@@ -692,6 +696,26 @@ theorem e_lt_3 : e < 3 := by
 
 
 /-
+  Application: `e` is not an integer! To prove this, use the lemma
+    `no_int_between_n_and_succ_n (h1 : x > n) (h2 : x < n + 1) : ¬ isInt x`
+  which says that a real number strictly between `n` and `n + 1` cannot be an integer.
+-/
+
+theorem e_not_integral : ¬ isInt e := by
+  have h1 : e > 2 := by apply e_gt_2
+  have h2 : e < 3 := by apply e_lt_3
+  have h3 : e < 2 + 1 := by linarith
+  apply no_int_between_n_and_succ_n h1 h3
+
+/-
+  Now all that remains to do is to prove that `e` is not rational...
+-/
+
+
+
+/-
+  ## The tail `t n` of the series
+
   We will now prove that e is irrational. Consider the tail
 
   t n = e - s n = 1 / n! + 1 / (n+1)! + ...
@@ -725,10 +749,6 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   addarith [key_bound_e n hn]
 
 
--- KEY INGREDIENT 1:
-lemma fac_mul_s_succ_integral (n : ℕ) :
-    ∃ N : ℤ, (fac n) * s (n + 1) = N := by
-  exact s_integrality (n + 1) n (by rfl)
 
 -- KEY INGREDIENT 2:
 lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
@@ -760,20 +780,10 @@ lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
 
 
 -- KEY INGREDIENT 4: no real number between n and n+1 is an integer!
-lemma no_int_between_n_and_succ_n (n : ℤ) (x : ℝ) (h1 : n < x) (h2 : x < n + 1) : ¬ isInt x := by
-  intro h
-  obtain ⟨N, hN⟩ := h
-  rw [hN] at h1 h2
-  linarith
 
 
 -- KEY STEP: show that n! * e cannot be an integer!
 
-lemma e_not_integral : ¬ isInt e := by
-  intro h
-  have h2 : e > 2 := by apply e_gt_2
-  have h3 : e < 2 + 1 := by linarith[e_lt_3]
-  apply no_int_between_n_and_succ_n 2 e h2 h3 h
 
 lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * e) := by

@@ -1,4 +1,5 @@
 import Mathlib.Data.Real.Basic
+import Mathlib.Tactic.Linarith
 
 /-!
 # Integrality and Rationality
@@ -68,6 +69,14 @@ lemma isInt_nat_mul {x : ℝ} (hx : isInt x) (n : ℕ) : isInt (n * x) := by
   use n * N
   rw [hN]
   push_cast; ring
+
+
+lemma no_int_between_n_and_succ_n {n : ℤ} {x : ℝ} (h1 : n < x) (h2 : x < n + 1) : ¬ isInt x := by
+  intro h
+  obtain ⟨N, hN⟩ := h
+  rw [hN] at h1 h2
+  norm_cast at h1 h2
+  linarith
 
 
 /-- A real number `x` is rational if there exists a positive natural number `q`

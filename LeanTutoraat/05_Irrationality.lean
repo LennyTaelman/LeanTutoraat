@@ -697,8 +697,11 @@ theorem e_lt_3 : e < 3 := by
 
 /-
   Application: `e` is not an integer! To prove this, use the lemma
-    `no_int_between_n_and_succ_n (h1 : x > n) (h2 : x < n + 1) : ¬ isInt x`
-  which says that a real number strictly between `n` and `n + 1` cannot be an integer.
+  `no_int_between_n_and_succ_n (h1 : x > n) (h2 : x < n + 1) : ¬ isInt x`
+  which says that a real number strictly between `n` and `n + 1` cannot be an
+  integer.
+
+  The symbol `¬` means "not". You can type it using `\not`.
 -/
 
 theorem e_not_integral : ¬ isInt e := by

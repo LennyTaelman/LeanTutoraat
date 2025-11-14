@@ -367,16 +367,8 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 
 /-
   Key bounds on s n
-  TODO: clean up for generality! Remove extraneous conditions as soon as possible.
 -/
-
-
-
-
-
-
-
-lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+theorem s_geometric_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) ≤ s n + (a n) * (g k) := by
   simple_induction k with k IH
   · -- base case
@@ -392,45 +384,66 @@ lemma s_under_geometric (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
       _ = s n + (a n) * ((g k) + (1/2) ^ k) := by algebra
       _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
 
-
-theorem key_bound_s (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
+/-
+  Using `g_lt_2` this implies that `s (n + k) < s n + 2 * (a n)`.
+-/
+lemma s_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) < s n + 2 * (a n)  := by
   have h : a n > 0 := a_pos n
   calc
-    _ ≤ s n + (a n) * (g k) := by apply s_under_geometric n k hn
+    _ ≤ s n + (a n) * (g k) := by apply s_geometric_bound n k hn
     _ < s n + (a n) * 2 := by rel [g_lt_2 k]
-    _ = s n + 2 * (a n) := by ring
+    _ = s n + 2 * (a n) := by algebra
 
-lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
-    s m ≤ s n + 2 * (a n)  := by
+/-
+  Variant: since we eliminate `k` by replacing `n + k` with any `m` such that `m ≥ n`:
+-/
+lemma s_bound_variant (n m : ℕ) (hn : n ≥ 1) (hm : m ≥ n) : s m < s n + 2 * (a n) := by
   let k := m - n
   have hk : m = n + k := by exact (Nat.sub_eq_iff_eq_add' hm).mp rfl
   calc
-    _ = s (n + k)  := by rw [hk]
-    _ ≤ s n + 2 * (a n) := by rel [key_bound_s n k hn]
-    _ = s n + 2 * (a n) := by ring
+    s m = s (n + k)       := by rewrite [hk]; rfl
+      _ < s n + 2 * (a n) := by rel [s_bound n k hn]
+      _ = s n + 2 * (a n) := by algebra
+
+
+/-
+  Since `s` is increasing, the condition that `m ≥ n` is unnecessary!
+-/
+
+theorem s_key_bound (n m : ℕ) (hn : n ≥ 1) : s m < s n + 2 * (a n) := by
+  by_cases hm : m ≥ n
+  · -- either `m ≥ n`, then this is `s_bound_variant` above
+    apply s_bound_variant n m hn hm
+  · -- or `¬ m ≥ n`, then we have `m < n`:
+    push_neg at hm
+    -- now finish the proof
+    have ha : a n > 0 := by apply a_pos n
+    calc
+      s m < s n := by apply s_monotone m n hm
+        _ ≤ s n + 2 * (a n) := by extra
 
 
 
 /-
-  `s n` is less than `3` for all `n`.
+  Application: we can use `key_bound_s` to prove that `s n` is less than `3`
+  for all `n`. Indeed, taking `m = 2` we find `s n < s 2 + 2 * (a 2) = 3`.
 -/
-
-
-lemma s_lt_three_zero : s 0 < 3 := by
-  rw [s_zero]; numbers
-
-lemma s_lt_three_succ (n : ℕ) : s (n + 1) < 3 := by
-  have h : 1 ≥ 1 := by numbers
-  calc
-    _ = s (1 + n) := by ring
-    _ < s 1 + 2 * (a 1) := by exact key_bound_s 1 n h
-    _ = 3 := by rw [a_one, s_one]; numbers
-
 lemma s_lt_three (n : ℕ) : s n < 3 :=
-  match n with
-  | 0 => s_lt_three_zero
-  | n + 1 => s_lt_three_succ n
+  have h : 2 ≥ 1 := by numbers
+  calc
+    s n < s 2 + 2 * (a 2) := by exact s_key_bound 2 n h
+      _ = 3 := by rw [a_two, s_two]; numbers
+
+/-
+  Taking `m = 3` gives a slightly stronger bound: `s 3 + 2 * (a 3) = 5/2 + 2/6 = 17/6`.
+-/
+lemma s_lt_lt_three (n : ℕ) : s n < 17/6 := by
+  have h : 3 ≥ 1 := by numbers
+  calc
+    s n < s 3 + 2 * (a 3) := by exact s_key_bound 3 n h
+      _ = _ := by rw [a_three, s_three]; numbers
+
 
 
 /-

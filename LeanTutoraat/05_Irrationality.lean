@@ -410,14 +410,14 @@ lemma key_bound_s' (n : ℕ) (m : ℕ) (hm : m ≥ n) (hn : n ≥ 1) :
 
 
 /-
-  ## Part IV: Integrality
+  ## Part IV: Integrality and Rationality
 
   We will prove that `e` is irrational by proving that `M * e` is not an integer for any
   positive natural number `M`. In this section, we define what it means for a real number
   to be an integer, and prove some basic properties of this notion.
 -/
 
-def isInt (a : ℝ) : Prop := ∃ N : ℤ, a = N
+def isInt (x : ℝ) : Prop := ∃ N : ℤ, x = N
 
 lemma isInt_zero : isInt 0 := by use 0; numbers
 
@@ -427,35 +427,36 @@ lemma isInt_nat (n : ℕ) : isInt (n : ℝ) := by use n; rfl
 
 lemma isInt_int (n : ℤ) : isInt (n : ℝ) := by use n; rfl
 
-lemma isInt_add (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a + b) := by
-  obtain ⟨N, hN⟩ := ha
-  obtain ⟨M, hM⟩ := hb
+lemma isInt_add {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x + y) := by
+  obtain ⟨N, hN⟩ := hx
+  obtain ⟨M, hM⟩ := hy
   use N + M
   rw [hN, hM]
   algebra
 
-lemma isInt_sub (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a - b) := by
-  obtain ⟨N, hN⟩ := ha
-  obtain ⟨M, hM⟩ := hb
+lemma isInt_sub {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x - y) := by
+  obtain ⟨N, hN⟩ := hx
+  obtain ⟨M, hM⟩ := hy
   use N - M
   rw [hN, hM]
   algebra
 
-lemma isInt_mul (a b : ℝ) (ha : isInt a) (hb : isInt b) : isInt (a * b) := by
-  obtain ⟨N, hN⟩ := ha
-  obtain ⟨M, hM⟩ := hb
+lemma isInt_mul {x y : ℝ} (hx : isInt x) (hy : isInt y) : isInt (x * y) := by
+  obtain ⟨N, hN⟩ := hx
+  obtain ⟨M, hM⟩ := hy
   use N * M
   rw [hN, hM]
   algebra
 
-lemma isInt_nat_mul (a : ℝ) (h : isInt a) (n : ℕ) : isInt (n * a) := by
-  obtain ⟨N, hN⟩ := h
+lemma isInt_nat_mul {x : ℝ} (hx : isInt x) (n : ℕ) : isInt (n * x) := by
+  obtain ⟨N, hN⟩ := hx
   use n * N
   rw [hN]
   algebra
 
--- m! * a n is integral as soon as m ≥ n
-
+/-
+  Key integrality lemma about `a_n`
+-/
 lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
   induction_from_starting_point m, h with k hk IH
   · rw [fac_mul_a_eq_one]
@@ -470,8 +471,142 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
     exact IH
 
 
+def isRat (x : ℝ) : Prop := ∃ q : ℕ, q > 0 ∧ isInt (q * x)
+
+lemma isRat_zero : isRat 0 := by
+  use 1
+  constructor
+  · numbers
+  · simp; apply isInt_zero
+
+lemma isRat_one : isRat 1 := by
+  use 1
+  constructor
+  · numbers
+  · simp; norm_cast; apply isInt_one
+
+lemma isRat_add {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x + y) := by
+  obtain ⟨q, hq, hx⟩ := hx
+  obtain ⟨r, hr, hy⟩ := hy
+  use q * r
+  constructor
+  · positivity
+  · have h : (q * r : ℕ) * (x + y) = r * (q * x) + q * (r * y) := by algebra
+    rw [h]
+    apply isInt_add (isInt_nat_mul hx r) (isInt_nat_mul hy q)
+
+lemma isRat_mul {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x * y) := by
+  obtain ⟨q, hq, hx⟩ := hx
+  obtain ⟨r, hr, hy⟩ := hy
+  use q * r
+  constructor
+  · positivity
+  · have h : (q * r : ℕ) * (x * y) = (q * x) * (r * y) := by algebra
+    rw [h]
+    apply isInt_mul hx hy
+
+lemma isRat_sub {x y : ℝ} (hx : isRat x) (hy : isRat y) : isRat (x - y) := by
+  obtain ⟨q, hq, hx⟩ := hx
+  obtain ⟨r, hr, hy⟩ := hy
+  use q * r
+  constructor
+  · positivity
+  · have h : (q * r : ℕ) * (x - y) = r * (q * x) - q * (r * y) := by algebra
+    rw [h]
+    apply isInt_sub (isInt_nat_mul hx r) (isInt_nat_mul hy q)
+
+lemma isRat_of_isInt {x : ℝ} (hx : isInt x) : isRat x := by
+  use 1
+  constructor
+  · numbers
+  · norm_cast; simp; exact hx
+
+lemma isRat_nat (n : ℕ) : isRat (n : ℝ) := by
+  use 1
+  constructor
+  · numbers
+  · norm_cast; apply isInt_nat
+
+lemma isRat_int (n : ℤ) : isRat (n : ℝ) := by
+  use 1
+  constructor
+  · numbers
+  · norm_cast; apply isInt_int
+
+lemma isRat_inv_nat (n : ℕ) (h : n > 0) : isRat (n : ℝ)⁻¹ := by
+  use n
+  constructor
+  · exact h
+  · have h : (n : ℝ) * (n : ℝ)⁻¹ = 1 := by algebra
+    rw [h]
+    exact isInt_one
+
+/-
+  For `x : ℝ`, we write `isInt x` for the hypothesis that `x` is an integer. You
+  can use the following lemmas to reason about integrality:
+    - `isInt_zero : isInt 0`
+    - `isInt_one : isInt 1`
+    - `isInt_nat (n : ℕ) : isInt (n : ℝ)`
+    - `isInt_int (n : ℤ) : isInt (n : ℝ)`
+    - `isInt_add (hx : isInt x) (hy : isInt y) : isInt (x + y)`
+    - `isInt_sub (hx : isInt x) (hy : isInt y) : isInt (x - y)`
+    - `isInt_mul (hx : isInt x) (hy : isInt y) : isInt (x * y)`
+    - `isInt_nat_mul (hx : isInt x) (n : ℕ) : isInt (↑n * x)`
+
+  Similarly, `isRat x` is the hypothesis that `x` is a rational number. You
+  can use the following lemmas:
+    - `isRat_zero : isRat 0`
+    - `isRat_one : isRat 1`
+    - `isRat_nat (n : ℕ) : isRat (n : ℝ)`
+    - `isRat_int (n : ℤ) : isRat (n : ℝ)`
+    - `isRat_inv_nat (n : ℕ) (h : n > 0) : isRat (n : ℝ)⁻¹`
+    - `isRat_add (hx : isRat x) (hy : isRat y) : isRat (x + y)`
+    - `isRat_mul (hx : isRat x) (hy : isRat y) : isRat (x * y)`
+    - `isRat_sub (hx : isRat x) (hy : isRat y) : isRat (x - y)`
+-/
+
+/-
+  Let's do a few warming up exercises to get used to these. They won't be
+  strictly necessary in the rest of the worksheet, but should help you get
+  familiar with `isInt` and `isRat`.
+-/
+example : isInt 2 := by
+  apply isInt_nat 2
+
+example : isRat 2⁻¹ := by
+  have h : 2 > 0 := by numbers
+  apply isRat_inv_nat 2 h
+
+example : isRat (5/8) := by
+  have h5 : isRat 5 := by apply isRat_nat 5
+  have h8 : isRat (8⁻¹) := by apply isRat_inv_nat 8 (by numbers)
+  -- without the (_ : ℝ), lean will not know to treat 5 and 8 as real numbers
+  have h : (5 : ℝ) / 8  = 5 * (8⁻¹) := by numbers
+  rw [h]
+  apply isRat_mul h5 h8
 
 
+
+
+/-
+  Key rationality criterion. To prove that a number `x` is irrational, it
+  suffices to show that `(fac N) * x` is not an integer for all `N`.
+
+  The main reason is the following lemma:
+-/
+lemma more_integral {x : ℝ} (n : ℕ) (h : isInt (n * x)) : isInt (fac n * x) := by
+  sorry
+
+/-
+  Now we can prove the irrationality criterion that we wil use to establish that
+  `e` is irrational.
+-/
+lemma irrationality_criterion {x : ℝ} (h : ∀ N, ¬ isInt ((fac N) * x)) : ¬ isRat x := by
+  by_contra h2
+  obtain ⟨q, hq, hx⟩ := h2
+  specialize h q
+  apply more_integral q at hx
+  contradiction
 
 
 

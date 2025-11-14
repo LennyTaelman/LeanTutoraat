@@ -455,9 +455,13 @@ example : isRat (5/8) := by
   have h8 : isRat (8⁻¹) := by apply isRat_inv_nat 8 (by numbers)
   -- without the (_ : ℝ), lean will not know to treat 5 and 8 as real numbers
   have h : (5 : ℝ) / 8  = 5 * (8⁻¹) := by numbers
-  rw [h]
+  rewrite [h]
   apply isRat_mul h5 h8
 
+example (x : ℝ) (h : isInt x) : isInt (x ^ 2) := by
+  have h2 : x ^ 2 = x * x := by algebra
+  rewrite [h2]
+  apply isInt_mul h h
 
 /-
   Key integrality lemma about `a_n`
@@ -474,12 +478,6 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
     rw [h2]
     apply isInt_nat_mul
     exact IH
-
-/-
-
--/
-
-
 
 
 

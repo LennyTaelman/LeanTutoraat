@@ -96,6 +96,11 @@ lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
   calc fac n ≥ fac 2 := fac_ge_of_ge 2 n hn
     _ = 2 := by rewrite [fac_two]; rfl
 
+lemma fac_prev (n : ℕ) (h1 : n ≥ 1) : fac n = fac (n - 1) * n := by
+  induction_from_starting_point n, h1 with k hk IH
+  · rewrite [fac_one, fac_zero]; numbers
+  · rewrite [fac_succ k]; algebra
+
 
 /-
   In the proof of `fac_bound` below, it will be useful to know that `2 ^ k * fac n` is positive.
@@ -485,20 +490,32 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
   Key rationality criterion. To prove that a number `x` is irrational, it
   suffices to show that `(fac N) * x` is not an integer for all `N`.
 
-  The main reason is the following lemma:
+  The main reason is the following lemma, which states that if `n * x` is an
+  integer, then `(fac n) * x` is also an integer. The proof uses `fac_prev` to
+  express `fac n` as a product of `fac (n - 1)` and `n` (using the fact that `n ≥ 1`).
 -/
-lemma more_integral {x : ℝ} (n : ℕ) (h : isInt (n * x)) : isInt (fac n * x) := by
-  sorry
+
+lemma is_int_fac_mul_of_is_int_mul {x : ℝ} (n : ℕ) (h1 : n ≥ 1) (h : isInt (n * x)) : isInt (fac n * x) := by
+  rewrite [fac_prev n h1]
+  have h2 : (fac (n - 1) * n : ℕ) * x = (fac (n - 1) * (n * x)) := by algebra
+  rewrite [h2]
+  apply isInt_nat_mul h
 
 /-
   Now we can prove the irrationality criterion that we wil use to establish that
-  `e` is irrational.
+  `e` is irrational. The proof has been pre-filled since it uses a few tactics
+  we have not seen yet. The proof in English:
+
+  Assume for the sake of contradiction that `x` is rational. Then there exists
+  an `N > 0` such that `N * x` is an integer. By Lemma
+  `is_int_fac_mul_of_is_int_mul`, we have that `(fac N) * x` is an integer,
+  contradicting assumption `h`.
 -/
 lemma irrationality_criterion {x : ℝ} (h : ∀ N, ¬ isInt ((fac N) * x)) : ¬ isRat x := by
   by_contra h2
-  obtain ⟨q, hq, hx⟩ := h2
-  specialize h q
-  apply more_integral q at hx
+  obtain ⟨N, hN, hx⟩ := h2
+  specialize h N
+  apply is_int_fac_mul_of_is_int_mul N hN at hx
   contradiction
 
 

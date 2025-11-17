@@ -803,8 +803,14 @@ lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
   have h2 : (fac n) * t (n + 1) > 0 := by apply fac_mul_t_succ_pos n
   apply no_int_between_0_and_1 h2 h1
 
-
-lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
+/-
+  Under the assumption that `n ≥ 2`, we have now established:
+  - `(fac n) * t (n + 1)` is not integral (this is lemma `fac_mul_t_succ_not_integral`)
+  - `(fac n) * s (n + 1)` is integral (this is lemma `s_integrality`)
+  - `t (n + 1) = e - s (n + 1)` (by lemma `t_def`)
+  From this we should be able to conclude that `(fac n) * e` is not integral!
+-/
+lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * e) := by
 
   sorry

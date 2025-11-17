@@ -213,6 +213,10 @@ lemma a_three : a 3 = 1 / 6 := by
   rewrite [a_def, fac_three, nat_inv_def]
   numbers
 
+lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by
+  rewrite [a_def, a_def, nat_inv_def, nat_inv_def, fac_succ]
+  algebra
+
 lemma a_pos (n : ℕ) : a n > 0 := by
   rewrite [a_def]
   apply nat_inv_pos
@@ -695,26 +699,6 @@ theorem e_lt_3 : e < 3 := by
     _ < 3 := by rewrite [s_three, a_three]; numbers
 
 
-/-
-  Application: `e` is not an integer! To prove this, use the lemma
-  `no_int_between_n_and_succ_n (h1 : x > n) (h2 : x < n + 1) : ¬ isInt x`
-  which says that a real number strictly between `n` and `n + 1` cannot be an
-  integer.
-
-  The symbol `¬` means "not". You can type it using `\not`.
--/
-
-theorem e_not_integral : ¬ isInt e := by
-  have h1 : e > 2 := by apply e_gt_2
-  have h2 : e < 3 := by apply e_lt_3
-  have h3 : e < 2 + 1 := by linarith
-  apply no_int_between_n_and_succ_n h1 h3
-
-/-
-  Now all that remains to do is to prove that `e` is not rational...
--/
-
-
 
 /-
   ## The tail `t n` of the series
@@ -754,7 +738,7 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   linarith
 
 
-lemma fac_mul_s_succ (n : ℕ) :
+lemma fac_mul_a_succ (n : ℕ) :
     (fac n) * (a (n + 1)) = 1 / (n + 1) := by
   rewrite [a_def, nat_inv_def, fac_succ]
   have h : fac n > 0 := by apply fac_pos n
@@ -764,66 +748,66 @@ lemma fac_mul_t_le (n : ℕ) (hn : n ≥ 1) :
     (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by
   have h3 : n + 1 ≥ 1 := by linarith
   calc
-    (fac n) * t (n + 1) ≤ (fac n) * (2 * (a (n + 1))) := by rel [t_le_twice_a (n + 1) h3]
+    (fac n) * t (n + 1) ≤ (fac n) * (2 * (a (n + 1))) := by rel [t_le_twice_a _ h3]
     _ = _ := by algebra
 
--- TODO: continue from here, with the above lemmas should be able to conclude quickly
+-- TODO: continue from here, with the above lemmas should be able
 
--- KEY INGREDIENT 2:
-lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
-    (fac n) * (t (n + 1)) < 1 := by
-  have h1 : n + 1 ≥ 1 := by addarith [hn]
-  have h2 : a n > 0 := by addarith [a_pos n]
-  have h3 : a (n + 1) > 0 := by addarith [a_pos (n + 1)]
-  -- this whole proof of h4 is a giant bottleneck!
-  have h4 : ((n : ℝ) + 1)⁻¹ ≤ 3⁻¹ := by
-    apply inv_le_of_inv_le
-    · numbers
-    · calc
-        (3: ℝ)⁻¹⁻¹ = 3 := by numbers
-        _ ≤ n + 1 := by linarith
+lemma fac_mul_t_le' (n : ℕ) (hn : n ≥ 1) :
+    (fac n) * t (n + 1) ≤ 2 / (n + 1) := by
   calc
-  _ ≤ (fac n) * (2 * a (n + 1)) := by rel [t_le_twice_a (n + 1) h1]
-  _ = (fac n) * (2 * (((n : ℝ) + 1)⁻¹ * a n)) := by rewrite [a_def, a_def, fac_succ, nat_inv_mul, nat_inv_def]; algebra
-  _ = ((fac n) * a n) * (2 * ((n : ℝ) + 1)⁻¹) := by ring
-  _ = 1 * (2 * ((n : ℝ) + 1)⁻¹) := by rw [fac_mul_a_eq_one n]
-  _ = 2 * ((n : ℝ) + 1)⁻¹ := by ring
-  _ ≤ 2 * (3)⁻¹ := by rel [h4]
-  _ < 1 := by numbers
+    (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by apply fac_mul_t_le n hn
+    _ = 2 * ((fac n) * a (n + 1)) := by algebra
+    _ = 2  / (n + 1) := by rewrite [fac_mul_a_succ n]; algebra
 
--- KEY INGREDIENT 3:
+lemma le_two_thirds (n : ℕ) (hn : n ≥ 2) :
+    (2 : ℝ) / (n + 1) ≤ 2 / 3 := by
+  have h2 : (2 : ℝ) > 0 := by numbers
+  apply (mul_le_mul_left h2).mpr
+  have h3 : (n : ℝ) + 1 > 0 := by linarith
+  have h4 : (3 : ℝ) > 0 := by numbers
+  apply (inv_le_inv h3 h4).mpr
+  linarith
+
+/-
+  Combining `fac_mul_t_le'` and `le_two_thirds` we get that
+  `(fac n) * t (n + 1) ≤ 2 / (n + 1) ≤ 2 / 3 < 1`
+-/
+
+lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
+    (fac n) * t (n + 1) < 1 := by
+  have h1 : n ≥ 1 := by linarith
+  calc
+    (fac n) * t (n + 1) ≤ 2 / (n + 1) := by apply fac_mul_t_le' n h1
+    _ ≤ 2 / 3 := by apply le_two_thirds n hn
+    _ < 1 := by numbers
+
+
+/-
+  We also have: `(fac n) * t (n + 1) > 0`. To prove this, establish that `fac n`
+  and `t (n + 1)` are positive (using lemmas proven above), and let `positivity` conclude.
+-/
 lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
   have h1 : (fac n) > 0 := by apply fac_pos n
   have h2 : t (n + 1) > 0 := by apply t_pos (n + 1)
   positivity
 
-
--- KEY INGREDIENT 4: no real number between n and n+1 is an integer!
-
-
--- KEY STEP: show that n! * e cannot be an integer!
+/-
+  But something that is both `< 1` and `> 0` cannot be an integer! This can be
+  shown using the lemma
+    `no_int_between_0_and_1 (h1 : x > 0) (h2 : x < 1) : ¬ isInt x`
+-/
+lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
+    ¬ isInt ((fac n) * t (n + 1)) := by
+  have h1 : (fac n) * t (n + 1) < 1 := by apply fac_mul_t_succ_lt_1 n hn
+  have h2 : (fac n) * t (n + 1) > 0 := by apply fac_mul_t_succ_pos n
+  apply no_int_between_0_and_1 h2 h1
 
 
 lemma fac_mul_e_not_integral (n : ℕ) (N : ℤ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * e) := by
-  intro hN
-  obtain ⟨N2, hN2⟩ := fac_mul_s_succ_integral n
-  let N3 := N - N2
-  have N3_def : N3 = N - N2 := by rfl
-  have h : (fac n) * t (n + 1) = N3 := by
-    rw [N3_def, t_def]
-    push_cast
-    rw  [←hN, ←hN2]
-    ring
-  have h2 : (N3 : ℝ) > 0 := by
-    rw [←h]
-    exact fac_mul_t_succ_pos n
-  norm_cast at h2
-  have h3 : (N3 : ℝ) < 1 := by
-    rw [←h]
-    exact fac_mul_t_succ_lt_1 n hn
-  norm_cast at h3
-  exact no_int_between_0_and_1 N3 h2 h3
+
+  sorry
 
 #print axioms fac_mul_e_not_integral
 

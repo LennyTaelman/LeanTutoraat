@@ -812,8 +812,15 @@ lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
 -/
 lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * e) := by
-
-  sorry
+  intro he
+  have hsub : (fac n) * t (n + 1) = (fac n) * e - (fac n) * s (n + 1) := by
+    rewrite [t_def]; algebra
+  have hs : isInt ((fac n) * s (n + 1)) := by
+    apply isInt_fac_mul_s (n + 1) n (by linarith)
+  have ht : isInt ((fac n) * t (n + 1)) := by
+    rewrite [hsub]
+    apply isInt_sub he hs
+  apply fac_mul_t_succ_not_integral n hn ht
 
 #print axioms fac_mul_e_not_integral
 

@@ -130,6 +130,9 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
       _ = 2 ^ (k + 1) * fac n := by algebra
 
 
+
+
+
 /-
   ## Part II: the term `a n := 1 / n!`
 -/
@@ -822,62 +825,39 @@ lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
     apply isInt_sub he hs
   apply fac_mul_t_succ_not_integral n hn ht
 
-#print axioms fac_mul_e_not_integral
-
 
 lemma fac_mul_integral_of_rational (x : ℝ) (h : isRat x) :
     ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by
-  obtain ⟨p, q, hq, hx⟩ := h
-
-  use q
-  rw [hx]
-  rw [fac_div_integral q hq]
-  algebra
-  sorry
-
-
--- TODO: make this idiomatic!
-lemma fac_div_integral (q : ℕ) (hq : q > 0) : (fac q) = q * fac (q - 1) := by
-  have h : (q - 1) + 1 = q := by exact Nat.sub_add_cancel hq
-  rw [← h]
-  rw [fac_succ]
-  rw [h]
-
-
-
-lemma e_rational_factorial :
-    (∃ p q : ℕ, q > 0 ∧ e = p / q) → (∃ n > 1, ∃ N : ℕ, (fac n) * e = N) := by
-  intro h
-  obtain ⟨p, q, hq, he⟩ := h
-  use q + 1
-  constructor
-  · addarith [hq]
-  · rw [he]
-    rw [fac_succ]
-    use fac (q - 1) * p * (q + 1)
-    rw [fac_div_integral q hq]
-    algebra
+  obtain ⟨p, h1, h2⟩ := h
+  by_cases h4 : p ≤ 1
+  · have h5 : p = 1 := by linarith
+    use 2
+    constructor
+    · numbers
+    · rewrite [fac_two]
+      rewrite [h5] at h2
+      simp at h2
+      apply isInt_nat_mul h2
+  · have h5 : p ≥ 2 := by linarith
+    use p
+    constructor
+    · linarith
+    · rewrite [fac_prev p h1]
+      have h6 : (fac (p - 1) * p : ℕ) * x = (fac (p - 1) * (p * x)) := by algebra
+      rewrite [h6]
+      apply isInt_nat_mul h2
 
 
+/-
+  Now everything comes together!
+-/
 
+theorem e_irrational : ¬ isRat e := by
+  -- assume for the sake of contradiction `h : isRat e`
+  by_contra h
+  -- then `fac_mul_integral_of_rational e h` gives us a `n ≥ 2` such that `(fac n) * e` is integral
+  obtain ⟨n, h1, h2⟩ := fac_mul_integral_of_rational e h
+  -- now `fac_mul_e_not_integral n h1` gives us a contradiction with `h2`
+  apply fac_mul_e_not_integral n h1 h2
 
-  theorem e_irrational : ¬ ∃ p q : ℕ, q > 0 ∧ e = p / q := by
-  intro h
-  obtain ⟨n, hn, N, hN⟩ := e_rational_factorial h
-  have h : (n - 1) + 1 = n := by exact Nat.sub_add_cancel (by addarith [hn])
-  have h2: ∃ N2 : ℤ, (fac n) * s (n - 1) = N2 := by exact s_integrality (n - 1) n (by addarith [h])
-  obtain ⟨N2, hN2⟩ := h2
-  have h3 : ∃ N3 : ℤ, (fac n) * t (n - 1) = N3 := by
-    rw [t_def]
-    use N - N2
-    push_cast
-    rw [←hN, ←hN2]
-    ring
-  obtain ⟨N3, hN3⟩ := h3
-  have h4 : (N3 : ℝ) < 1 := by
-    rw [← hN3]
-    -- apply fac_mul_t_succ_lt_1
-    sorry
-  sorry
-
-#print axioms e_irrational
+-- #print axioms e_irrational

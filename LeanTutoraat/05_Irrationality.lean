@@ -162,16 +162,29 @@ def nat_inv (n : ℕ) : ℝ := (n : ℝ)⁻¹
 
 lemma nat_inv_def (n : ℕ) : nat_inv n = (n : ℝ)⁻¹ := by rfl
 
+/-
+  Whenever you see an expression `nat_inv n`, you can use `rewrite [nat_inv_def]` to
+  replace it with `(↑n)⁻¹`. Lean will use the arrow `↑` is there to remind you that it
+  is treating the (a priori) natural number `n` as a real number now.
+-/
+
+
 lemma nat_inv_one : nat_inv 1 = 1 := by
-  rw [nat_inv_def]
+  rewrite [nat_inv_def]
   numbers
 
 lemma nat_inv_pos (n : ℕ) (hn : n > 0) : nat_inv n > 0 := by
-  rw [nat_inv_def n]
+  rewrite [nat_inv_def n]
   positivity
 
+/-
+  Hint: `linarith` or `positivity` can prove this, but they cannot "see"
+  the fact `nat_inv n > 0` proved above by default. You'll need to make it visible
+  with a `have` statement first.
+-/
 lemma nat_inv_ne_zero (n : ℕ) (hn : n > 0) : nat_inv n ≠ 0 := by
-  linarith [nat_inv_pos n hn]
+  have h : nat_inv n > 0 := by apply nat_inv_pos n hn
+  linarith
 
 lemma nat_inv_mul (n m : ℕ) : nat_inv (n * m) = nat_inv n * nat_inv m := by
   rewrite [nat_inv_def, nat_inv_def, nat_inv_def]
@@ -233,6 +246,12 @@ lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by
   rewrite [a_def, a_def, nat_inv_def, nat_inv_def, fac_succ]
   algebra
 
+
+/-
+  Most of the lemmas below follow from applying corresponding properties of `nat_inv` and
+  `fac`. Have a look at the lemmas above, and use `apply` to apply them.
+-/
+
 lemma a_pos (n : ℕ) : a n > 0 := by
   rewrite [a_def]
   apply nat_inv_pos
@@ -263,19 +282,19 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
   have h : fac n ≠ 0 := by apply fac_ne_zero
   algebra
 
-lemma a_bound_aux (n : ℕ) (k : ℕ) : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
-  rewrite [a_def, nat_inv_def, nat_inv_def]
-  algebra
-
 
 /-
   We can now use `fac_bound` from above to prove the following key inequality
-  for `a n`. Hint: use `a_bound_aux` to rewrite this into an inequality between
-  `nat_inv`'s.
+  for `a n`, namely
+    `a (n + k) ≤ (1/2) ^ k * (a n)`
+  You'll need to use `fac_bound` and `pow_two_mul_fac_pos` to prove this.
 -/
 theorem a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     a (n + k) ≤  (1/2) ^ k * (a n) := by
-  rewrite [a_bound_aux, a_def]
+  have h : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
+    rewrite [a_def, nat_inv_def, nat_inv_def]
+    algebra
+  rewrite [h]
   apply nat_inv_le
   apply fac_bound
   positivity

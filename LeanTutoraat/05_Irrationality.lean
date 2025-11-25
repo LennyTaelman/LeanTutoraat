@@ -40,11 +40,11 @@ lemma fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by rfl
   Now let's prove some basic facts about the factorial function.
 -/
 
-lemma fac_one : fac 1 = 1 := by rw [fac_succ]; rw [fac_zero]
+lemma fac_one : fac 1 = 1 := by rewrite [fac_succ, fac_zero]; rfl
 
-lemma fac_two : fac 2 = 2 := by rw [fac_succ]; rw [fac_one]
+lemma fac_two : fac 2 = 2 := by rewrite [fac_succ, fac_one]; rfl
 
-lemma fac_three : fac 3 = 6 := by rw [fac_succ]; rw [fac_two]
+lemma fac_three : fac 3 = 6 := by rewrite [fac_succ, fac_two]; rfl
 
 
 lemma fac_pos (n : ℕ) : fac n > 0 := by
@@ -52,16 +52,23 @@ lemma fac_pos (n : ℕ) : fac n > 0 := by
   · rewrite [fac_zero]; positivity
   · rewrite [fac_succ]; positivity
 
+/-
+  Hint: `linarith` or `positivity` can prove this, but they cannot "see"
+  the fact `fac n > 0` proved above by default. You'll need to make it visible
+  with a `have` statement first.
+-/
 lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
-  linarith [fac_pos n]
+  have h : fac n > 0 := by apply fac_pos n
+  linarith
 
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
-  linarith [fac_pos n]
+  have h : fac n > 0 := by apply fac_pos n
+  linarith
 
 lemma fac_strictly_monotone (n : ℕ) (h : n ≥ 1) : fac (n + 1) > fac n := by
-  rewrite [fac_succ]
   have h1 : n + 1 > 1 := by extra
   have h2 : fac n > 0 := by apply fac_pos n
+  rewrite [fac_succ]
   calc
     (n + 1) * fac n > 1 * fac n := by rel [h1]
     _ = fac n := by algebra
@@ -70,7 +77,8 @@ lemma fac_gt_one (n : ℕ) (h : n ≥ 2) : fac n > 1 := by
   induction_from_starting_point n, h with k hk IH
   · rewrite [fac_two]; numbers
   · have hk' : k ≥ 1 := by linarith
-    linarith [fac_strictly_monotone k hk']
+    have h2 : fac (k + 1) > fac k := by apply fac_strictly_monotone k hk'
+    linarith
 
 
 lemma fac_gt_of_gt (n m : ℕ) (h1 : n ≥ m + 1) (h2 : m ≥ 1): fac n > fac m := by
@@ -102,16 +110,12 @@ lemma fac_prev (n : ℕ) (h1 : n ≥ 1) : fac n = fac (n - 1) * n := by
   · rewrite [fac_succ k]; algebra
 
 
-/-
-  In the proof of `fac_bound` below, it will be useful to know that `2 ^ k * fac n` is positive.
--/
 
-lemma aux (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
-  have h : fac n > 0 := by apply fac_pos
-  positivity
 
 /-
-  The following is the key inequality in the proof of irrationality of `e`.
+  This is the `big boss` of Part I. It is the key inequality on which the proof of
+  the irrationality of `e` is based.
+
   I recommend you write out the proof in detail on paper first.
 -/
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
@@ -124,13 +128,22 @@ theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     have h1 : n + k + 1 ≥ 2 := by addarith [hn]
     have h2 : fac n > 0 := by apply fac_pos
     calc fac (n + (k + 1)) = fac (n + k + 1) := by algebra
-      _ = (n + k + 1) * fac (n + k) := by rw [fac_succ]
+      _ = (n + k + 1) * fac (n + k) := by rewrite [fac_succ]; rfl
       _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
       _ ≥ 2 * (2 ^ k * fac n) := by rel [h1]
       _ = 2 ^ (k + 1) * fac n := by algebra
 
 
+/-
+  We will apply `fac_bound` above to say something about `1 / fac (n + k)`. For this, it will
+  be useful to know that `2 ^ k * fac n` is positive.
 
+  Hint: `positivity` can do this, but think a bit about what it needs to know to conclude.
+-/
+
+lemma pow_two_mul_fac_pos (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
+  have h : fac n > 0 := by apply fac_pos
+  positivity
 
 
 /-
@@ -266,7 +279,7 @@ theorem a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
   apply nat_inv_le
   apply fac_bound
   positivity
-  apply aux n k
+  apply pow_two_mul_fac_pos n k
 
 
 
@@ -858,6 +871,7 @@ theorem e_irrational : ¬ isRat e := by
   -- then `fac_mul_integral_of_rational e h` gives us a `n ≥ 2` such that `(fac n) * e` is integral
   obtain ⟨n, h1, h2⟩ := fac_mul_integral_of_rational e h
   -- now `fac_mul_e_not_integral n h1` gives us a contradiction with `h2`
-  apply fac_mul_e_not_integral n h1 h2
+  apply fac_mul_e_not_integral n h1
+  apply h2
 
--- #print axioms e_irrational
+#print axioms e_irrational

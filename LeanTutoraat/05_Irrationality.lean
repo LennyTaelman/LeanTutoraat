@@ -319,9 +319,19 @@ def g (n : ℕ) : ℝ := match n with
   | 0 => 0
   | n + 1 => g n + (1/2) ^ n
 
+/-
+  As usualy, you can ignore the *definition* of `g` and just use the two defining lemmas
+  - `g_zero : g 0 = 0`
+  - `g_succ : g (n + 1) = g n + (1/2) ^ n`
+-/
+
 lemma g_zero : g 0 = 0 := by rfl
 
 lemma g_succ (n : ℕ) : g (n + 1) = g n + (1/2) ^ n := by rfl
+
+/-
+  Now let's do some sanity checks to make sure `g n` matches our expectations.
+-/
 
 lemma g_one : g 1 = 1 := by rw [g_succ, g_zero]; numbers
 
@@ -329,19 +339,23 @@ lemma g_two : g 2 = 3 / 2 := by rw [g_succ, g_one]; numbers
 
 lemma g_three : g 3 = 7 / 4 := by rw [g_succ, g_two]; numbers
 
-lemma g_eq (n : ℕ) : g n = 2 - 2 * (1/2) ^ n := by
+
+/-
+  Prove a closed formula for `g n`.
+-/
+lemma g_formula (n : ℕ) : g n = 2 - 2 * (1/2) ^ n := by
   simple_induction n with n IH
   · simp; rfl
   · rewrite [g_succ]
     rewrite [IH]
     algebra
 
-
--- we can now prove the main result of this section:
-
+/-
+  Use this to prove the following basic inequality:
+-/
 theorem g_lt_2 (n : ℕ) : g n < 2 := by
   calc
-    g n = 2 - 2 * (1/2) ^ n := by rewrite [g_eq]; rfl
+    g n = 2 - 2 * (1/2) ^ n := by rewrite [g_formula]; rfl
     _ < 2 := by extra
 
 

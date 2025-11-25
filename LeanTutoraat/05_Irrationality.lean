@@ -364,7 +364,7 @@ theorem g_lt_2 (n : ℕ) : g n < 2 := by
   ## Part IV: the partial sums `s n`
 
   Recall that `a n = 1 / n!`. We will define the number `e` through the series `e = ∑_n a n`.
-  Consider the partial sums:
+  To prepare for this, we consider the partial sums:
     `s n = a 0 + a 1 + ... + a (n-1)`   (n terms)
   They are defined recursively by:
     `s 0 = 0`
@@ -381,45 +381,69 @@ def s (n : ℕ) :=
   | 0 => 0
   | n + 1 => s n + a n
 
+/-
+  As usual, you can ignore the *definition* of `s` and just use the two defining lemmas
+  - `s_zero : s 0 = 0`
+  - `s_succ : s (n + 1) = s n + a n`
+-/
+
 lemma s_zero : s 0 = 0 := by rfl
 
 lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by rfl
 
-lemma s_one : s 1 = 1 := by rw [s_succ, s_zero, a_zero]; numbers
+/-
+  Now let's do some sanity checks to make sure `s n` matches our expectations.
+-/
 
-lemma s_two : s 2 = 2 := by rw [s_succ, s_one, a_one]; numbers
+lemma s_one : s 1 = 1 := by rewrite [s_succ, s_zero, a_zero]; numbers
 
-lemma s_three : s 3 = 5 / 2 := by rw [s_succ, s_two, a_two]; numbers
+lemma s_two : s 2 = 2 := by rewrite [s_succ, s_one, a_one]; numbers
+
+lemma s_three : s 3 = 5 / 2 := by rewrite [s_succ, s_two, a_two]; numbers
 
 
-lemma s_lt_next (n : ℕ) : s n < s (n + 1) := by
-  rw [s_succ]
-  addarith [a_pos n]
+/-
+  The lemma below boils down to `s n + a n > s n`. The tactics `extra` or `linarith`
+  can prove this, but they need to *see* the fact that `a n > 0`. Remind them by
+  including a `have` statement (which you can prove by applying the lemma `a_pos`
+  above).
+-/
+lemma s_strictly_monotone (n : ℕ) : s n < s (n + 1) := by
+  rewrite [s_succ]
+  have h : a n > 0 := by apply a_pos n
+  extra
 
-lemma s_monotone (n : ℕ) (m : ℕ) (hm : m > n) : s n < s m := by
-  induction_from_starting_point m, hm with k hk IH
-  · exact s_lt_next n
+lemma s_lt_of_lt (n : ℕ) (m : ℕ) (h : n < m) : s n < s m := by
+  induction_from_starting_point m, h with k hk IH
+  · apply s_strictly_monotone n
   · calc
     _ < s k := by rel [IH]
-    _ < s (k + 1) := by rel [s_lt_next k]
+    _ < s (k + 1) := by rel [s_strictly_monotone k]
 
-lemma s_monotone' (n : ℕ) (m : ℕ) (hm : m ≥ n) : s n ≤ s m := by
-  induction_from_starting_point m, hm with k hk IH
+lemma s_le_of_le (n : ℕ) (m : ℕ) (h : n ≤ m) : s n ≤ s m := by
+  induction_from_starting_point m, h with k hk IH
   · rfl
   · calc
     _ ≤ s k := by rel [IH]
-    _ ≤ s (k + 1) := by rel [s_lt_next k]
+    _ ≤ s (k + 1) := by rel [s_strictly_monotone k]
 
 lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
   simple_induction n with n IH
   · rw [s_zero]
   · rw [s_succ]
-    addarith [IH, a_pos n]
+    have h : a n > 0 := by apply a_pos n
+    positivity
 
 
 
 /-
-  Key bounds on s n
+  This is the *big boss* theorem of Part IV.
+
+  We now come to the key bound on `s n`. It is basde on `a_bound` from Part II. Look up
+  the statement of `a_bound` first.
+
+  I strongly suggest you use pen and paper to write out a detailed proof of the inductive step
+  first.
 -/
 theorem s_geometric_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) ≤ s n + (a n) * (g k) := by
@@ -473,7 +497,7 @@ theorem s_key_bound (n m : ℕ) (hn : n ≥ 1) : s m < s n + 2 * (a n) := by
     -- now finish the proof
     have ha : a n > 0 := by apply a_pos n
     calc
-      s m < s n := by apply s_monotone m n hm
+      s m < s n := by apply s_lt_of_lt m n hm
         _ ≤ s n + 2 * (a n) := by extra
 
 
@@ -486,7 +510,7 @@ lemma s_lt_three (n : ℕ) : s n < 3 :=
   have h : 2 ≥ 1 := by numbers
   calc
     s n < s 2 + 2 * (a 2) := by exact s_key_bound 2 n h
-      _ = 3 := by rw [a_two, s_two]; numbers
+      _ = 3 := by rewrite [a_two, s_two]; numbers
 
 
 /-
@@ -652,7 +676,7 @@ lemma s_cauchy : IsCauSeq abs s := by
   · intro n hn
     apply s_abs_bounded n
   · intro n hn
-    rel [s_lt_next n]
+    rel [s_strictly_monotone n]
   · use 0
 
 /-
@@ -680,7 +704,7 @@ lemma s_tends_to_e : ∀ ε > 0, ∃ N : ℕ, ∀ n ≥ N, |s n - e| < ε := by
 lemma s_lt_e (n : ℕ) : s n < e := by
   by_contra h
   rw [not_lt] at h
-  have h2 : e < s (n+1) := by addarith [h, s_lt_next n]
+  have h2 : e < s (n+1) := by linarith [h, s_strictly_monotone n]
   let ε := s (n+1) - e
   have hε : ε > 0 := by dsimp; linarith [h2]
   obtain ⟨N, hN⟩ := s_tends_to_e ε hε
@@ -692,7 +716,7 @@ lemma s_lt_e (n : ℕ) : s n < e := by
   push_neg
   calc
     _ = s (n + 1) - e := by rfl
-    _ ≤ s m - e := by linarith [s_monotone' (n + 1) m hm2]
+    _ ≤ s m - e := by linarith [s_le_of_le (n + 1) m hm2]
     _ ≤ |s m - e| := by exact le_abs_self (s m - e)
 
 

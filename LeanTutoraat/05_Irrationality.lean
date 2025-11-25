@@ -514,7 +514,7 @@ lemma s_lt_three (n : ℕ) : s n < 3 :=
 
 
 /-
-  ## Part IV: Integrality and Rationality
+  ## Part V: Integrality and Rationality - TODO, move this to the bottom!
 
   We will prove that `e` is irrational by proving that `(fac N) * e` is not an integer for any
   positive natural number `N`.
@@ -568,7 +568,8 @@ example (x : ℝ) (h : isInt x) : isInt (x ^ 2) := by
   apply isInt_mul h h
 
 /-
-  Key integrality lemma about `a_n`
+  Key integrality lemma about `a_n`:
+    `(fac m) * a n` is an integer for all `m ≥ n`.
 -/
 lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
   induction_from_starting_point m, h with k hk IH
@@ -583,46 +584,10 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
     apply isInt_nat_mul
     exact IH
 
-
-
 /-
-  Key rationality criterion. To prove that a number `x` is irrational, it
-  suffices to show that `(fac N) * x` is not an integer for all `N`.
-
-  The main reason is the following lemma, which states that if `n * x` is an
-  integer, then `(fac n) * x` is also an integer. The proof uses `fac_prev` to
-  express `fac n` as a product of `fac (n - 1)` and `n` (using the fact that `n ≥ 1`).
+  Key integrality lemma about `s n`:
+    `(fac m) * s n` as soon as `m + 1 ≥ n`.
 -/
-
-lemma is_int_fac_mul_of_is_int_mul {x : ℝ} (n : ℕ) (h1 : n ≥ 1) (h : isInt (n * x)) : isInt (fac n * x) := by
-  rewrite [fac_prev n h1]
-  have h2 : (fac (n - 1) * n : ℕ) * x = (fac (n - 1) * (n * x)) := by algebra
-  rewrite [h2]
-  apply isInt_nat_mul h
-
-/-
-  Now we can prove the irrationality criterion that we wil use to establish that
-  `e` is irrational. The proof has been pre-filled since it uses a few tactics
-  we have not seen yet. The proof in English:
-
-  Assume for the sake of contradiction that `x` is rational. Then there exists
-  an `N > 0` such that `N * x` is an integer. By Lemma
-  `is_int_fac_mul_of_is_int_mul`, we have that `(fac N) * x` is an integer,
-  contradicting assumption `h`.
--/
-lemma irrationality_criterion {x : ℝ} (h : ∀ N, ¬ isInt ((fac N) * x)) : ¬ isRat x := by
-  by_contra h2
-  obtain ⟨N, hN, hx⟩ := h2
-  specialize h N
-  apply is_int_fac_mul_of_is_int_mul N hN at hx
-  contradiction
-
-
-
-
-
--- TODO: decide between (fac m) * s n and (fac m) * s (n + 1) !
-
 lemma isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
     isInt ((fac m) * s n) := by
   simple_induction n with k IH
@@ -637,14 +602,59 @@ lemma isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
       apply isInt_fac_mul_a k m h''
 
 
+/-
+  This is the key theorem we will use to reduce the irrationality of `e` to the
+  fact that certain numbers are not integral.
 
+  It says that if `x` is rational, then there exists an `n ≥ 2` such that
+  `(fac n) * x` is an integer. Hint: use `rewrite [fac_prev n h1]` to express `fac n` as a
+  product of `fac (n - 1)` and `n`.
+-/
 
+lemma fac_mul_isInt_of_isRat (x : ℝ) (h : isRat x) :
+    ∃ n : ℕ, n ≥ 1 ∧ isInt ((fac n) * x) := by
+  -- by definition of IsRat, there exists an `n > 0` such that `n * x` is an integer.
+  obtain ⟨n, h1, h2⟩ := h
+  use n
+  -- we need to show that `n ≥ 1` and that `(fac n) * x` is an integer.
+  constructor
+  · linarith
+  · rewrite [fac_prev n h1]
+    have h3 : (fac (n - 1) * n : ℕ) * x = (fac (n - 1) * (n * x)) := by algebra
+    rewrite [h3]
+    apply isInt_nat_mul h2
+
+/-
+  Variation: we'll actually need a slightly stronger conclusion: that we can take `n ≥ 2`.
+-/
+
+theorem rationality_criterion (x : ℝ) (h : isRat x) :
+    ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by
+  -- by the previous lemma, there is an `n ≥ 1` such that `(fac n) * x` is an integer.
+  obtain ⟨n, h1, h2⟩ := fac_mul_isInt_of_isRat x h
+  -- case distinction on `n`:
+  by_cases h3 : n ≥ 2
+  · -- either `n ≥ 2` and then we can use the previous lemma directly
+    use n
+    exact ⟨h3, h2⟩
+  · -- or not `n ≥ 2`. The following tactic rewrites this to `n < 2`.
+    push_neg at h3
+    -- now we can just use `n = 2`.
+    use 2
+    -- we need to prove that `2 ≥ 2` and that `(fac 2) * x` is an integer.
+    constructor
+    · numbers
+    · have h4 : n = 1 := by linarith
+      rewrite [h4] at h2
+      rewrite [fac_one] at h2
+      simp at h2
+      apply isInt_nat_mul h2
 
 
 /-
-  ## The number `e` as limit of the sequence `s n`
+  ## Part VI: The number `e` as limit of the sequence `s n`
 
-  The next part defines the number `e` as follows:
+  So far, we have not mentioned the number `e` yet! In this part, we define `e` as follows:
   - we show that the sequence `s n` is Cauchy, and hence has a limit
   - we define `e` to be this limit.
   The details are a bit technical, since they require working closely with the
@@ -661,7 +671,8 @@ lemma isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
 -/
 
 /-
-  `|s n| ≤ 3`, so `s n` is a bounded sequence.
+  `|s n| ≤ 3`, so `s n` is a bounded sequence. Uses the inequalities `0 ≤ s n` and `s n < 3`
+  proven above.
 -/
 lemma s_abs_bounded (n : ℕ) : |s n| ≤ 3 := by
   rw [abs_of_nonneg]
@@ -744,8 +755,6 @@ lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n < c) : e ≤ c := by
     _ = |s N - e| := by ring
 
 /-
-  ## Part V: Key bounds on the number `e`
-
   We now use `s_lt_e` and `e_le_of_s_le` to prove some inequalities satisfied by `e`.
 -/
 
@@ -896,26 +905,6 @@ lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
   apply fac_mul_t_succ_not_integral n hn ht
 
 
-lemma fac_mul_integral_of_rational (x : ℝ) (h : isRat x) :
-    ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by
-  obtain ⟨p, h1, h2⟩ := h
-  by_cases h4 : p ≤ 1
-  · have h5 : p = 1 := by linarith
-    use 2
-    constructor
-    · numbers
-    · rewrite [fac_two]
-      rewrite [h5] at h2
-      simp at h2
-      apply isInt_nat_mul h2
-  · have h5 : p ≥ 2 := by linarith
-    use p
-    constructor
-    · linarith
-    · rewrite [fac_prev p h1]
-      have h6 : (fac (p - 1) * p : ℕ) * x = (fac (p - 1) * (p * x)) := by algebra
-      rewrite [h6]
-      apply isInt_nat_mul h2
 
 
 /-
@@ -926,7 +915,7 @@ theorem e_irrational : ¬ isRat e := by
   -- assume for the sake of contradiction `h : isRat e`
   by_contra h
   -- then `fac_mul_integral_of_rational e h` gives us a `n ≥ 2` such that `(fac n) * e` is integral
-  obtain ⟨n, h1, h2⟩ := fac_mul_integral_of_rational e h
+  obtain ⟨n, h1, h2⟩ := rationality_criterion e h
   -- now `fac_mul_e_not_integral n h1` gives us a contradiction with `h2`
   apply fac_mul_e_not_integral n h1
   apply h2

@@ -514,7 +514,7 @@ lemma s_lt_three (n : ℕ) : s n < 3 :=
 
 
 /-
-  ## Part V: Integrality and Rationality - TODO, move this to the bottom!
+  ## Part V: Integrality and Rationality
 
   We will prove that `e` is irrational by proving that `(fac N) * e` is not an integer for any
   positive natural number `N`.
@@ -588,7 +588,7 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
   Key integrality lemma about `s n`:
     `(fac m) * s n` as soon as `m + 1 ≥ n`.
 -/
-lemma isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
+theorem isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
     isInt ((fac m) * s n) := by
   simple_induction n with k IH
   · rw [s_zero]; simp; apply isInt_zero
@@ -754,63 +754,63 @@ lemma e_le_of_s_le (c : ℝ) (h : ∀ n, s n < c) : e ≤ c := by
     _ = |- (e - s N )| := by rw [abs_neg]
     _ = |s N - e| := by ring
 
+
+
+
 /-
-  We now use `s_lt_e` and `e_le_of_s_le` to prove some inequalities satisfied by `e`.
+  ## Part VII: The tail `t n` of the series
+
+  We will now prove that e is irrational. A key player is the "tail"
+    `t n = e - s n = 1 / n! + 1 / (n+1)! + ...`
+  of the series defining `e`.
+
+  We will establish that for all `n ≥ 2` we have:
+   `0 < (fac n) * t (n + 1) < 1`
+
+  Later, we will show that if `e` were rational, then `(fac n) * t (n + 1)` would be
+  integral for some `n` large enough. But this is absurd, since no number strictly between
+  0 and 1 can be an integer.
 -/
 
--- hint: `s 2 = 2`
-theorem e_gt_2 : e > 2 := by
-  calc
-    e > s 2 := by apply s_lt_e
-    _ = 2 := by apply s_two
+/-
+  First we establish a key inequality on `e`.
+-/
 
 theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
   -- by `e_le_of_s_le` it suffices to show that `s m < s n + 2 * (a n)` for all `m`.
-  apply e_le_of_s_le _
+  apply e_le_of_s_le
   intro m
-  -- finish the proof by applying `s_key_bound`
+  -- finish the proof by applying `s_key_bound` with the correct arguments.
   apply s_key_bound n m hn
 
 
 /-
-  Application: `e < 3`. Hint: `s 3 + 2 * (a 3) = 17/6 < 3`
--/
-theorem e_lt_3 : e < 3 := by
-   calc
-    e ≤ s 3 + 2 * (a 3) := by apply key_bound_e; numbers
-    _ < 3 := by rewrite [s_three, a_three]; numbers
-
-
-
-/-
-  ## The tail `t n` of the series
-
-  We will now prove that e is irrational. Consider the tail
-
-  `t n = e - s n = 1 / n! + 1 / (n+1)! + ...`
-
-  By the key bound, we have t n ≤ 2 * 1 / n!, so
-  n! * t (n + 1) < 1 for n > 1
-
-  Note that n! * s (n + 1) is an integer.
-
-  Now if e is rational, then n! * e is an integer for n big enough
-
-  But then n! * t (n + 1) is an integer/
-
-  This is a contradiction with the fact that n! * t (n + 1) < 1.
-
-  BAH, stuff below is a mess. Write out argument *very carefully*
-  on paper first!
-
+  Now consider the tail `t n`.
 -/
 
 def t (n : ℕ) := e - s n
 
 lemma t_def (n : ℕ) : t n = e - s n := by rfl
 
+/-
+  Let's do a quick sanity check to make sure `t n` behaves as expected.
+-/
+
+lemma t_zero : t 0 = e := by
+  rewrite [t_def]
+  rewrite [s_zero]
+  algebra
+
+lemma t_add_s (n : ℕ) : t n + s n = e := by
+  rewrite [t_def]
+  algebra
+
+/-
+  Now let us prove lower and upper bounds for `t n`.
+-/
 lemma t_pos (n : ℕ) : 0 < t n := by
-  rw [t_def]
+  -- hint: use `s_lt_e`, introduced above.
+  rewrite [t_def]
   linarith [s_lt_e n]
 
 lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
@@ -819,30 +819,46 @@ lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
   have h : e ≤ s n + 2 * (a n) := by apply key_bound_e n hn
   linarith
 
+/-
+  We use these to prove lower and upper bounds for `(fac n) * t (n + 1)`. The lower bound is
+  easy:
+-/
+lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
+  have h1 : (fac n) > 0 := by apply fac_pos n
+  have h2 : t (n + 1) > 0 := by apply t_pos (n + 1)
+  positivity
 
-lemma fac_mul_a_succ (n : ℕ) :
-    (fac n) * (a (n + 1)) = 1 / (n + 1) := by
-  rewrite [a_def, nat_inv_def, fac_succ]
-  have h : fac n > 0 := by apply fac_pos n
-  algebra
+/-
+  For the upper bound, we proceed in a few steps. In order of appearance, we show:
+  - `(fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1)` (using `t_le_twice_a`)
+  - `(fac n) * t (n + 1) ≤ 2 / (n + 1)`
+  - `(fac n) * t (n + 1) < 1`
+  Each builds on the previous one.
+-/
 
-lemma fac_mul_t_le (n : ℕ) (hn : n ≥ 1) :
+lemma bound_1 (n : ℕ) (hn : n ≥ 1) :
     (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by
   have h3 : n + 1 ≥ 1 := by linarith
   calc
     (fac n) * t (n + 1) ≤ (fac n) * (2 * (a (n + 1))) := by rel [t_le_twice_a _ h3]
     _ = _ := by algebra
 
--- TODO: continue from here, with the above lemmas should be able
+-- auxiliary lemma to deduce `fac_mul_t_succ_le_2` below:
+lemma aux_1 (n : ℕ) :
+    (fac n) * (a (n + 1)) = 1 / (n + 1) := by
+  rewrite [a_def, nat_inv_def, fac_succ]
+  have h : fac n > 0 := by apply fac_pos n
+  algebra
 
-lemma fac_mul_t_le' (n : ℕ) (hn : n ≥ 1) :
+lemma bound_2 (n : ℕ) (hn : n ≥ 1) :
     (fac n) * t (n + 1) ≤ 2 / (n + 1) := by
   calc
-    (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by apply fac_mul_t_le n hn
+    (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by apply bound_1 n hn
     _ = 2 * ((fac n) * a (n + 1)) := by algebra
-    _ = 2  / (n + 1) := by rewrite [fac_mul_a_succ n]; algebra
+    _ = 2  / (n + 1) := by rewrite [aux_1 n]; algebra
 
-lemma le_two_thirds (n : ℕ) (hn : n ≥ 2) :
+-- auxiliary lemma to deduce `fac_mul_t_succ_lt_one` below:
+lemma aux_2 (n : ℕ) (hn : n ≥ 2) :
     (2 : ℝ) / (n + 1) ≤ 2 / 3 := by
   have h2 : (2 : ℝ) > 0 := by numbers
   apply (mul_le_mul_left h2).mpr
@@ -851,43 +867,47 @@ lemma le_two_thirds (n : ℕ) (hn : n ≥ 2) :
   apply (inv_le_inv h3 h4).mpr
   linarith
 
-/-
-  Combining `fac_mul_t_le'` and `le_two_thirds` we get that
-  `(fac n) * t (n + 1) ≤ 2 / (n + 1) ≤ 2 / 3 < 1`
--/
-
-lemma fac_mul_t_succ_lt_1 (n : ℕ) (hn : n ≥ 2) :
+theorem fac_mul_t_succ_lt_one (n : ℕ) (hn : n ≥ 2) :
     (fac n) * t (n + 1) < 1 := by
   have h1 : n ≥ 1 := by linarith
   calc
-    (fac n) * t (n + 1) ≤ 2 / (n + 1) := by apply fac_mul_t_le' n h1
-    _ ≤ 2 / 3 := by apply le_two_thirds n hn
+    (fac n) * t (n + 1) ≤ 2 / (n + 1) := by apply bound_2 n h1
+    _ ≤ 2 / 3 := by apply aux_2 n hn
     _ < 1 := by numbers
 
 
-/-
-  We also have: `(fac n) * t (n + 1) > 0`. To prove this, establish that `fac n`
-  and `t (n + 1)` are positive (using lemmas proven above), and let `positivity` conclude.
--/
-lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
-  have h1 : (fac n) > 0 := by apply fac_pos n
-  have h2 : t (n + 1) > 0 := by apply t_pos (n + 1)
-  positivity
 
 /-
-  But something that is both `< 1` and `> 0` cannot be an integer! This can be
-  shown using the lemma
-    `no_int_between_0_and_1 (h1 : x > 0) (h2 : x < 1) : ¬ isInt x`
+  ## Part VIII: The irrationality of `e`
+
+  Recall that we have for all `n ≥ 2`:
+  - `(fac n) * t (n + 1) > 0`, by lemma `fac_mul_t_succ_pos`
+  - `(fac n) * t (n + 1) < 1`, by theorem `fac_mul_t_succ_lt_one`
+
+  We also know that:
+  - `(fac n) * s (n + 1)` is integral, by theorem `isInt_fac_mul_s`
+
+  If `e` were rational, then theorem `rationality_criterion` would give us a `n ≥ 2` such that
+  - `(fac n) * e` is integral
+
+  But since `t (n + 1) = e - s (n + 1)`, we would conclude that
+  - `(fac n) * (e - s (n + 1))` is integral ??
+  A contradiction with the inequalities above. Below we spell out this argument in detail.
+-/
+
+
+/-
+  First we show that `(fac n) * t (n + 1)` is not integral (it lies strictly between 0 and 1).
 -/
 lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * t (n + 1)) := by
-  have h1 : (fac n) * t (n + 1) < 1 := by apply fac_mul_t_succ_lt_1 n hn
+  have h1 : (fac n) * t (n + 1) < 1 := by apply fac_mul_t_succ_lt_one n hn
   have h2 : (fac n) * t (n + 1) > 0 := by apply fac_mul_t_succ_pos n
   apply no_int_between_0_and_1 h2 h1
 
 /-
   Under the assumption that `n ≥ 2`, we have now established:
-  - `(fac n) * t (n + 1)` is not integral (this is lemma `fac_mul_t_succ_not_integral`)
+  - `(fac n) * t (n + 1)` is not integral (above)
   - `(fac n) * s (n + 1)` is integral (this is lemma `s_integrality`)
   - `t (n + 1) = e - s (n + 1)` (by lemma `t_def`)
   From this we should be able to conclude that `(fac n) * e` is not integral!
@@ -908,9 +928,8 @@ lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
 
 
 /-
-  Now everything comes together!
+  Now everything comes together!!
 -/
-
 theorem e_irrational : ¬ isRat e := by
   -- assume for the sake of contradiction `h : isRat e`
   by_contra h
@@ -920,4 +939,10 @@ theorem e_irrational : ¬ isRat e := by
   apply fac_mul_e_not_integral n h1
   apply h2
 
+
+/-
+  Let's check to make sure that no `sorry`s are left in the proof. This should print:
+    `'e_irrational' depends on axioms: [propext, Classical.choice, Quot.sound]`
+  If in stead it mentions `sorryAx`, then there is still a `sorry` left somewhere...
+-/
 #print axioms e_irrational

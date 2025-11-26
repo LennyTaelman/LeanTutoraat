@@ -177,7 +177,11 @@ lemma nat_inv_lt_one (n : ℕ) (hn : n > 1) : nat_inv n < 1 := by
 
 
 /-
-  Now define `a n := nat_inf fac n`, so `a n = 1 / n!`
+  Now define `a n := nat_inf fac n`, so `a n = 1 / n!`. The first few values are:
+  - `a 0 = 1 / 0! = 1`
+  - `a 1 = 1 / 1! = 1`
+  - `a 2 = 1 / 2! = 1 / 2`
+  - `a 3 = 1 / 3! = 1 / 6`
 -/
 
 def a (n : ℕ) : ℝ := nat_inv (fac n)
@@ -275,30 +279,28 @@ lemma g_succ (n : ℕ) : g (n + 1) = g n + (1/2) ^ n := by rfl
   Now let's do some sanity checks to make sure `g n` matches our expectations.
 -/
 
-lemma g_one : g 1 = 1 := by rw [g_succ, g_zero]; numbers
+lemma g_one : g 1 = 1 := by
+  sorry
 
-lemma g_two : g 2 = 3 / 2 := by rw [g_succ, g_one]; numbers
+lemma g_two : g 2 = 3 / 2 := by
+  sorry
 
-lemma g_three : g 3 = 7 / 4 := by rw [g_succ, g_two]; numbers
+lemma g_three : g 3 = 7 / 4 := by
+  sorry
+
 
 
 /-
-  Prove a closed formula for `g n`.
+  Prove a closed formula for `g n`, by induction on `n`.
 -/
 lemma g_formula (n : ℕ) : g n = 2 - 2 * (1/2) ^ n := by
-  simple_induction n with n IH
-  · simp; rfl
-  · rewrite [g_succ]
-    rewrite [IH]
-    algebra
+  sorry
 
 /-
   Use this to prove the following basic inequality:
 -/
 theorem g_lt_2 (n : ℕ) : g n < 2 := by
-  calc
-    g n = 2 - 2 * (1/2) ^ n := by rewrite [g_formula]; rfl
-    _ < 2 := by extra
+  sorry
 
 
 
@@ -337,52 +339,43 @@ lemma s_succ (n : ℕ) : s (n + 1) = s n + a n := by rfl
   Now let's do some sanity checks to make sure `s n` matches our expectations.
 -/
 
-lemma s_one : s 1 = 1 := by rewrite [s_succ, s_zero, a_zero]; numbers
+lemma s_one : s 1 = 1 := by
+  sorry
 
-lemma s_two : s 2 = 2 := by rewrite [s_succ, s_one, a_one]; numbers
+lemma s_two : s 2 = 2 := by
+  sorry
 
-lemma s_three : s 3 = 5 / 2 := by rewrite [s_succ, s_two, a_two]; numbers
+lemma s_three : s 3 = 5 / 2 := by
+  sorry
 
 
 /-
-  The lemma below boils down to `s n + a n > s n`. The tactics `extra` or `linarith`
+  Using `s_succ`, this reduces to `s n + a n > s n`. The tactics `extra` or `linarith`
   can prove this, but they need to *see* the fact that `a n > 0`. Remind them by
   including a `have` statement (which you can prove by applying the lemma `a_pos`
   above).
 -/
 lemma s_strictly_monotone (n : ℕ) : s n < s (n + 1) := by
-  rewrite [s_succ]
-  have h : a n > 0 := by apply a_pos n
-  extra
+  sorry
 
+-- to prove something holds for all `m > n`, you can use `induction_from_starting_point`
 lemma s_lt_of_lt (n : ℕ) (m : ℕ) (h : n < m) : s n < s m := by
   induction_from_starting_point m, h with k hk IH
-  · apply s_strictly_monotone n
-  · calc
-    _ < s k := by rel [IH]
-    _ < s (k + 1) := by rel [s_strictly_monotone k]
+  · sorry
+  · sorry
 
+-- variation:
 lemma s_le_of_le (n : ℕ) (m : ℕ) (h : n ≤ m) : s n ≤ s m := by
-  induction_from_starting_point m, h with k hk IH
-  · rfl
-  · calc
-    _ ≤ s k := by rel [IH]
-    _ ≤ s (k + 1) := by rel [s_strictly_monotone k]
+  sorry
 
 lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
-  simple_induction n with n IH
-  · rw [s_zero]
-  · rw [s_succ]
-    have h : a n > 0 := by apply a_pos n
-    positivity
-
+  sorry
 
 
 /-
   This is the *big boss* theorem of Part IV.
 
-  We now come to the key bound on `s n`. It is basde on `a_bound` from Part II. Look up
-  the statement of `a_bound` first.
+  The result is based on `a_bound` from Part II. Look up the statement of `a_bound` first.
 
   I strongly suggest you use pen and paper to write out a detailed proof of the inductive step
   first.
@@ -390,40 +383,30 @@ lemma s_nonneg (n : ℕ) : s n ≥ 0 := by
 theorem s_geometric_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) ≤ s n + (a n) * (g k) := by
   simple_induction k with k IH
-  · -- base case
-    rw [g_zero]
-    simp
-    extra
-  · -- inductive step
-    calc
-      _ = s (n + k + 1) := by ring
-      _ = s (n + k) + a (n + k) := by rw [s_succ]
-      _ ≤ s n + (a n) * (g k) + a (n + k) := by rel [IH]
-      _ ≤ s n + (a n) * (g k) + (1/2) ^ k * a n := by rel [a_bound n k hn]
-      _ = s n + (a n) * ((g k) + (1/2) ^ k) := by algebra
-      _ = s n + (a n) * (g (k + 1)) := by rw [g_succ]
+  · sorry
+  · sorry
 
 /-
   Using `g_lt_2` this implies that `s (n + k) < s n + 2 * (a n)`.
 -/
 lemma s_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     s (n + k) < s n + 2 * (a n)  := by
+  -- remind Lean that `a n > 0`, so that `linarith`, `rel`, ... can use this
   have h : a n > 0 := a_pos n
-  calc
-    _ ≤ s n + (a n) * (g k) := by apply s_geometric_bound n k hn
-    _ < s n + (a n) * 2 := by rel [g_lt_2 k]
-    _ = s n + 2 * (a n) := by algebra
+  -- now finish the proof using `s_geometric_bound` and `g_lt_2`
+  sorry
+
 
 /-
-  Variant: since we eliminate `k` by replacing `n + k` with any `m` such that `m ≥ n`:
+  Variant: we eliminate `k` by replacing `n + k` with any `m` such that `m ≥ n`:
 -/
 lemma s_bound_variant (n m : ℕ) (hn : n ≥ 1) (hm : m ≥ n) : s m < s n + 2 * (a n) := by
+  -- first, let's define `k` as `m - n`
   let k := m - n
+  -- `hk` is the hypothesis that `m = n + k`
   have hk : m = n + k := by exact (Nat.sub_eq_iff_eq_add' hm).mp rfl
-  calc
-    s m = s (n + k)       := by rewrite [hk]; rfl
-      _ < s n + 2 * (a n) := by rel [s_bound n k hn]
-      _ = s n + 2 * (a n) := by algebra
+  -- now finish the proof
+  sorry
 
 
 /-
@@ -433,14 +416,11 @@ lemma s_bound_variant (n m : ℕ) (hn : n ≥ 1) (hm : m ≥ n) : s m < s n + 2 
 theorem s_key_bound (n m : ℕ) (hn : n ≥ 1) : s m < s n + 2 * (a n) := by
   by_cases hm : m ≥ n
   · -- either `m ≥ n`, then this is `s_bound_variant` above
-    apply s_bound_variant n m hn hm
+    sorry
   · -- or `¬ m ≥ n`, then we have `m < n`:
     push_neg at hm
     -- now finish the proof
-    have ha : a n > 0 := by apply a_pos n
-    calc
-      s m < s n := by apply s_lt_of_lt m n hm
-        _ ≤ s n + 2 * (a n) := by extra
+    sorry
 
 
 
@@ -449,10 +429,7 @@ theorem s_key_bound (n m : ℕ) (hn : n ≥ 1) : s m < s n + 2 * (a n) := by
   for all `n`. Indeed, taking `m = 2` we find `s n < s 2 + 2 * (a 2) = 3`.
 -/
 lemma s_lt_three (n : ℕ) : s n < 3 :=
-  have h : 2 ≥ 1 := by numbers
-  calc
-    s n < s 2 + 2 * (a 2) := by exact s_key_bound 2 n h
-      _ = 3 := by rewrite [a_two, s_two]; numbers
+  sorry
 
 
 /-

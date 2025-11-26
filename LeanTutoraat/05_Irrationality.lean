@@ -92,34 +92,27 @@ lemma fac_prev (n : ℕ) (h1 : n ≥ 1) : fac n = fac (n - 1) * n := by
   This is the `big boss` of Part I. It is the key inequality on which the proof of
   the irrationality of `e` is based.
 
-  I recommend you write out the proof in detail on paper first.
+  I recommend you write out the proof in detail on paper first, especially for the
+  inductive step.
 -/
 theorem fac_bound (n : ℕ) (k : ℕ) (hn : n > 0) :
     fac (n + k) ≥ 2 ^ k * fac n := by
   simple_induction k with k IH
   · -- base case
-    calc fac (n + 0) = 1 * fac n := by algebra
-      _ ≥ 1 * fac n := by extra
+    sorry
   · -- inductive step
-    have h1 : n + k + 1 ≥ 2 := by addarith [hn]
-    have h2 : fac n > 0 := by apply fac_pos
-    calc fac (n + (k + 1)) = fac (n + k + 1) := by algebra
-      _ = (n + k + 1) * fac (n + k) := by rewrite [fac_succ]; rfl
-      _ ≥ (n + k + 1) * (2 ^ k * fac n) := by rel [IH]
-      _ ≥ 2 * (2 ^ k * fac n) := by rel [h1]
-      _ = 2 ^ (k + 1) * fac n := by algebra
-
+    sorry
 
 /-
   We will apply `fac_bound` above to say something about `1 / fac (n + k)`. For this, it will
   be useful to know that `2 ^ k * fac n` is positive.
 
   Hint: `positivity` can do this, but think a bit about what it needs to know to conclude.
+  Remember: tactics like `positivity` or `linarith` cannot see what we have proven above
+  without reminding them.
 -/
-
 lemma pow_two_mul_fac_pos (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
-  have h : fac n > 0 := by apply fac_pos
-  positivity
+  sorry
 
 
 /-
@@ -127,8 +120,8 @@ lemma pow_two_mul_fac_pos (n : ℕ) (k : ℕ) : 0 < 2 ^ k * fac n := by
 -/
 
 /-
-  We will define `e` as `∑_n 1 / n!`. There is a subtlety here:
-  we have defined `fac n` as a natural number, and we want to consider
+  We will define `e` as `∑_n 1 / n!`. In this part, we consider the term `a n := 1 / n!`.
+  There is a subtlety here: we have defined `fac n` as a natural number, and we want to consider
   its inverse as a real number. To avoid lots of technicalities later on,
   we separate out the transition from "natural number `n!`" to "real number `1 / n!`",
   and prove the elementary properties of this function.
@@ -143,55 +136,44 @@ lemma nat_inv_def (n : ℕ) : nat_inv n = (n : ℝ)⁻¹ := by rfl
   replace it with `(↑n)⁻¹`. Lean will use the arrow `↑` is there to remind you that it
   is treating the (a priori) natural number `n` as a real number now.
 -/
-
-
 lemma nat_inv_one : nat_inv 1 = 1 := by
-  rewrite [nat_inv_def]
-  numbers
+  sorry
+
+lemma nat_inv_two : nat_inv 2 = 1 / 2 := by
+  sorry
 
 lemma nat_inv_pos (n : ℕ) (hn : n > 0) : nat_inv n > 0 := by
-  rewrite [nat_inv_def n]
-  positivity
+  sorry
 
 /-
-  Hint: `linarith` or `positivity` can prove this, but they cannot "see"
-  the fact `nat_inv n > 0` proved above by default. You'll need to make it visible
+  Hint: `linarith` or `positivity` can prove this, but by defaultthey cannot "see"
+  the fact `nat_inv n > 0` proved above. You'll need to make it visible
   with a `have` statement first.
 -/
 lemma nat_inv_ne_zero (n : ℕ) (hn : n > 0) : nat_inv n ≠ 0 := by
-  have h : nat_inv n > 0 := by apply nat_inv_pos n hn
-  linarith
+  sorry
 
 lemma nat_inv_mul (n m : ℕ) : nat_inv (n * m) = nat_inv n * nat_inv m := by
-  rewrite [nat_inv_def, nat_inv_def, nat_inv_def]
-  algebra
+  sorry
 
+/-
+  In the lemma below, it may be useful to use the following lemma:
+    `inv_le_inv_of_le (h1 : 0 < a) (h2 : a ≤ b) : b⁻¹ ≤ a⁻¹`
+-/
 lemma nat_inv_le (n m : ℕ) (h : n ≥ m) (hm : m > 0) : nat_inv n ≤ nat_inv m := by
-  rewrite [nat_inv_def n, nat_inv_def m]
-  have hn : n > 0 := by linarith
-  apply inv_le_inv_of_le
-  positivity
-  linarith
-
+  sorry
+/-
+  In the lemma below, it may be useful to use the following lemma:
+    `inv_lt_inv_of_lt (h1 : 0 < a) (h2 : a < b) : b⁻¹ < a⁻¹`
+-/
 lemma nat_inv_lt (n m : ℕ) (h : n > m) (hm : m > 0) : nat_inv n < nat_inv m := by
-  rw [nat_inv_def n, nat_inv_def m]
-  have hn : n > 0 := by linarith
-  apply inv_lt_inv_of_lt
-  positivity
-  linarith
+  sorry
 
 lemma nat_inv_le_one (n : ℕ) (hn : n > 0) : nat_inv n ≤ 1 := by
-  rewrite [← nat_inv_one]
-  apply nat_inv_le
-  exact hn
-  numbers
+  sorry
 
 lemma nat_inv_lt_one (n : ℕ) (hn : n > 1) : nat_inv n < 1 := by
-  rewrite [← nat_inv_one]
-  apply nat_inv_lt
-  exact hn
-  numbers
-
+  sorry
 
 
 /-
@@ -202,25 +184,24 @@ def a (n : ℕ) : ℝ := nat_inv (fac n)
 
 lemma a_def (n : ℕ) : a n = nat_inv (fac n) := by rfl
 
+
+/-
+  A few sanity checks to make sure `a n` behaves as expected.
+-/
 lemma a_zero : a 0 = 1 := by
-  rewrite [a_def, fac_zero, nat_inv_one]
-  rfl
+  sorry
 
 lemma a_one : a 1 = 1 := by
-  rewrite [a_def, fac_one, nat_inv_one]
-  rfl
+  sorry
 
 lemma a_two : a 2 = 1 / 2 := by
-  rewrite [a_def, fac_two, nat_inv_def]
-  numbers
+  sorry
 
 lemma a_three : a 3 = 1 / 6 := by
-  rewrite [a_def, fac_three, nat_inv_def]
-  numbers
+  sorry
 
 lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by
-  rewrite [a_def, a_def, nat_inv_def, nat_inv_def, fac_succ]
-  algebra
+  sorry
 
 
 /-
@@ -228,35 +209,23 @@ lemma a_succ (n : ℕ) : a (n + 1) = a n / (n + 1) := by
   `fac`. Have a look at the lemmas above, and use `apply` to apply them.
 -/
 
+-- example:
 lemma a_pos (n : ℕ) : a n > 0 := by
   rewrite [a_def]
   apply nat_inv_pos
   apply fac_pos
 
 lemma a_le_one (n : ℕ) : a n ≤ 1 := by
-  rewrite [a_def]
-  apply nat_inv_le_one
-  apply fac_pos
+  sorry
 
 lemma a_le (n m : ℕ) (h : n ≥ m) : a n ≤ a m := by
-  rw [a_def]
-  apply nat_inv_le
-  apply fac_ge_of_ge
-  apply h
-  apply fac_pos
+  sorry
 
 lemma a_lt (n m : ℕ) (h : n > m) (hn : m > 0) : a n < a m := by
-  rw [a_def]
-  apply nat_inv_lt
-  apply fac_gt_of_gt
-  exact h
-  linarith
-  apply fac_pos
+  sorry
 
 lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
-  rewrite [a_def, nat_inv_def]
-  have h : fac n ≠ 0 := by apply fac_ne_zero
-  algebra
+  sorry
 
 
 /-
@@ -267,15 +236,12 @@ lemma fac_mul_a_eq_one (n : ℕ) : fac n * a n = 1 := by
 -/
 theorem a_bound (n : ℕ) (k : ℕ) (hn : n ≥ 1) :
     a (n + k) ≤  (1/2) ^ k * (a n) := by
+  -- it is useful to first prove the following:
   have h : (1/2) ^ k * (a n) = nat_inv (2 ^ k * fac n) := by
-    rewrite [a_def, nat_inv_def, nat_inv_def]
-    algebra
-  rewrite [h]
-  apply nat_inv_le
-  apply fac_bound
-  positivity
-  apply pow_two_mul_fac_pos n k
-
+    sorry
+  -- now use `h` and `a_def` to rewrite the goal into an inequality of `nat_inv`'s
+  -- and finish the proof.
+  sorry
 
 
 

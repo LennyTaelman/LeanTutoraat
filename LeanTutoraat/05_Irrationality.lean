@@ -467,41 +467,37 @@ lemma s_lt_three (n : ℕ) : s n < 3 :=
   familiar with `isInt` and `isRat` before diving into the important bits.
 -/
 example : isInt 2 := by
-  apply isInt_nat 2
+  sorry
 
+-- hint: first establish `h : 2 > 0` and then use `apply isRat_inv_nat` with the correct arguments
 example : isRat 2⁻¹ := by
-  have h : 2 > 0 := by numbers
-  apply isRat_inv_nat 2 h
+  sorry
 
 example : isRat (5/8) := by
-  have h5 : isRat 5 := by apply isRat_nat 5
-  have h8 : isRat (8⁻¹) := by apply isRat_inv_nat 8 (by numbers)
   -- without the (_ : ℝ), lean will not know to treat 5 and 8 as real numbers
   have h : (5 : ℝ) / 8  = 5 * (8⁻¹) := by numbers
-  rewrite [h]
-  apply isRat_mul h5 h8
+  -- now finish the proof using the lemmas above.
+  sorry
 
+-- another exercise to get used to the lemmas above: the square of an integer is an integer
 example (x : ℝ) (h : isInt x) : isInt (x ^ 2) := by
-  have h2 : x ^ 2 = x * x := by algebra
-  rewrite [h2]
-  apply isInt_mul h h
+  sorry
 
 /-
   Key integrality lemma about `a_n`:
     `(fac m) * a n` is an integer for all `m ≥ n`.
+  Hint: look up `fac_mul_a_eq_one` and `fac_succ` above.
 -/
 lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
   induction_from_starting_point m, h with k hk IH
-  · rw [fac_mul_a_eq_one]
-    apply isInt_one
-  · -- bottleneck: make clear that k+1 is a nat!
-    -- bottleneck: instinct should be to do rw [fac_succ] FIRST!
+  · sorry
+  · -- in the following identity we force Lean to treat `k + 1` as a natural number
     have h2 : fac (k + 1) * a n = (k + 1 : ℕ) * (fac k * a n) := by
-      rw [fac_succ]
-      algebra
-    rw [h2]
-    apply isInt_nat_mul
-    exact IH
+      -- first prove the identity `h2`
+      sorry
+    -- now finish the proof of the induction step.
+    sorry
+
 
 /-
   Key integrality lemma about `s n`:

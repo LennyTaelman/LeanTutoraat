@@ -40,74 +40,50 @@ lemma fac_succ (n : ℕ) : fac (n + 1) = (n + 1) * fac n := by rfl
   Now let's prove some basic facts about the factorial function.
 -/
 
-lemma fac_one : fac 1 = 1 := by rewrite [fac_succ, fac_zero]; rfl
+lemma fac_one : fac 1 = 1 := by
+  sorry
 
-lemma fac_two : fac 2 = 2 := by rewrite [fac_succ, fac_one]; rfl
+lemma fac_two : fac 2 = 2 := by
+  sorry
 
-lemma fac_three : fac 3 = 6 := by rewrite [fac_succ, fac_two]; rfl
+lemma fac_three : fac 3 = 6 := by
+  sorry
 
-
+-- use `simple_induction` to prove this
 lemma fac_pos (n : ℕ) : fac n > 0 := by
-  simple_induction n with n IH
-  · rewrite [fac_zero]; positivity
-  · rewrite [fac_succ]; positivity
+  sorry
 
 /-
-  Hint: `linarith` or `positivity` can prove this, but they cannot "see"
-  the fact `fac n > 0` proved above by default. You'll need to make it visible
+  Hint: `linarith` or `positivity` can prove this, but by default they cannot "see"
+  the fact `fac n > 0` (proved above). You'll need to make it visible
   with a `have` statement first.
 -/
 lemma fac_ne_zero (n : ℕ) : fac n ≠ 0 := by
-  have h : fac n > 0 := by apply fac_pos n
-  linarith
+  sorry
 
 lemma fac_ge_one (n : ℕ) : fac n ≥ 1 := by
-  have h : fac n > 0 := by apply fac_pos n
-  linarith
+  sorry
 
 lemma fac_strictly_monotone (n : ℕ) (h : n ≥ 1) : fac (n + 1) > fac n := by
-  have h1 : n + 1 > 1 := by extra
-  have h2 : fac n > 0 := by apply fac_pos n
-  rewrite [fac_succ]
-  calc
-    (n + 1) * fac n > 1 * fac n := by rel [h1]
-    _ = fac n := by algebra
+  sorry
 
+-- to prove something holds for all `n ≥ 2` you can use `induction_from_starting_point`
 lemma fac_gt_one (n : ℕ) (h : n ≥ 2) : fac n > 1 := by
-  induction_from_starting_point n, h with k hk IH
-  · rewrite [fac_two]; numbers
-  · have hk' : k ≥ 1 := by linarith
-    have h2 : fac (k + 1) > fac k := by apply fac_strictly_monotone k hk'
-    linarith
-
+  sorry
 
 lemma fac_gt_of_gt (n m : ℕ) (h1 : n ≥ m + 1) (h2 : m ≥ 1): fac n > fac m := by
   induction_from_starting_point n, h1 with k hk IH
-  · apply fac_strictly_monotone m h2
-  · rewrite [fac_succ]
-    calc
-      (k + 1) * fac k = k * fac k + fac k := by algebra
-                    _ ≥ fac k := by extra
-                    _ > fac m := by linarith
+  · sorry
+  · sorry
 
 lemma fac_ge_of_ge (n m : ℕ) (h : m ≥ n) : fac m ≥ fac n := by
-  induction_from_starting_point m, h with k hk IH
-  · extra
-  · have h : k + 1 ≥ 1 := by extra
-    calc
-      fac (k + 1) = (k + 1) * fac k := by rw [fac_succ]
-      _ ≥ 1 * fac k := by rel [h]
-      _ = fac k := by algebra
-      _ ≥ fac n := by rel [IH]
+  sorry
 
 lemma fac_ge_two (n : ℕ) (hn : n ≥ 2) : fac n ≥ 2 := by
-  calc fac n ≥ fac 2 := fac_ge_of_ge 2 n hn
-    _ = 2 := by rewrite [fac_two]; rfl
+  sorry
 
 lemma fac_prev (n : ℕ) (h1 : n ≥ 1) : fac n = fac (n - 1) * n := by
-  induction_from_starting_point n, h1 with k hk IH
-  · rewrite [fac_one, fac_zero]; numbers
-  · rewrite [fac_succ k]; algebra
+  sorry
 
 
 

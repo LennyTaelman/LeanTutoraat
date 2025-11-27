@@ -502,27 +502,25 @@ lemma isInt_fac_mul_a (n m : ℕ) (h : n ≤ m) : isInt (fac m * a n) := by
 /-
   Key integrality lemma about `s n`:
     `(fac m) * s n` as soon as `m + 1 ≥ n`.
+  I recommend you write out the induction step on paper first!
 -/
 theorem isInt_fac_mul_s (n : ℕ) (m : ℕ) (h : m + 1 ≥ n):
     isInt ((fac m) * s n) := by
   simple_induction n with k IH
-  · rw [s_zero]; simp; apply isInt_zero
-  · have h2 : (fac m) * s (k + 1) = (fac m) * s k + (fac m) * a k := by
-      rewrite [s_succ]; algebra
-    rewrite [h2]
-    apply isInt_add
-    · have h' : m + 1 ≥ k := by linarith
-      apply IH h'
-    · have h'' : m ≥ k := by linarith
-      apply isInt_fac_mul_a k m h''
+  · sorry
+  · -- let's first relate `(fac m) * s (k + 1)` and `(fac m) * s k`
+    have h2 : (fac m) * s (k + 1) = (fac m) * s k + (fac m) * a k := by
+      sorry
+    -- now finish the proof of the induction step.
+    sorry
 
 
 /-
-  This is the key theorem we will use to reduce the irrationality of `e` to the
-  fact that certain numbers are not integral.
+  The following lemma says that if `x` is rational, then there exists an `n ≥ 1` such that
+  `(fac n) * x` is an integer. (Convince yourself of this fact!). This will be used to prove (by
+  contradiction) that `e` is irrational: we'll show that `(fac n) * e` can never be integral.
 
-  It says that if `x` is rational, then there exists an `n ≥ 2` such that
-  `(fac n) * x` is an integer. Hint: use `rewrite [fac_prev n h1]` to express `fac n` as a
+  Hint: use `rewrite [fac_prev n h1]` to express `fac n` as a
   product of `fac (n - 1)` and `n`.
 -/
 
@@ -533,19 +531,23 @@ lemma fac_mul_isInt_of_isRat (x : ℝ) (h : isRat x) :
   use n
   -- we need to show that `n ≥ 1` and that `(fac n) * x` is an integer.
   constructor
-  · linarith
-  · rewrite [fac_prev n h1]
-    have h3 : (fac (n - 1) * n : ℕ) * x = (fac (n - 1) * (n * x)) := by algebra
-    rewrite [h3]
-    apply isInt_nat_mul h2
+  · -- prove that `n ≥ 1`
+    sorry
+  · -- prove that `(fac n) * x` is an integer
+    sorry
+
+
 
 /-
   Variation: we'll actually need a slightly stronger conclusion: that we can take `n ≥ 2`.
+  This clearly follows from the previous lemma: if we had `n = 1`, so that `(fac 1) * x` is
+  integral, then `x` is integeral and hence also `(fac 2) * x` is integral so we could have
+  taken `n = 2` instead of `n = 1`.
 -/
 
 theorem rationality_criterion (x : ℝ) (h : isRat x) :
     ∃ n : ℕ, n ≥ 2 ∧ isInt ((fac n) * x) := by
-  -- by the previous lemma, there is an `n ≥ 1` such that `(fac n) * x` is an integer.
+  -- by the previous lemma, there is an `n ≥ 1` such that `(fac n) * x` is integral.
   obtain ⟨n, h1, h2⟩ := fac_mul_isInt_of_isRat x h
   -- case distinction on `n`:
   by_cases h3 : n ≥ 2
@@ -558,12 +560,10 @@ theorem rationality_criterion (x : ℝ) (h : isRat x) :
     use 2
     -- we need to prove that `2 ≥ 2` and that `(fac 2) * x` is an integer.
     constructor
-    · numbers
-    · have h4 : n = 1 := by linarith
-      rewrite [h4] at h2
-      rewrite [fac_one] at h2
-      simp at h2
-      apply isInt_nat_mul h2
+    · -- prove that `2 ≥ 2`
+      sorry
+    · -- prove that `(fac 2) * x` is an integer
+      sorry
 
 
 /-

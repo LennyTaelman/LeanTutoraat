@@ -696,7 +696,7 @@ theorem key_bound_e (n : ℕ) (hn : n ≥ 1): e ≤ s n + 2 * (a n) := by
   apply e_le_of_s_le
   intro m
   -- finish the proof by applying `s_key_bound` with the correct arguments.
-  apply s_key_bound n m hn
+  sorry
 
 
 /-
@@ -712,36 +712,28 @@ lemma t_def (n : ℕ) : t n = e - s n := by rfl
 -/
 
 lemma t_zero : t 0 = e := by
-  rewrite [t_def]
-  rewrite [s_zero]
-  algebra
+  sorry
 
 lemma t_add_s (n : ℕ) : t n + s n = e := by
-  rewrite [t_def]
-  algebra
+  sorry
 
 /-
   Now let us prove lower and upper bounds for `t n`.
 -/
 lemma t_pos (n : ℕ) : 0 < t n := by
   -- hint: use `s_lt_e`, introduced above.
-  rewrite [t_def]
-  linarith [s_lt_e n]
+  sorry
 
 lemma t_le_twice_a (n : ℕ) (hn : n ≥ 1) : t n ≤ 2 * (a n) := by
-  -- let's first spell out the definition of `t n`
-  rewrite [t_def]
-  have h : e ≤ s n + 2 * (a n) := by apply key_bound_e n hn
-  linarith
+  sorry
 
 /-
-  We use these to prove lower and upper bounds for `(fac n) * t (n + 1)`. The lower bound is
-  easy:
+  We use these to prove lower and upper bounds for `(fac n) * t (n + 1)`. Remember that
+  a tactic such as `positivity` cannot "see" facts such as `fac_pos n` that have been
+  proven above. You'll need to remind Lean of such facts with a `have` statement first.
 -/
 lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
-  have h1 : (fac n) > 0 := by apply fac_pos n
-  have h2 : t (n + 1) > 0 := by apply t_pos (n + 1)
-  positivity
+  sorry
 
 /-
   For the upper bound, we proceed in a few steps. In order of appearance, we show:
@@ -753,24 +745,16 @@ lemma fac_mul_t_succ_pos (n : ℕ) : (fac n) * (t (n + 1)) > 0 := by
 
 lemma bound_1 (n : ℕ) (hn : n ≥ 1) :
     (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by
-  have h3 : n + 1 ≥ 1 := by linarith
-  calc
-    (fac n) * t (n + 1) ≤ (fac n) * (2 * (a (n + 1))) := by rel [t_le_twice_a _ h3]
-    _ = _ := by algebra
+  sorry
 
 -- auxiliary lemma to deduce `fac_mul_t_succ_le_2` below:
 lemma aux_1 (n : ℕ) :
     (fac n) * (a (n + 1)) = 1 / (n + 1) := by
-  rewrite [a_def, nat_inv_def, fac_succ]
-  have h : fac n > 0 := by apply fac_pos n
-  algebra
+  sorry
 
 lemma bound_2 (n : ℕ) (hn : n ≥ 1) :
     (fac n) * t (n + 1) ≤ 2 / (n + 1) := by
-  calc
-    (fac n) * t (n + 1) ≤ 2 * (fac n) * a (n + 1) := by apply bound_1 n hn
-    _ = 2 * ((fac n) * a (n + 1)) := by algebra
-    _ = 2  / (n + 1) := by rewrite [aux_1 n]; algebra
+  sorry
 
 -- auxiliary lemma to deduce `fac_mul_t_succ_lt_one` below:
 lemma aux_2 (n : ℕ) (hn : n ≥ 2) :
@@ -784,11 +768,7 @@ lemma aux_2 (n : ℕ) (hn : n ≥ 2) :
 
 theorem fac_mul_t_succ_lt_one (n : ℕ) (hn : n ≥ 2) :
     (fac n) * t (n + 1) < 1 := by
-  have h1 : n ≥ 1 := by linarith
-  calc
-    (fac n) * t (n + 1) ≤ 2 / (n + 1) := by apply bound_2 n h1
-    _ ≤ 2 / 3 := by apply aux_2 n hn
-    _ < 1 := by numbers
+  sorry
 
 
 
@@ -813,11 +793,14 @@ theorem fac_mul_t_succ_lt_one (n : ℕ) (hn : n ≥ 2) :
 
 /-
   First we show that `(fac n) * t (n + 1)` is not integral (it lies strictly between 0 and 1).
+  To prove the inequalities, you can `apply` the corresponding lemmas with the correct arguments.
 -/
 lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * t (n + 1)) := by
-  have h1 : (fac n) * t (n + 1) < 1 := by apply fac_mul_t_succ_lt_one n hn
-  have h2 : (fac n) * t (n + 1) > 0 := by apply fac_mul_t_succ_pos n
+  have h1 : (fac n) * t (n + 1) < 1 := by
+    sorry
+  have h2 : (fac n) * t (n + 1) > 0 := by
+    sorry
   apply no_int_between_0_and_1 h2 h1
 
 /-
@@ -829,15 +812,16 @@ lemma fac_mul_t_succ_not_integral (n : ℕ) (hn : n ≥ 2) :
 -/
 lemma fac_mul_e_not_integral (n : ℕ) (hn : n ≥ 2) :
     ¬ isInt ((fac n) * e) := by
+  -- proof by contradiction:
   intro he
+  -- we assume `he : isInt ((fac n) * e)` and we will derive a contradiction.
   have hsub : (fac n) * t (n + 1) = (fac n) * e - (fac n) * s (n + 1) := by
-    rewrite [t_def]; algebra
+    sorry
   have hs : isInt ((fac n) * s (n + 1)) := by
-    apply isInt_fac_mul_s (n + 1) n (by linarith)
+    sorry
   have ht : isInt ((fac n) * t (n + 1)) := by
-    rewrite [hsub]
-    apply isInt_sub he hs
-  apply fac_mul_t_succ_not_integral n hn ht
+    sorry
+  sorry
 
 
 

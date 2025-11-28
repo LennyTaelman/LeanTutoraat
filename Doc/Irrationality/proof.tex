@@ -17,6 +17,7 @@
 
 \def\N{\mathbb{N}}
 \def\Z{\mathbb{Z}}
+\def\Q{\mathbb{Q}}
 \def\R{\mathbb{R}}
 
 \begin{document}
@@ -24,82 +25,79 @@
 \maketitle
 
 
+\section{Bound on the factorial function}
+
+\begin{theorem}[{\tt fac\_bound}]\label{thm:fac-bound}
+  For all $n > 0$ and $k \in \mathbb{N}$,
+  \[
+  (n+k)! \geq 2^k \cdot n!.
+  \]
+  \end{theorem}
+  
+\begin{proof}
+Induction on $k$. For  $k = 0$, clear. Assume $(n+k)! \geq 2^k \cdot n!$. Then
+    \begin{align*}
+  (n+k+1)! &= (n+k+1) \cdot (n+k)! \\
+  &\geq (n+k+1) \cdot 2^k \cdot n! \\
+  &\geq 2 \cdot 2^k \cdot n! = 2^{k+1} \cdot n!,
+  \end{align*}
+  where the last inequality uses that $n+k+1 \geq 2$ when $n > 0$.
+\end{proof}
+  
+
 \section{The sequence $a_n = 1/n!$}
 
-\begin{lemma}[Key bound on the factorial function]\label{lemma:fac-bound}
-For all $n > 0$ and $k \in \mathbb{N}$,
-\[
-(n+k)! \geq 2^k \cdot n!.
-\]
-\end{lemma}
-
-\begin{proof}
-The proof proceeds by induction on $k$. For the base case $k = 0$, we have $(n+0)! = 2^0 \cdot n!$.
-For the inductive step, assume $(n+k)! \geq 2^k \cdot n!$. Then
-\begin{align*}
-(n+k+1)! &= (n+k+1) \cdot (n+k)! \\
-&\geq (n+k+1) \cdot 2^k \cdot n! \\
-&\geq 2 \cdot 2^k \cdot n! = 2^{k+1} \cdot n!,
-\end{align*}
-where the last inequality uses that $n+k+1 \geq 2$ when $n > 0$.
-\end{proof}
-
-Remark: the condition that $n>0$ cannot be dropped.
 
 \begin{definition}
 Set $a_n = 1/n!$. This defines a function $a\colon \N \to \R, n \mapsto a_n$.
 \end{definition}
 
 
-\begin{lemma}[Key bound on $a_n$]\label{lemma:a-bound}
+\begin{theorem}[{\tt a\_bound}]\label{thm:a-bound}
 For all $n \geq 1$ and $k \in \mathbb{N}$, we have
 \[
 a_{n+k}  \leq \left(\frac{1}{2}\right)^k \cdot a_n.
 \]
-\end{lemma}
+\end{theorem}
 
 \begin{proof}
-Follows from Lemma~\ref{lemma:fac-bound}, using the fact that both sides in the
-inequality in Lemma~\ref{lemma:fac-bound} are positive. 
+Follows from Theorem~\ref{thm:fac-bound}, using the fact that both sides in the
+inequality in Theorem~\ref{thm:fac-bound} are positive. 
 \end{proof}
 
-\section{The partial sums $s_n = a_0 + \cdots + a_{n-1}$}
+\section{Bounding the geometric series $g_n$}
+
+Define
+\[
+  g_n = \sum_{i=0}^{n-1} (\frac{1}{2})^i = 1 + \cdots + (\frac{1}{2})^{n-1}
+\]
+Note that there are $n$ terms in the sum. By convention, $g_0 = 0$ (empty sum).
+
+\begin{lemma}[{\tt g\_formula}] $g_n = 2 - 2 \cdot (1/2)^n$. \qed
+\end{lemma}
+
+\begin{corollary}[{\tt g\_lt\_2}] \label{cor:g-bound}
+  $g_n < 2$. \qed
+\end{corollary}
+
+\section{The partial sums $s_n$}
 
 Define the partial sums
 \[
 s_n = \sum_{i=0}^{n-1} a_i = \frac{1}{0!} + \frac{1}{1!} + \cdots + \frac{1}{(n-1)!} \in \R
 \]
-for $n \in \mathbb{N}$. Note that there are $n$ terms in the sum. We follow the usual
-convention that $s_0 = 0$ (empty sum).
+Note that there are $n$ terms in the sum. 
 
-The key inequality for the partial sums is:
 
-\begin{definition}
-Consider the partial sum of the geometric series
-\[
-  g_k = 1 + \frac{1}{2} + \cdots + \left(\frac{1}{2}\right)^{k-1},
-\]
-where again $g_0 = 0$ (empty sum).
-\end{definition}
-
-\begin{lemma}\label{lemma:g-bound}$g_k < 2$.
-\end{lemma}
- 
-\begin{proof}
-Indeed, we have $g_k = 2 - (1/2)^{k-1}$.
-\end{proof}
-
-\begin{lemma}\label{lemma:s-below-geometric}
+\begin{theorem}[{\tt s\_geometric\_bound}]\label{thm:s-below-geometric}
 For all $m$ and all $n \geq 1$ and $k \in \mathbb{N}$, we have
 \[
 s_{n+k} \leq s_n + a_n \cdot g_k.
 \]
-\end{lemma}
+\end{theorem}
 
 \begin{proof}
-The proof proceeds by induction on $k$. For $k = 0$, we have $s_{n+0} = s_n + a_n \cdot g_0$.
-
-For the inductive step, assume $s_{n+k} \leq s_n + a_n \cdot g_k$. Then
+The proof proceeds by induction on $k$. For $k = 0$, this is clear. Assume $s_{n+k} \leq s_n + a_n \cdot g_k$. Then
 \begin{align*}
 s_{n+k+1} &= s_{n+k} + a_{n+k} \\
 &\leq s_n + a_n \cdot g_k + a_{n+k} \\
@@ -107,34 +105,44 @@ s_{n+k+1} &= s_{n+k} + a_{n+k} \\
 &= s_n + a_n \cdot \left(g_k + \left(\frac{1}{2}\right)^k\right) \\
 &= s_n + a_n \cdot g_{k+1},
 \end{align*}
-where we used the bound $a_{n+k} \leq (1/2)^k \cdot a_n$ from Lemma~\ref{lemma:a-bound}.
+where we used the bound $a_{n+k} \leq (1/2)^k \cdot a_n$ from Theorem~\ref{thm:a-bound}.
 \end{proof}
 
-\begin{lemma}\label{lemma:s-bound}
-For all $n \geq 1$ and $k \in \mathbb{N}$,
-\[
-s_{n+k} < s_n + 2 \cdot a_n.
-\]
-\end{lemma}
-
-\begin{proof}
-Follows from Lemma~\ref{lemma:s-below-geometric} and Lemma~\ref{lemma:g-bound}.
-\end{proof}
 
 It will be convenient to establish the following variant:
 
-\begin{lemma}\label{lemma:s-bound-total}
+\begin{theorem}[{\tt s\_key\_bound}]\label{thm:s-bound-total}
 For all $n \geq 1$ and all $m \geq 0$ we have
 \[
   s_m < s_n + 2 \cdot a_n
 \]
-\end{lemma}
+\end{theorem}
 
 \begin{proof}
-Follows by case distinction: if $m>n$ then this is Lemma~\ref{lemma:s-bound}, and if $m\leq n$
-then this follows from $s_m \leq s_n$ and $a_n > 0$.
+Follows by case distinction: if $m\geq n$ then $m =n+k$ for some $k$ and this follows from
+Theorem~\ref{thm:s-below-geometric} and Corollary~\ref{cor:g-bound}.
 \end{proof}
 
+\section{Integrality and rationality}
+
+A real number $x$ is called \emph{integral} if $x$ lies in $\Z$ and \emph{rational} if it lies
+in $\Q$. 
+
+\begin{theorem}[{\tt isInt\_fac\_mul\_s}]\label{thm:int-fac-mul-s}
+If $m \geq n-1$, then $m! \cdot s_n$ is integral
+\end{theorem}
+
+\begin{proof}
+Follows from the fact that $m! \cdot a_k$ is integral for $k \leq m$.
+\end{proof}
+
+\begin{theorem}[{\tt rationality\_criterion}] \label{thm:rationality-criterion} If $x$ is rational,
+  then there exists an $n\geq 2$ such that $n! \cdot x$ is integral. 
+\end{theorem}
+
+\begin{proof}
+For $n$ sufficiently large, the denominator of $x$ will divide $n!$.
+\end{proof}
 
 \section{The number $e = \lim_{n \to \infty} s_n$}
 
@@ -143,130 +151,83 @@ The number $e$ is defined as the limit of the sequence $(s_n)$:
 e = \lim_{n \to \infty} s_n = \sum_{n=0}^{\infty} \frac{1}{n!}.
 \]
 
-Since $(s_n)$ is a strictly increasing sequence (as $a_n > 0$ for all $n$) and bounded
-above (by Lemma~\ref{lemma:s-bound-total}), the limit exists. 
+Since $(s_n)$ is an increasing sequence  and bounded
+above (by Lemma~\ref{thm:s-bound-total}), the limit exists. 
 
-\begin{lemma}[Characterisation of $e$]\label{lemma:e-characterisation} The number $e$ satisfies:
+\begin{lemma}[{\tt s\_lt\_e}, {\tt e\_le\_of\_s\_le}]\label{lemma:e-characterisation} The number $e$ satisfies:
     \begin{enumerate}
        \item For all $n$, we have $s_n < e$;
        \item If $c\in \R$ and $s_n \leq c$ for all $n$, then $e \leq c$.
     \end{enumerate}
-Moreover, $e$ is the \emph{only}  real number that satisfies these two properties. \qed
+ \qed
 \end{lemma}
 
-Combining the second point with Lemma~\ref{lemma:s-bound-total} we obtain:
+Note that $e$ is the \emph{only} real number satisfying this, so you can use
+this lemma as a \emph{definition} of $e$. Combining the second point with Theorem~\ref{thm:s-bound-total} we obtain:
 
-\begin{lemma}[Key bound on $e$]\label{lemma:e-bound}
+\begin{theorem}[{\tt key\_bound\_e}]\label{thm:e-bound}
   For all $n>0$ we have $e \leq s_n + 2 \cdot a_n$
-\end{lemma}
+\end{theorem}
 
 
-\section{Integrality of $n! \cdot s_{n+1}$}
+\section{The tail $t_n$ of the series}
 
-\begin{definition}We say that a real number $x$ is \emph{integral} if $x
-\in \Z$. (In Lean: if there exists an integer $N$ such that $x = \uparrow N$.)
-\end{definition}
-
-\begin{lemma}\label{lemma:fac-mul-a-integral}
-  For all $m \leq n$ we have $n! \cdot a_m$ is an integer.
-\end{lemma}
-
-\begin{proof}By induction on $n$ starting at $n=m$. The base step is the
-statement that $n! \cdot a_n = 1$ is an integer. For the inductive step, assume
-that $n! \cdot a_m$ is an integer. Then
+Define
 \[
-   (n+1)! \cdot a_m = (n+1) \cdot n! \cdot a_m = (n+1) \cdot (\text{some integer}),
+  t_n = e - s_n = \sum_{i\geq n} a_i = \frac{1}{n!} + \frac{1}{(n+1)!} + \cdots
 \]
-hence $(n+1)! \cdot a_m$ is an integer.
-\end{proof}
 
-\begin{lemma}For all $n$ we have that $n! \cdot s_{n+1}$ is an integer.
+\begin{lemma}[{\tt t\_le\_twice\_a}]For $n\geq 1$ we have $t_n \leq 2 \cdot a_n$.
 \end{lemma}
 
 \begin{proof}
-Induction on $n$. For $n=0$ we have $0! \cdot s_1 = 1$, which is an integer. For
-the inductive step, assume that $n! \cdot s_{n+1}$ is an integer. Then we have
-\[
-  (n+1)! \cdot s_{n+2} = (n+1)! \cdot (s_{n+1} + a_{n+1}) = (n+1) \cdot (n! \cdot s_{n+1}) + (n+1)! \cdot a_{n+1}.
-\]
-The first term is an integer by the induction hypothesis, and the second term is an integer by Lemma~\ref{lemma:fac-mul-a-integral}.
+Follows from Theorem \label{thm:e-bound}.
 \end{proof}
 
-\section{The tail $t_n = e - s_n$}
-
-Consider the `tail' of the series:
-\[
-t_n := e - s_n = \frac{1}{n!} + \frac{1}{(n+1)!} + \cdots.
-\]
-
-\begin{lemma}\label{lemma:t-positive}$t_n > 0$ for all $n$.
-\end{lemma}
-
-\begin{proof} Follows from the inequality $s_n < e$ of Lemma~\ref{lemma:e-characterisation}.
-\end{proof}
-
-\begin{lemma}\label{lemma:t-bound}
-If $n > TODO$ then $t_n \leq 2 \cdot a_n$
-\end{lemma}
+\begin{theorem}[{\tt fac\_mul\_t\_succ\_pos}, {\tt fac\_mul\_t\_succ\_lt\_one}]
+  \label{thm:fac-mul-t-bound}
+  For $n\geq 2$, 
+  we have
+  \[
+     0 < (n!) \cdot t_{n+1} < 1
+  \]
+\end{theorem}
 
 \begin{proof}
-Follows from Lemma~\ref{lemma:t-bound} and Lemma~\ref{lemma:a-bound}.
-\end{proof}
-
-\begin{lemma}\label{lemma:fac-mul-t-bound}
-For all $n \geq 2$,
-\[
-0 < n! \cdot t_{n+1} < 1.
-\]
-\end{lemma}
-
-\begin{proof}
-The positivity follows from $t_{n+1} > 0$. For the upper bound, we use:
-\begin{align*}
-n! \cdot t_{n+1} &\leq n! \cdot 2 \cdot a_{n+1} \\
-&= n! \cdot 2 \cdot \frac{1}{(n+1)!} \\
-&= \frac{2}{n+1} \\
-&\leq \frac{2}{3} < 1,
-\end{align*}
-where the last inequality uses $n \geq 2$.
+For the upper bound, we use:
+  \begin{align*}
+  n! \cdot t_{n+1} &\leq n! \cdot 2 \cdot a_{n+1} \\
+  &= n! \cdot 2 \cdot \frac{1}{(n+1)!} \\
+  &= \frac{2}{n+1} \leq \frac{2}{3} < 1,
+  \end{align*}
+  where we use $n \geq 2$.
 \end{proof}
 
 
-\begin{lemma}
+
+\begin{corollary}\label{cor:fac-mul-t-not-integral}
 If $n\geq 2$, then $n! \cdot t_{n+1}$ is not integral.
-\end{lemma}
+\end{corollary}
 
 \begin{proof}
-Direct consequence of Lemma~\ref{lemma:fac-mul-t-bound}: there is no integer strictly
+Direct consequence of Theorem~\ref{thm:fac-mul-t-bound}: there is no integer strictly
 between $0$ and $1$.
 \end{proof}
 
 \section{Irrationality of $e$}
-
-
-\begin{proof}[Proof sketch]
-Suppose for contradiction that $n! \cdot e = N$ for some integer $N$. Since $n! \cdot s_{n+1}$ is an integer (say $M$), we have
-\[
-n! \cdot t_{n+1} = n! \cdot (e - s_{n+1}) = N - M \in \mathbb{Z}.
-\]
-But $0 < n! \cdot t_{n+1} < 1$, and there are no integers strictly between $0$ and $1$, which is a contradiction.
-\end{proof}
-
-\section{Proof that $e$ is not rational}
 
 \begin{theorem}[Irrationality of $e$]
 The number $e$ is irrational.
 \end{theorem}
 
 \begin{proof}[Proof sketch]
-Suppose for contradiction that $e = p/q$ for some natural numbers $p, q$ with $q > 0$.
-
-Then for $n = q + 1 \geq 2$, we have:
+Suppose for contradiction that $e$ is rational.  By theorem \label{thm:rationality-criterion}
+there is an $n\geq 2$ such that $n! \cdot e$ is integral. By Theorem~\ref{thm:int-fac-mul-s}
+also $n! \cdot s_{n+1}$ is integral. But then we have that also
 \[
-(q+1)! \cdot e = (q+1)! \cdot \frac{p}{q} = (q+1) \cdot q! \cdot \frac{p}{q} = (q+1) \cdot (q-1)! \cdot p \in \mathbb{N}.
+  n! t_{n+1} = n! \cdot e - n! \cdot s_{n+1}
 \]
-
-But by the previous theorem, $(q+1)! \cdot e$ cannot be an integer, which is a contradiction.
+is integral, which contradicts Corollary~\ref{cor:fac-mul-t-not-integral}.
 \end{proof}
 
 \end{document}
